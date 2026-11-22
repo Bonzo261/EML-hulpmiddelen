@@ -115,6 +115,7 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
   <a href="#pv-generator" data-view="pv-generator">PV-generator</a>
   <a href="#uitslagen-generator" data-view="uitslagen-generator">Uitslagen-generator</a>
   <a href="#controleprotocol" data-view="controleprotocol">Controleprotocol</a>
+  <a href="#zetelverdeling-controle" data-view="zetelverdeling-controle">Zetelverdeling</a>
 </nav>
 
 <!-- ============================ OVERZICHT ============================ -->
@@ -159,10 +160,19 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
     <div class="card">
       <span class="lvl">GSB · HSB · CSB</span>
       <h2>Controleprotocol</h2>
-      <p>De digitale vervanger van de controle-spreadsheet van de Kiesraad. Controleer of de uitslagsoftware goed heeft opgeteld (artikel Na 27 Kieswet): loot lijsten, voer de lijsttotalen in vanaf papier en vergelijk die met de uitslag-EML.</p>
+      <p>De digitale vervanger van de controle-spreadsheet van de Kiesraad, volgens de protocollen GR26. Loot lijsten, voer de lijsttotalen in vanaf papier (online of offline in Excel) en vergelijk die met de uitslag-EML.</p>
       <div class="btns">
         <a class="btn primary" href="#controleprotocol">Handleiding lezen</a>
         <a class="btn" href="controleprotocol.html">App openen</a>
+      </div>
+    </div>
+    <div class="card">
+      <span class="lvl">CSB · P 5–P 10</span>
+      <h2>Controle zetelverdeling</h2>
+      <p>Bereken de zetelverdeling zelf volgens de Kieswet, stap voor stap en met loting, P 9 en P 10, en vergelijk de uitkomst met de programmatuur. Voor het Verslag controleprotocol CSB, onderdeel B.</p>
+      <div class="btns">
+        <a class="btn primary" href="#zetelverdeling-controle">Handleiding lezen</a>
+        <a class="btn" href="zetelverdeling.html">App openen</a>
       </div>
     </div>
     <div class="card">
@@ -189,7 +199,7 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
       <span>110a</span><span>110b</span><span>230b</span><i>→</i>
       <span class="app">Uitslagen-generator</span><i>→</i>
       <span>510b · 510c · 510d</span><i>→</i>
-      <span class="app">Controleprotocol</span> <i>,</i> <span class="app">PV-generator</span> <i>en</i> <span>Abacus</span>
+      <span class="app">Controleprotocol</span> <i>,</i> <span class="app">Controle zetelverdeling</span> <i>,</i> <span class="app">PV-generator</span> <i>en</i> <span>Abacus</span>
     </div>
   </div>
 </section>
@@ -594,12 +604,15 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
     <b>Inhoud</b>
     <ol>
       <li><a href="#cp-doel">Waarvoor is de app?</a></li>
+      <li><a href="#cp-bron">Welk protocol?</a></li>
       <li><a href="#cp-nodig">Wat heb je nodig?</a></li>
       <li><a href="#cp-scherm">Het scherm</a></li>
       <li><a href="#cp-s1">Stap 1 · Gegevens</a></li>
       <li><a href="#cp-s2">Stap 2 · Loting</a></li>
       <li><a href="#cp-s3">Stap 3 · Invoer</a></li>
+      <li><a href="#cp-excel">Offline invoeren in Excel</a></li>
       <li><a href="#cp-s4">Stap 4 · Vergelijken</a></li>
+      <li><a href="#cp-verschil">Er is een verschil</a></li>
       <li><a href="#cp-verslag">Verslag en export</a></li>
       <li><a href="#cp-sessie">Sessie bewaren</a></li>
       <li><a href="#cp-ids">Hoe ID's worden gekoppeld</a></li>
@@ -614,24 +627,32 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
     <p class="lead">Handleiding voor het gemeentelijk stembureau (GSB), het hoofdstembureau (HSB) en het centraal stembureau (CSB).</p>
 
     <h3 id="cp-doel">1. Waarvoor is de app?</h3>
-    <p>Na de stemming telt de uitslagsoftware (Abacus) de uitslagen op. Volgens het controleprotocol van de Kiesraad (artikel Na 27 Kieswet) controleert het stembureau of die optelling klopt. Dat gebeurt door voor een aantal gelote lijsten de lijsttotalen <em>zelf</em> in te voeren vanaf de papieren processen-verbaal, en de som te vergelijken met het totaal in de uitslag van de software.</p>
+    <p>Na de stemming telt de uitslagprogrammatuur (Abacus) de uitslagen op. Volgens het controleprotocol van de Kiesraad (artikel Na 27 Kieswet) controleert het stembureau of die optelling klopt. Dat gebeurt door voor gelote lijsten de lijsttotalen <em>zelf</em> in te voeren vanaf de papieren processen-verbaal, en de som te vergelijken met het totaal in de uitslag van de programmatuur.</p>
     <p>Deze app vervangt de controle-spreadsheet van de Kiesraad. Het belangrijkste uitgangspunt:</p>
-    <div class="tip"><b>Onafhankelijke invoer</b>De controle-invoer loopt naast de invoer in Abacus. Je kunt de uitslag-EML pas inlezen als álle controle-invoer compleet is. Zo kan niemand de uitkomst van de software zien tijdens het invoeren.</div>
+    <div class="tip"><b>Onafhankelijke invoer</b>De controle-invoer loopt naast de invoer in de programmatuur. Je kunt de uitslag-EML pas inlezen als álle controle-invoer compleet is. Zo kan niemand de uitkomst van de programmatuur zien tijdens het invoeren.</div>
 
-    <h3 id="cp-nodig">2. Wat heb je nodig?</h3>
+    <h3 id="cp-bron">2. Welk protocol volgt de app?</h3>
+    <p>De app volgt de controleprotocollen <b>GR26</b> van de Kiesraad (november 2025). Die vervangen de versie van 2023/2024.</p>
+    <ul>
+      <li><b>GSB:</b> loting van 3 lijsten. Invoeren mag zodra het betreffende stembureau in de uitslagprogrammatuur staat. Vergelijken pas als alles in de programmatuur én in de app staat. De uitkomst verantwoord je in rubriek 2.5 van het proces-verbaal (Na 31-1 of Na 31-2); er is geen apart verslag.</li>
+      <li><b>CSB:</b> deze app doet de controle van de lijsttotalen uit onderdeel B van het protocol. De controle van de zetelverdeling doe je met de app <a href="#zetelverdeling-controle">Controle zetelverdeling</a>. Onderdeel A (data-analyse) zit niet in deze app.</li>
+      <li><b>HSB:</b> voor het hoofdstembureau is er geen GR26-versie (bij een gemeenteraadsverkiezing is er geen HSB). De app gebruikt neutrale teksten: de Na 31 van de gemeentelijk stembureaus tegen de O 7.</li>
+    </ul>
+
+    <h3 id="cp-nodig">3. Wat heb je nodig?</h3>
     <div class="tablewrap"><table>
       <thead><tr><th>Bestand</th><th>Wat staat erin</th><th>Wanneer</th></tr></thead>
       <tbody>
         <tr><td><code>110b</code></td><td>De stembureaus van de gemeente</td><td>Stap 1, bij GSB</td></tr>
-        <tr><td><code>110a</code></td><td>De verkiezingsdefinitie: gemeenten per kieskring (HSB) of de kieskringen (CSB)</td><td>Stap 1, bij HSB en CSB</td></tr>
+        <tr><td><code>110a</code></td><td>De verkiezingsdefinitie: gemeenten per kieskring, of de kieskringen</td><td>Stap 1, bij HSB en CSB</td></tr>
         <tr><td><code>230b</code></td><td>De kandidatenlijsten. Hieruit komen de loten.</td><td>Stap 1, altijd</td></tr>
-        <tr><td><code>510b</code> / <code>510c</code> / <code>510d</code></td><td>De uitslag uit de software, passend bij je niveau</td><td>Pas in stap 4</td></tr>
-        <tr><td>Papieren processen-verbaal</td><td>De bron voor de handmatige invoer</td><td>Stap 3</td></tr>
+        <tr><td><code>510b</code> / <code>510c</code> / <code>510d</code></td><td>De uitslag uit de programmatuur, passend bij je niveau</td><td>Pas in stap 4</td></tr>
+        <tr><td>Papieren processen-verbaal</td><td>De bron voor de invoer (zie de tabel bij stap 1)</td><td>Stap 3</td></tr>
       </tbody>
     </table></div>
-    <p>Heb je geen 110b of 110a? Dan kun je de eenheden en lijsten ook zelf plakken, bijvoorbeeld uit de Excel van de Kiesraad (zie stap 1).</p>
+    <p>Heb je geen 110b of 110a? Dan kun je de eenheden en lijsten ook zelf plakken (zie stap 1).</p>
 
-    <h3 id="cp-scherm">3. Het scherm</h3>
+    <h3 id="cp-scherm">4. Het scherm</h3>
     <ul>
       <li><b>Bovenaan</b> staan de knoppen <span class="ui">Sessie opslaan</span>, <span class="ui">Sessie laden</span>, <span class="ui">Voorbeeld</span> en <span class="ui">Opnieuw beginnen</span>.</li>
       <li><b>Daaronder</b> staan de vier stappen als tabbladen. Elk tabblad heeft een badge die laat zien of de stap klaar is (groen), aandacht vraagt (oranje) of een probleem heeft (rood).</li>
@@ -640,126 +661,277 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
     <div class="tip"><b>Eerst oefenen?</b>Klik op <span class="ui">Voorbeeld</span>. De app laadt dan een fictieve verkiezing, zodat je alle stappen kunt doorlopen zonder echte bestanden.</div>
     <div class="note"><b>Let op</b><span class="ui">Opnieuw beginnen</span> wist alles. Je moet twee keer klikken: de eerste klik maakt de knop rood, de tweede klik (binnen 4 seconden) bevestigt.</div>
 
-    <h3 id="cp-s1">4. Stap 1 · Gegevens</h3>
+    <h3 id="cp-s1">5. Stap 1 · Gegevens</h3>
     <div class="step"><span class="n">1</span><div>
-      <p><b>Laad de EML-bestanden.</b> Sleep ze naar het vak <em>EML-bestanden inladen</em> of klik op <span class="ui">Kies bestanden</span>. Je mag meerdere bestanden tegelijk kiezen; de app herkent zelf welk soort het is. Ingelezen bestanden verschijnen als labels onder het vak.</p>
+      <p><b>Laad de EML-bestanden.</b> Sleep ze naar het vak <em>EML-bestanden inladen</em> of klik op <span class="ui">Kies bestanden</span>. Je mag meerdere bestanden tegelijk kiezen; de app herkent zelf welk soort het is. Je kunt hier ook een ingevuld Excel van de app slepen; de sessie wordt daaruit hersteld (zie <a href="#cp-excel">Offline invoeren</a>).</p>
     </div></div>
     <div class="step"><span class="n">2</span><div>
-      <p><b>Kies welk orgaan de controle uitvoert:</b> <span class="ui">Gemeentelijk stembureau</span>, <span class="ui">Hoofdstembureau</span> of <span class="ui">Centraal stembureau</span>. Het niveau bepaalt wat een <em>eenheid</em> is in de rest van de app:</p>
+      <p><b>Kies welk orgaan de controle uitvoert:</b> <span class="ui">Gemeentelijk stembureau</span>, <span class="ui">Hoofdstembureau</span> of <span class="ui">Centraal stembureau</span>. Bij het gemeentelijk stembureau kies je ook de <b>stemopneming</b>: <span class="ui">Decentraal</span> of <span class="ui">Centraal</span>. Daarmee noemen alle schermen, het Excel en het verslag de juiste processen-verbaal en rubrieken.</p>
       <div class="tablewrap"><table>
-        <thead><tr><th>Niveau</th><th>Eenheden</th><th>Bron op papier</th><th>Uitslag-EML</th></tr></thead>
+        <thead><tr><th>Niveau</th><th>Eenheden</th><th>Invoer vanaf</th><th>Uitslag-EML</th></tr></thead>
         <tbody>
-          <tr><td>GSB</td><td>Stembureaus</td><td>Processen-verbaal van de stembureaus</td><td><code>510b</code></td></tr>
-          <tr><td>HSB</td><td>Gemeenten in de kieskring</td><td>Processen-verbaal van de GSB's</td><td><code>510c</code></td></tr>
-          <tr><td>CSB</td><td>Kieskringen</td><td>Processen-verbaal van de HSB's</td><td><code>510d</code></td></tr>
+          <tr><td>GSB, decentraal</td><td>Stembureaus</td><td>N 10-1 van de stembureaus</td><td><code>510b</code></td></tr>
+          <tr><td>GSB, centraal</td><td>Stembureaus</td><td>Na 31-2 bijlage 1</td><td><code>510b</code></td></tr>
+          <tr><td>HSB</td><td>Gemeenten in de kieskring</td><td>Na 31 van de gemeentelijk stembureaus</td><td><code>510c</code></td></tr>
+          <tr><td>CSB, met hoofdstembureaus</td><td>Hoofdstembureaus</td><td>O 7 van de hoofdstembureaus</td><td><code>510d</code></td></tr>
+          <tr><td>CSB, zonder hoofdstembureaus</td><td>Gemeenten</td><td>Na 31-1 of Na 31-2 van de gemeentelijk stembureaus (met eventueel corrigendum)</td><td><code>510d</code></td></tr>
         </tbody>
       </table></div>
-      <p>Bij het hoofdstembureau kies je daarna ook de <b>kieskring</b> van dit hoofdstembureau.</p>
+      <p>Bij het hoofdstembureau kies je daarna de <b>kieskring</b> van dit hoofdstembureau.</p>
     </div></div>
     <div class="step"><span class="n">3</span><div>
       <p><b>Controleer de samenvatting.</b> Rechts zie je de verkiezing, het orgaan, het aantal eenheden en het aantal lijsten, met eventuele meldingen eronder. In de tabellen onderaan staan de eenheden en de lijsten.</p>
     </div></div>
-    <h4>Zelf invullen of plakken</h4>
-    <p>Klik bij de eenheden op <span class="ui">Zelf invullen of plakken uit Excel</span> (of bij de lijsten op <span class="ui">Zelf invullen of plakken</span>). Zet één eenheid per regel: het nummer en de naam, gescheiden door een tab, puntkomma of spatie. Twee kolommen kopiëren uit de spreadsheet van de Kiesraad werkt direct.</p>
+    <h4>Werkt de verkiezing met hoofdstembureaus?</h4>
+    <p>Voor het centraal stembureau bepaalt de app dat zelf:</p>
     <ul>
-      <li>GSB: het nummer is het stembureaunummer.</li>
-      <li>HSB: het nummer is de gemeentecode.</li>
-      <li>CSB: het nummer is het kieskringnummer.</li>
+      <li><b>Ja</b> als de 110a meer dan één kieskring heeft, of zonder 110a bij de Tweede Kamer of het Europees Parlement. Je voert dan de O 7's van de hoofdstembureaus in.</li>
+      <li><b>Nee</b> als de 110a één kieskring heeft (bijvoorbeeld een provincie met één kieskring) of geen kieskringen, en zonder 110a bij gemeenteraad, waterschap, Eerste Kamer, eilandsraad, BC en GC. Je voert dan de Na 31's van de gemeenten in.</li>
+      <li>Weet de app het niet (bijvoorbeeld Provinciale Staten zonder 110a), dan noemt de tekst beide.</li>
     </ul>
-    <p>Klik daarna op <span class="ui">Lijst overnemen</span>. Met <span class="ui">Terug naar de EML</span> (of <span class="ui">Terug naar de 230b</span>) gebruik je weer de gegevens uit het bestand.</p>
-    <div class="note"><b>Uitslag hier niet inlezen</b>Een 510-bestand wordt in stap 1 geweigerd. De uitslag komt pas in stap 4.</div>
+    <h4>Zelf invullen of plakken</h4>
+    <p>Klik bij de eenheden op <span class="ui">Zelf invullen of plakken uit Excel</span> (of bij de lijsten op <span class="ui">Zelf invullen of plakken</span>). Zet één eenheid per regel: het nummer en de naam, gescheiden door een tab, puntkomma of spatie. Bij het hoofdstembureau is het nummer de gemeentecode, bij het centraal stembureau het kieskringnummer (of de gemeentecode als er geen hoofdstembureaus zijn). Klik daarna op <span class="ui">Lijst overnemen</span>.</p>
+    <div class="note"><b>Uitslag hier niet inlezen</b>Een 510-bestand wordt in stap 1 geweigerd. De uitslag komt pas in stap 4. Na het vastleggen van de loting liggen de gegevens vast; met <span class="ui">Loting opnieuw</span> bij stap 2 zet je ze weer open.</div>
 
-    <h3 id="cp-s2">5. Stap 2 · Loting</h3>
+    <h3 id="cp-s2">6. Stap 2 · Loting</h3>
     <div class="step"><span class="n">1</span><div>
       <p><b>Kies wat er gecontroleerd wordt:</b> <span class="ui">Steekproef via loting</span> of <span class="ui">Alle lijsten</span>. Bij een steekproef vul je het aantal lijsten in; standaard is dat 3, zoals in het protocol.</p>
+      <div class="note"><b>Centraal stembureau</b>Het centraal stembureau, en een hoofdstembureau met maar één gemeente, controleert altijd alle lijsten, zonder loting. De app zet dat zelf zo.</div>
     </div></div>
     <div class="step"><span class="n">2</span><div>
       <p><b>Kies de manier van loten:</b></p>
       <ul>
         <li><span class="ui">Loten uit de pot (klik aan)</span>: je trekt fysiek loten en klikt de getrokken lijsten aan in het overzicht <em>Alle loten</em>. De volgorde van aanklikken wordt bijgehouden.</li>
-        <li><span class="ui">Digitaal trekken</span>: klik op <span class="ui">Trek loten</span>. De app trekt met een cryptografisch veilige toevalsgenerator (<code>crypto.getRandomValues</code>).</li>
+        <li><span class="ui">Digitaal trekken</span>: klik op <span class="ui">Trek loten</span>. De app trekt met een cryptografisch veilige toevalsgenerator.</li>
       </ul>
     </div></div>
     <div class="step"><span class="n">3</span><div>
-      <p><b>Leg de loting vast</b> met <span class="ui">Loting vastleggen</span>. De datum en tijd worden genoteerd en komen in het verslag. Ben je nog niet tevreden, gebruik dan eerst <span class="ui">Loting opnieuw</span>.</p>
+      <p><b>Leg de loting vast</b> met <span class="ui">Loting vastleggen</span>. De datum en tijd worden genoteerd, en de app toont een <b>controlecode</b>. Noteer die code bij de loting; hij staat ook in het Excel en in het verslag. Ben je nog niet tevreden, gebruik dan eerst <span class="ui">Loting opnieuw</span>.</p>
     </div></div>
-    <p>De gelote lijsten staan rechts onder <em>Te controleren lijsten</em>.</p>
+    <p>De gelote lijsten staan rechts onder <em>Te controleren lijsten</em>. In de invoer staan ze altijd op volgorde van lijstnummer; de volgorde van trekken staat in de loting en het verslag.</p>
 
-    <h3 id="cp-s3">6. Stap 3 · Invoer</h3>
-    <p>Je ziet een raster: per rij een eenheid (stembureau, gemeente of kieskring) en per kolom een gecontroleerde lijst. Vul in elk vak het lijsttotaal in van het papieren proces-verbaal.</p>
+    <h3 id="cp-s3">7. Stap 3 · Invoer</h3>
+    <p>Kies eerst hoe je invoert: <span class="ui">Online in de app</span> of <span class="ui">Offline in Excel</span> (zie de volgende paragraaf).</p>
+    <p>Online zie je een raster: per rij een eenheid (stembureau, gemeente of hoofdstembureau) en per kolom een gecontroleerde lijst. Vul in elk vak het lijsttotaal in van het papieren proces-verbaal.</p>
     <ul>
       <li>Met <span class="kbd">Enter</span> ga je naar het volgende vak. Kies rechtsboven of Enter naar de <b>volgende lijst</b> gaat (per stembureau invoeren) of naar de <b>volgende rij</b> (per lijst invoeren).</li>
       <li>Een rij die helemaal is ingevuld krijgt links een groene streep. De huidige rij is gemarkeerd.</li>
       <li>De voortgangsbalk bovenaan laat zien hoeveel vakken al zijn ingevuld.</li>
-      <li>Onder <span class="ui">Meer</span> staat <span class="ui">Invoer wissen</span>. In het voorbeeld staat daar ook een knop die de juiste getallen invult, eventueel <span class="ui">met één afwijking</span>, zodat je de verschillen-weergave kunt uitproberen.</li>
+      <li>Onder <span class="ui">Meer</span> staat <span class="ui">Invoer wissen</span>. In het voorbeeld staat daar ook een knop die de juiste getallen invult, eventueel <span class="ui">met één afwijking</span>.</li>
     </ul>
-    <div class="tip"><b>Tip</b>Voer in vanaf het papier, niet vanaf een scherm van Abacus. Dat is het hele punt van de controle.</div>
+    <div class="tip"><b>Tip</b>Voer in vanaf het papier, niet vanaf een scherm van de programmatuur. Dat is het hele punt van de controle.</div>
 
-    <h3 id="cp-s4">7. Stap 4 · Uitslag inlezen en vergelijken</h3>
+    <h3 id="cp-excel">8. Offline invoeren in Excel</h3>
+    <p>Wil je invoeren op een computer zonder de app, bijvoorbeeld een invoercomputer zonder internet? Kies dan bij stap 3 <span class="ui">Offline in Excel</span>.</p>
+    <div class="step"><span class="n">1</span><div><p>Klik op <span class="ui">Excel downloaden</span>. Het bestand bevat de eenheden, de gelote lijsten op volgorde van lijstnummer, de controlecode en alle gegevens om later verder te gaan.</p></div></div>
+    <div class="step"><span class="n">2</span><div><p>Vul op de invoercomputer per eenheid het aantal stemmen per lijst in, in de <b>gele vakken</b>, en sla het bestand op. Alleen de gele vakken kun je wijzigen, en alleen hele getallen vanaf 0 zijn toegestaan.</p></div></div>
+    <div class="step"><span class="n">3</span><div><p>Lees het ingevulde Excel in met <span class="ui">Ingevuld Excel inlezen</span>, of sleep het naar het vak. Dat kan ook later of op een andere computer: sleep het dan bij stap 1 in de app, en de sessie wordt uit het Excel hersteld.</p></div></div>
+    <p>Bij het inlezen controleert de app de controlecode, de koppen en de rijen.</p>
+    <ul>
+      <li>Staat er in een vak tekst of een negatief getal, dan wordt het bestand geweigerd, met een lijst van de cellen.</li>
+      <li>Hoort het Excel bij een andere sessie, dan vraagt de app eerst of je de huidige sessie wilt vervangen (<span class="ui">Sessie vervangen door het Excel</span> of <span class="ui">Annuleren</span>).</li>
+      <li>Is de uitslag al ingelezen, dan wordt een Excel met een andere loting geweigerd.</li>
+      <li>Wijzig je na het inlezen nog getallen in de app, dan komen die wijzigingen in het verslag.</li>
+    </ul>
+
+    <h3 id="cp-s4">9. Stap 4 · Uitslag inlezen en vergelijken</h3>
     <div class="step"><span class="n">1</span><div>
-      <p><b>Lees de uitslag-EML in</b> met <span class="ui">Kies de uitslag-EML</span> of door het bestand naar het vak te slepen. Dit kan alleen als:</p>
-      <ul><li>de loting is vastgelegd, en</li><li>alle vakken in stap 3 zijn ingevuld.</li></ul>
-      <p>Het bestand moet passen bij je niveau (510b, 510c of 510d). Bevat een 510d meerdere contests, kies dan de juiste bij <em>Contest in de uitslag</em>.</p>
+      <p><b>Lees de uitslag-EML in</b> met <span class="ui">Kies de uitslag-EML</span> of door het bestand naar het vak te slepen. Dit kan alleen als de loting is vastgelegd en alle vakken in stap 3 zijn ingevuld. Bevat de uitslag meerdere contests, kies dan de juiste bij <em>Contest in de uitslag</em>.</p>
     </div></div>
     <div class="step"><span class="n">2</span><div>
-      <p><b>Bekijk de controles op het bestand zelf.</b> De app controleert of:</p>
-      <ul>
-        <li>de eenheden en lijsten overeenkomen met jouw invoer;</li>
-        <li>het om dezelfde verkiezing gaat;</li>
-        <li>de eenheden optellen tot het totaal;</li>
-        <li>de kandidaatstemmen optellen tot het lijsttotaal.</li>
-      </ul>
+      <p><b>Controleer de kenmerken.</b> De app toont de SHA-256-hashcode van het bestand. Dezelfde code staat in de voettekst van het uitgeprinte proces-verbaal. Tik de eerste 8 tekens over uit de voettekst; de app controleert of ze gelijk zijn. Datum en tijd zijn alvast ingevuld uit het bestand; vergelijk ze met de voettekst. Zo weet je zeker dat het bestand en het papier dezelfde uitslag zijn.</p>
     </div></div>
     <div class="step"><span class="n">3</span><div>
-      <p><b>Lees de uitkomst.</b> Per gecontroleerde lijst zie je de som van jouw invoer tegenover <code>TotalVotes</code> uit de uitslag. Het grote vak bovenaan geeft het eindoordeel.</p>
+      <p><b>Bekijk de controles op het bestand zelf.</b> De app controleert of de eenheden en lijsten overeenkomen met jouw invoer, of het om dezelfde verkiezing gaat, of de eenheden optellen tot het totaal en of de kandidaatstemmen optellen tot het lijsttotaal.</p>
     </div></div>
-    <h4>Er is een verschil</h4>
-    <p>Onder <em>Waar zit het verschil?</em> zie je per eenheid de afwijking tussen jouw invoer en <code>ReportingUnitVotes</code> in de uitslag. Zo vind je snel of het een invoerfout is (controleer het papier opnieuw) of een echt verschil.</p>
-    <p>Wil of moet je daarna alle lijsten controleren, klik dan op <span class="ui">Alle lijsten controleren</span>. De nieuwe lijsten komen erbij in stap 3. Tot ze helemaal zijn ingevoerd, blijven de cijfers uit de uitslag weer verborgen.</p>
+    <div class="step"><span class="n">4</span><div>
+      <p><b>Lees de uitkomst.</b> Per gecontroleerde lijst zie je de som van jouw invoer tegenover het totaal in de uitslag. Het grote vak bovenaan geeft het eindoordeel.</p>
+    </div></div>
+    <p>Lees je later een nieuwe versie van de uitslag in (met een andere hashcode), dan bewaart de app de vorige in een geschiedenis, met per uitslag de uitkomst.</p>
     <h4>Gegevens liggen vast</h4>
-    <p>Zodra er een uitslag is ingelezen, liggen stap 1 en de loting vast. Wil je toch iets aanpassen, klik dan op <span class="ui">Uitslag weghalen</span>. Daarna kun je stap 1 en 2 weer wijzigen; de uitslag lees je opnieuw in als de invoer weer compleet is.</p>
+    <p>Zodra er een uitslag is ingelezen, liggen stap 1 en de loting vast. Wil je toch iets aanpassen, klik dan op <span class="ui">Uitslag weghalen</span>.</p>
 
-    <h3 id="cp-verslag">8. Verslag en export</h3>
-    <p>Rechts in stap 4 vul je de verklaring of opmerkingen in, de plaats en de naam van de voorzitter. Daarna download je:</p>
+    <h3 id="cp-verschil">10. Er is een verschil</h3>
+    <p>Onder <em>Waar zit het verschil?</em> zie je per eenheid de afwijking tussen jouw invoer en de uitslag. De app volgt daarna de stappen uit het GR26-protocol:</p>
+    <ol>
+      <li><b>Controleer eerst de invoer.</b> Vergelijk de getallen met het papier. Was het een invoerfout in de app, verbeter die dan.</li>
+      <li><b>Blijft het verschil bestaan,</b> neem dan direct telefonisch contact op met de Kiesraad (Informatiepunt Verkiezingen, 070 426 73 29). Misschien is er een fout gemaakt bij het overnemen in de uitslagprogrammatuur, of werkt de programmatuur lokaal niet zoals verwacht.</li>
+    </ol>
+    <p>Het uitbreiden van de controle naar alle lijsten staat niet meer in het GR26-protocol; die knop is uit de app gehaald.</p>
+
+    <h3 id="cp-verslag">11. Verslag en export</h3>
+    <p>Rechts in stap 4 vul je een verklaring of opmerkingen in, de plaats en de naam van de voorzitter. Wat je krijgt, hangt af van het niveau:</p>
     <ul>
-      <li><span class="ui">Verslag downloaden (.html)</span>: het verslag volgens de opbouw van het Verslag controleprotocol van de Kiesraad, met de drie aankruisopties. Open het in je browser om het af te drukken of als pdf te bewaren.</li>
-      <li><span class="ui">Spreadsheet (.xlsx)</span>: invoer en vergelijking als Excel-bestand.</li>
-      <li><span class="ui">CSV</span>: dezelfde gegevens als platte tekst.</li>
+      <li><b>GSB:</b> een uitkomst van het controleprotocol, met een tekst die je overneemt in rubriek 2.5 van het proces-verbaal (Na 31-1 of Na 31-2).</li>
+      <li><b>CSB:</b> onderdeel B, controle lijsttotalen (ja of nee, met toelichting).</li>
+      <li><b>HSB:</b> een verslag met aankruisopties.</li>
     </ul>
-    <p>Cijfers uit de uitslag komen pas in het verslag en de export als de vergelijking is toegestaan (invoer compleet).</p>
-    <div class="note"><b>Officieel formulier</b>Het officiële formulier van de Kiesraad blijft leidend. Het verslag uit de app is een hulpmiddel. De naam van de voorzitter is niet bedoeld voor publicatie.</div>
+    <p>Elk verslag bevat de kenmerken (hashcode, datum en tijd) van het gecontroleerde document en de controlecode van de loting. Je downloadt het met <span class="ui">Verslag downloaden (.html)</span>; open het in je browser om af te drukken of als pdf te bewaren. Met <span class="ui">Spreadsheet (.xlsx)</span> en <span class="ui">CSV</span> exporteer je de invoer en de vergelijking.</p>
+    <div class="note"><b>Officieel formulier</b>Het formulier van de Kiesraad blijft leidend. De naam van de voorzitter is niet bedoeld voor publicatie.</div>
 
-    <h3 id="cp-sessie">9. Sessie bewaren</h3>
+    <h3 id="cp-sessie">12. Sessie bewaren</h3>
     <ul>
       <li>De app bewaart je werk automatisch in deze browser. Herlaad je de pagina, dan raak je niets kwijt.</li>
-      <li>Met <span class="ui">Sessie opslaan</span> download je alles als <code>.json</code>. Gebruik dit om op een andere computer verder te gaan of om de invoer te archiveren.</li>
-      <li>Met <span class="ui">Sessie laden</span> zet je zo'n bestand weer terug.</li>
+      <li>Met <span class="ui">Sessie opslaan</span> download je alles als <code>.json</code>; met <span class="ui">Sessie laden</span> zet je het terug.</li>
+      <li>Het Excel voor offline invoer bevat ook de hele sessie. Sleep het bij stap 1 in de app om verder te gaan.</li>
       <li>Er gaan geen gegevens naar een server; alles gebeurt in je browser.</li>
     </ul>
-    <div class="note"><b>Andere browser = lege app</b>Automatisch bewaren werkt alleen in dezelfde browser op dezelfde computer. Sla daarom aan het eind altijd een sessie op.</div>
 
-    <h3 id="cp-ids">10. Hoe ID's worden gekoppeld</h3>
-    <p>De eenheden in de uitslag hebben soms een ander ID-formaat dan in de 110a of 110b. De app koppelt ze zo:</p>
+    <h3 id="cp-ids">13. Hoe ID's worden gekoppeld</h3>
     <div class="tablewrap"><table>
       <thead><tr><th>Niveau</th><th>Regel</th><th>Voorbeeld</th></tr></thead>
       <tbody>
         <tr><td>GSB</td><td>Het laatste getal in het ID</td><td><code>9999::SB3</code> = stembureau <code>3</code></td></tr>
         <tr><td>HSB</td><td>Het deel na <code>::</code>, als 4 cijfers</td><td><code>HSB1::0344</code> = gemeente <code>344</code></td></tr>
-        <tr><td>CSB</td><td>Het laatste getal</td><td><code>HSB2</code> = kieskring <code>2</code></td></tr>
+        <tr><td>CSB</td><td>Het laatste getal</td><td><code>HSB2</code> = kieskring <code>2</code>; <code>0796</code> = gemeente <code>796</code></td></tr>
       </tbody>
     </table></div>
 
-    <h3 id="cp-faq">11. Vragen en problemen</h3>
-    <details><summary>Ik kan de uitslag-EML niet inlezen.</summary><p>Controleer of de loting is vastgelegd en of alle vakken in stap 3 zijn ingevuld. De badge op het tabblad Invoer moet groen zijn. Controleer ook of het bestand past bij je niveau: een GSB leest een 510b, een HSB een 510c, een CSB een 510d.</p></details>
-    <details><summary>De app zegt dat de eenheden niet overeenkomen.</summary><p>De uitslag bevat eenheden die niet in jouw lijst staan, of andersom. Kijk of je de goede 110b of 110a hebt geladen, en bij een HSB of de goede kieskring is gekozen. Heb je de eenheden zelf geplakt, controleer dan de nummers (bij HSB de gemeentecode).</p></details>
-    <details><summary>Ik wil iets in stap 1 of de loting wijzigen, maar het lukt niet.</summary><p>Na het inlezen van de uitslag ligt alles vast. Klik in stap 4 op <span class="ui">Uitslag weghalen</span>.</p></details>
-    <details><summary>Ik heb een sessie geladen met een uitslag erin, maar zie geen vergelijking.</summary><p>Dat is zo bedoeld: is de invoer in de sessie niet compleet, dan blijft de vergelijking verborgen tot alles is ingevoerd.</p></details>
-    <details><summary>Kan ik de Excel van de Kiesraad direct openen?</summary><p>Nog niet. Kopieer de twee kolommen (nummer en naam) en plak ze in stap 1.</p></details>
+    <h3 id="cp-faq">14. Vragen en problemen</h3>
+    <details><summary>Ik kan de uitslag-EML niet inlezen.</summary><p>Controleer of de loting is vastgelegd en of alle vakken in stap 3 zijn ingevuld. Controleer ook of het bestand past bij je niveau: een GSB leest een 510b, een HSB een 510c, een CSB een 510d.</p></details>
+    <details><summary>Ik kan bij het centraal stembureau niet loten.</summary><p>Dat klopt: het centraal stembureau controleert altijd alle lijsten.</p></details>
+    <details><summary>Mijn ingevulde Excel wordt geweigerd.</summary><p>De app noemt de cellen waar het om gaat. Meestal staat er tekst of een negatief getal in een geel vak. Verbeter het en lees het opnieuw in. Hoort het Excel bij een andere loting dan de ingelezen uitslag, dan kan het niet meer worden ingelezen.</p></details>
+    <details><summary>De eerste 8 tekens van de hashcode komen niet overeen.</summary><p>Dan is het ingelezen bestand niet hetzelfde als het uitgeprinte proces-verbaal. Zoek het juiste bestand of de juiste print op. Let op: spaties maken niet uit.</p></details>
+    <details><summary>Ik wil iets in stap 1 of de loting wijzigen.</summary><p>Na het inlezen van de uitslag ligt alles vast. Klik in stap 4 op <span class="ui">Uitslag weghalen</span>, en daarna eventueel op <span class="ui">Loting opnieuw</span> bij stap 2.</p></details>
+    <details><summary>Waar controleer ik de zetelverdeling?</summary><p>In de app <a href="#zetelverdeling-controle">Controle zetelverdeling</a>.</p></details>
 
-    <h3 id="cp-beperk">12. Bekende beperkingen</h3>
+    <h3 id="cp-beperk">15. Bekende beperkingen</h3>
     <ul>
-      <li>De Excel van de Kiesraad kan nog niet direct worden ingelezen; alleen plakken.</li>
-      <li>Een 510d met meerdere contests is nog niet getest met een echt bestand van een Tweede Kamerverkiezing.</li>
+      <li>Het Excel is getest met LibreOffice, maar nog niet in Microsoft Excel.</li>
+      <li>Onderdeel A van het CSB-protocol (data-analyse) en de controle of het GSB-protocol is uitgevoerd, zitten niet in deze app.</li>
+      <li>Bij de Eerste Kamer zijn de ‘gemeenten’ in de 110a mogelijk andere regio's; dat is nog niet nagekeken.</li>
+      <li>Een 510d met meerdere contests, en een 510d bij één kieskring of zonder kieskringen, zijn nog niet getest met een echt bestand.</li>
+    </ul>
+  </article>
+</div>
+</section>
+
+<!-- ============================ ZETELVERDELING ============================ -->
+<section data-pane="zetelverdeling-controle" class="wrap" hidden>
+<div class="doc">
+  <aside class="toc">
+    <b>Inhoud</b>
+    <ol>
+      <li><a href="#zv-doel">Waarvoor is de app?</a></li>
+      <li><a href="#zv-nodig">Wat heb je nodig?</a></li>
+      <li><a href="#zv-scherm">Het scherm</a></li>
+      <li><a href="#zv-s1">Stap 1 · Gegevens</a></li>
+      <li><a href="#zv-s2">Stap 2 · Berekening</a></li>
+      <li><a href="#zv-lot">Loting</a></li>
+      <li><a href="#zv-s3">Stap 3 · Vergelijken</a></li>
+      <li><a href="#zv-verslag">Verslag</a></li>
+      <li><a href="#zv-regels">De rekenregels</a></li>
+      <li><a href="#zv-faq">Vragen en problemen</a></li>
+      <li><a href="#zv-beperk">Bekende beperkingen</a></li>
+    </ol>
+    <div class="open"><a class="btn primary" href="zetelverdeling.html">App openen</a></div>
+  </aside>
+  <article>
+    <h2>Controle zetelverdeling</h2>
+    <p class="lead">Handleiding voor het centraal stembureau: de zetelverdeling zelf berekenen en vergelijken met de programmatuur (Verslag controleprotocol CSB, onderdeel B).</p>
+
+    <h3 id="zv-doel">1. Waarvoor is de app?</h3>
+    <p>Het controleprotocol vraagt het centraal stembureau de zetelverdeling zelf te berekenen, volgens de artikelen P 5 tot en met P 10 van de Kieswet, en de uitkomst te vergelijken met die van de programmatuur. Dat doe je na de rest van het protocol en vóór de vaststelling in de openbare zitting.</p>
+    <p>Deze app doet die berekening stap voor stap, laat elke stap zien, en maakt het verslag. Anders dan de spreadsheet van de Kiesraad kan de app ook omgaan met de meerderheidsregel (P 9), lijstuitputting (P 10) en loting.</p>
+    <div class="note"><b>Geen formele berekening</b>Deze controle is een hulpmiddel. De vaststelling gebeurt in de openbare zitting van het centraal stembureau.</div>
+
+    <h3 id="zv-nodig">2. Wat heb je nodig?</h3>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Bestand</th><th>Waarvoor</th></tr></thead>
+      <tbody>
+        <tr><td><code>510b</code>, <code>510c</code> of <code>510d</code></td><td>De stemcijfers: de stemtotalen per lijst</td></tr>
+        <tr><td><code>110a</code></td><td>Het aantal te verdelen zetels</td></tr>
+        <tr><td><code>230b</code></td><td>De namen van de lijsten en het aantal kandidaten per lijst (nodig voor lijstuitputting, P 10)</td></tr>
+        <tr><td><code>520</code> (als die er is)</td><td>De uitkomst van de programmatuur, met de gekozen kandidaten</td></tr>
+      </tbody>
+    </table></div>
+    <p>Zonder bestanden kan het ook: je vult de stemcijfers en het aantal zetels zelf in, of plakt ze uit de spreadsheet van de Kiesraad. De uitkomst van de programmatuur kun je overtikken van het proces-verbaal.</p>
+
+    <h3 id="zv-scherm">3. Het scherm</h3>
+    <ul>
+      <li><b>Bovenaan</b> staan <span class="ui">Sessie opslaan</span>, <span class="ui">Sessie laden</span>, de keuzelijst <span class="ui">Voorbeeld…</span> en <span class="ui">Opnieuw beginnen</span>.</li>
+      <li><b>Daaronder</b> drie stappen als tabbladen: <em>Gegevens</em>, <em>Berekening</em> en <em>Vergelijking en verslag</em>, elk met een badge voor de status.</li>
+    </ul>
+    <div class="tip"><b>Eerst oefenen?</b>Kies een voorbeeld: 's-Hertogenbosch GR26 (39 zetels), een kleine gemeente (13 zetels), minder dan 19 zetels met P 8 lid 3, lijstuitputting (P 10), gelijke stand (loting) of de meerderheidsregel (P 9).</div>
+
+    <h3 id="zv-s1">4. Stap 1 · Gegevens</h3>
+    <div class="step"><span class="n">1</span><div><p><b>Laad de EML-bestanden.</b> Sleep ze naar het vak of klik op <span class="ui">Kies bestanden</span>. De app herkent zelf welk bestand wat is.</p></div></div>
+    <div class="step"><span class="n">2</span><div>
+      <p><b>Controleer de verkiezing.</b> Je ziet de verkiezing, het totaal van de stemcijfers, het aantal lijsten en het <em>stelsel voor restzetels</em>. Controleer het <b>aantal zetels</b> en de <b>soort verkiezing</b>; die komen uit de 110a en de 510.</p>
+      <p>Het vinkje <span class="ui">Restzetels alleen voor lijsten met een stemcijfer van ten minste de kiesdeler (P 7 lid 2)</span> staat standaard aan bij de Tweede Kamer en het Europees Parlement, en uit bij de andere verkiezingen.</p>
+    </div></div>
+    <div class="step"><span class="n">3</span><div>
+      <p><b>Controleer de lijsten.</b> De tabel toont per lijst het nummer, de naam, het stemcijfer en het aantal kandidaten. Je kunt alles aanpassen. Een veld met een gekleurde rand wijkt af van het ingelezen bestand; die afwijkingen komen in het verslag.</p>
+      <ul>
+        <li><span class="ui">Lijst toevoegen</span> en <span class="ui">Lijsten wissen</span>.</li>
+        <li><span class="ui">Plakken uit Excel</span>: één lijst per regel, met lijstnummer, naam en stemcijfer gescheiden door tabs. Zo plak je kolom C, D en H uit de spreadsheet van de Kiesraad. Een vierde getal is het aantal kandidaten. Bestaande lijsten worden vervangen.</li>
+      </ul>
+      <p>Het stemcijfer is het aantal geldige stemmen op de kandidaten van de lijst (P 5). Vul ook het aantal kandidaten in; zonder dat kan de app lijstuitputting (P 10) niet controleren.</p>
+    </div></div>
+
+    <h3 id="zv-s2">5. Stap 2 · Berekening</h3>
+    <p>Bovenaan staat de status van de berekening. Daaronder volgt de berekening in de volgorde van de Kieswet:</p>
+    <ol>
+      <li><b>Kiesdeler (P 5):</b> het totaal van de stemcijfers gedeeld door het aantal zetels, als exacte breuk (bijvoorbeeld 1.711 17/39).</li>
+      <li><b>Volle zetels (P 6):</b> per lijst hoe vaak de kiesdeler in het stemcijfer past, met het overschot.</li>
+      <li><b>Restzetels:</b>
+        <ul>
+          <li>bij 19 zetels of meer: grootste gemiddelden (P 7). De tabel toont de gemiddelden per restzetel, met het vak dat de zetel krijgt gemarkeerd;</li>
+          <li>bij minder dan 19 zetels: grootste overschotten (P 8). Lijsten met minder dan 75% van de kiesdeler doen niet mee. Zijn er daarna nog zetels over, dan volgen grootste gemiddelden met hoogstens één zetel per lijst (P 8 lid 3).</li>
+        </ul>
+      </li>
+      <li><b>Meerderheid van stemmen (P 9):</b> heeft een lijst meer dan de helft van de stemmen maar niet meer dan de helft van de zetels, dan krijgt ze er één zetel bij, ten koste van de laatst toegewezen restzetel.</li>
+      <li><b>Lijstuitputting (P 10):</b> krijgt een lijst meer zetels dan ze kandidaten heeft, dan gaan de overige zetels naar andere lijsten.</li>
+    </ol>
+    <p>Rechts staat de <b>uitkomst</b> per lijst: volle zetels, restzetels en totaal. Onder <span class="ui">Alle stappen op volgorde</span> vind je elke stap van de berekening. Met <span class="ui">Berekening als CSV</span> exporteer je de berekening.</p>
+
+    <h3 id="zv-lot">6. Loting</h3>
+    <p>Bij een gelijke stand die bepaalt wie een zetel krijgt, moet het centraal stembureau loten. De app kan niet zelf loten. Ze toont dan een oranje vak met de lijsten die gelijk staan, met een knop per lijst. Klik op de lijst die de loting van het centraal stembureau heeft gewonnen; de berekening gaat daarna verder.</p>
+    <ul>
+      <li>Krijgen alle lijsten met hetzelfde getal een zetel, dan is er geen loting nodig.</li>
+      <li>De app bewaart de lotingen op volgorde. Pas je daarna de gegevens zo aan dat een loting niet meer past, dan haalt de app die loting weg.</li>
+      <li>Lotingen komen in het verslag.</li>
+    </ul>
+
+    <h3 id="zv-s3">7. Stap 3 · Vergelijking met de programmatuur</h3>
+    <p>Kies hoe je de uitkomst van de programmatuur invoert:</p>
+    <ul>
+      <li><span class="ui">520 inlezen</span>: sleep de 520 (uitslag met gekozen kandidaten) naar het vak of klik op <span class="ui">Kies de 520</span>.</li>
+      <li><span class="ui">Overtikken van het proces-verbaal</span>: tik per lijst het totaal aantal zetels over uit het proces-verbaal van de programmatuur. Volle zetels en restzetels zijn optioneel; vul je ze in, dan worden ze ook vergeleken.</li>
+    </ul>
+    <p>Rechts zie je het antwoord op de vraag <em>Is de uitkomst gelijk aan die van de programmatuur?</em>, met de meldingen en de kenmerken (hashcode, datum, tijd) van de 510 en de 520. Controleer de eerste 8 tekens van de hashcode tegen de voettekst van het proces-verbaal.</p>
+
+    <h3 id="zv-verslag">8. Verslag</h3>
+    <p>Vul de toelichting in. Bij een verschil is die verplicht: beschrijf welk nader onderzoek is gedaan en wat de uitkomst is. Vul ook het centraal stembureau, de plaats en de voorzitter in.</p>
+    <ul>
+      <li><span class="ui">Verslag downloaden (.html)</span>: het verslag voor onderdeel B, controle zetelverdeling, met het antwoord ja of nee, de toelichting en de bijzonderheden (loting, P 9, P 10, drempel, handmatige wijzigingen). Open het in je browser om af te drukken of als pdf te bewaren.</li>
+      <li><span class="ui">Tekst kopiëren</span>: de tekst om in het formulier van de Kiesraad te plakken.</li>
+    </ul>
+    <div class="note"><b>Officieel formulier</b>Het Verslag controleprotocol CSB van de Kiesraad blijft leidend.</div>
+    <p>De app bewaart de sessie in deze browser. Met <span class="ui">Sessie opslaan</span> download je hem als <code>.json</code>.</p>
+
+    <h3 id="zv-regels">9. De rekenregels</h3>
+    <p>De app volgt de Kieswet zoals die geldt per 1 oktober 2026, in dezelfde volgorde als Abacus: volle zetels, restzetels, de meerderheidsregel (P 9) en daarna lijstuitputting (P 10). De rekenkern is overgenomen uit Abacus en rekent met exacte breuken, zodat afronding nooit een verschil veroorzaakt.</p>
+    <ul>
+      <li>Gelijkluidende lijsten en lijstengroepen tellen als één lijst: de app telt de stemmen van alle kieskringen per lijst op.</li>
+      <li>De drempel van de kiesdeler voor restzetels (P 7 lid 2) geldt bij de Tweede Kamer en het Europees Parlement.</li>
+      <li>Bij P 8 lid 3 doen ook lijsten met minder dan 75% van de kiesdeler mee. De wet zegt dat niet uitdrukkelijk; de app volgt Abacus.</li>
+      <li>Het wetsvoorstel 36 641 over restzetels is niet in werking (stand 22 november 2026). De app volgt de huidige tekst.</li>
+    </ul>
+    <p>De app is getest met alle 46 tests uit Abacus, met de uitslag van 's-Hertogenbosch GR26 en met ruim 16.000 willekeurige gevallen.</p>
+
+    <h3 id="zv-faq">10. Vragen en problemen</h3>
+    <details><summary>De app meldt dat P 10 niet is gecontroleerd.</summary><p>Vul het aantal kandidaten per lijst in, of laad de 230b.</p></details>
+    <details><summary>Ik heb geen 520.</summary><p>Abacus maakt (nog) geen 520. Kies dan <em>Overtikken van het proces-verbaal</em> bij stap 3.</p></details>
+    <details><summary>De berekening blijft staan op een loting.</summary><p>Klik in het oranje vak op de lijst die de loting heeft gewonnen.</p></details>
+    <details><summary>Kan ik de app gebruiken voor de Eerste Kamer?</summary><p>Niet goed: de Eerste Kamer werkt met stemwaarden (hoofdstuk U van de Kieswet). De app waarschuwt daarvoor.</p></details>
+    <details><summary>Waar controleer ik de lijsttotalen?</summary><p>In de app <a href="#controleprotocol">Controleprotocol</a>, op het niveau centraal stembureau.</p></details>
+
+    <h3 id="zv-beperk">11. Bekende beperkingen</h3>
+    <ul>
+      <li>Nog niet getest met een echte 520 van de programmatuur, en niet met een echte 510d van de Tweede Kamer of het Europees Parlement met meerdere kieskringen.</li>
+      <li>De Eerste Kamer (stemwaarden) wordt niet ondersteund.</li>
+      <li>In het voorbeeld van 's-Hertogenbosch zijn de echte aantallen kandidaten niet bekend; P 10 staat daar op ‘niet gecontroleerd’.</li>
     </ul>
   </article>
 </div>
@@ -919,8 +1091,8 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
 
 <script>
 "use strict";
-const views = ["overzicht", "verkiezingsdefinitie-maker", "stembureaus-maker", "kandidatenlijsten-maker", "pv-generator", "controleprotocol", "uitslagen-generator"];
-const prefix = { vd: "verkiezingsdefinitie-maker", sb: "stembureaus-maker", kl: "kandidatenlijsten-maker", pv: "pv-generator", cp: "controleprotocol", ug: "uitslagen-generator" };
+const views = ["overzicht", "verkiezingsdefinitie-maker", "stembureaus-maker", "kandidatenlijsten-maker", "pv-generator", "controleprotocol", "uitslagen-generator", "zetelverdeling-controle"];
+const prefix = { vd: "verkiezingsdefinitie-maker", sb: "stembureaus-maker", kl: "kandidatenlijsten-maker", pv: "pv-generator", cp: "controleprotocol", ug: "uitslagen-generator", zv: "zetelverdeling-controle" };
 let current = null;
 function show(hash) {
   let h = (hash || "").replace(/^#/, "");

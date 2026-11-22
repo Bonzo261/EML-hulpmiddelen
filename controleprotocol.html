@@ -103,6 +103,7 @@ table{border-collapse:separate;border-spacing:0;width:100%;font-size:14px}
 th,td{padding:6px 9px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
 thead th{position:sticky;top:0;background:var(--panel);z-index:2;font:600 13px/1.25 var(--font-body);color:var(--muted);vertical-align:bottom;border-bottom:1.5px solid var(--ink)}
 thead th small{display:block;font-weight:400;max-width:16ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+thead th.num small{margin-left:auto}
 tfoot td{position:sticky;bottom:0;background:var(--panel);font-weight:600;border-top:1.5px solid var(--ink);border-bottom:0;z-index:2}
 td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 td.mono{font:500 12.5px var(--font-mono);color:var(--muted);white-space:nowrap}
@@ -181,8 +182,8 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
     <div class="q">
       <h2>EML-bestanden inladen</h2>
       <div class="drop" id="drop">
-        <div>Sleep hier de EML-bestanden heen. De app herkent het soort bestand zelf.</div>
-        <div class="btns"><input type="file" id="openFile" accept=".xml,.eml,text/xml" multiple hidden><button type="button" class="primary" id="openBtn">Kies bestanden</button></div>
+        <div>Sleep hier de EML-bestanden heen. De app herkent het soort bestand zelf.<br><span class="hint">Heb je al een Excel van deze app (offline invoer)? Sleep dat hierheen om met die sessie verder te gaan.</span></div>
+        <div class="btns"><input type="file" id="openFile" accept=".xml,.eml,.xlsx,text/xml" multiple hidden><button type="button" class="primary" id="openBtn">Kies bestanden</button></div>
       </div>
       <div class="chips" id="loaded"></div>
       <ul class="checks">
@@ -201,6 +202,14 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
         <input type="radio" name="level" id="lvCSB" value="CSB"><label for="lvCSB">Centraal stembureau</label>
       </div>
       <p class="hint" id="levelHint"></p>
+      <div class="row">
+        <div class="field narrow" id="methRow" style="flex:0 1 240px"><label>Stemopneming</label>
+          <div class="seg" role="radiogroup" aria-label="Stemopneming">
+            <input type="radio" name="smeth" id="smD" value="DSO"><label for="smD">Decentraal</label>
+            <input type="radio" name="smeth" id="smC" value="CSO"><label for="smC">Centraal</label>
+          </div></div>
+      </div>
+      <p class="hint" id="pvHint"></p>
       <div class="row" id="kkRow" hidden>
         <div class="field"><label for="kkSel">Kieskring van dit hoofdstembureau</label><select id="kkSel"></select></div>
       </div>
@@ -297,8 +306,28 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
         <select id="enterDir" style="width:auto"><option value="row">volgende lijst (per stembureau)</option><option value="col">volgende rij (per lijst)</option></select>
       </div>
     </div>
+    <div class="row" style="align-items:center;gap:14px">
+      <div class="seg" role="radiogroup" aria-label="Manier van invoeren">
+        <input type="radio" name="emode" id="emOn" value="online"><label for="emOn">Online in de app</label>
+        <input type="radio" name="emode" id="emOff" value="offline"><label for="emOff">Offline in Excel</label>
+      </div>
+      <span class="hint" id="emodeHint"></span>
+    </div>
+    <div id="offlineBox" class="q" style="background:var(--paper)" hidden>
+      <ol class="hint" style="margin:0;padding-left:18px;display:grid;gap:4px">
+        <li>Download het Excel. Het bevat de <span data-units>stembureaus</span> en de gelote lijsten op volgorde van lijstnummer, de controlecode en alle gegevens om later verder te gaan.</li>
+        <li>Vul op de invoercomputer per <span data-unit>stembureau</span> het aantal stemmen per lijst in (de gele vakken) en sla het bestand op.</li>
+        <li>Lees het ingevulde Excel hier in. Dat kan ook later of op een andere computer: sleep het dan bij stap 1 in de app, de sessie wordt uit het Excel hersteld.</li>
+      </ol>
+      <div class="drop" id="xlDrop" style="padding:12px">
+        <div class="btns"><button type="button" class="primary" id="xlDown">Excel downloaden</button><input type="file" id="xlFile" accept=".xlsx" hidden><button type="button" id="xlUp">Ingevuld Excel inlezen</button></div>
+        <div class="hint">of sleep het ingevulde Excel hierheen</div>
+      </div>
+      <div class="status idle" id="xlStatus" hidden></div>
+      <div class="btns" id="xlConfirm" hidden><button type="button" class="primary" id="xlReplace">Sessie vervangen door het Excel</button><button type="button" id="xlCancel">Annuleren</button></div>
+    </div>
     <p class="hint" id="entryHint"></p>
-    <div class="row" style="align-items:center"><div style="flex:1"><div class="progress"><i id="prog"></i></div></div><span class="rowst" id="progTxt"></span></div>
+    <div class="row" style="align-items:center" id="progRow"><div style="flex:1"><div class="progress"><i id="prog"></i></div></div><span class="rowst" id="progTxt"></span></div>
     <div class="tablewrap" id="gridWrap"></div>
     <details>
       <summary>Meer</summary>
@@ -324,6 +353,18 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
       <div class="btns"><input type="file" id="resFile" accept=".xml,.eml,text/xml" hidden><button type="button" class="primary" id="resBtn">Kies de uitslag-EML</button><button type="button" id="demoRes" hidden>Voorbeeld-uitslag inlezen</button></div>
     </div>
     <div class="chips" id="resChip"></div>
+    <div id="resMeta" hidden class="q" style="background:var(--paper);padding:12px 14px">
+      <h3>Kenmerken van het gecontroleerde document</h3>
+      <p class="hint">De SHA-256 van het ingelezen bestand. Dezelfde hashcode staat in de voettekst van het uitgeprinte proces-verbaal: vergelijk de eerste 8 tekens, zodat je zeker weet dat het bestand en het papier dezelfde uitslag zijn.</p>
+      <div class="hash" id="resHash" style="font:500 13px/1.5 var(--font-mono);word-break:break-all"></div>
+      <div class="row">
+        <div class="field narrow" style="flex:0 1 150px"><label for="pvDate">Datum (voettekst)</label><input type="text" id="pvDate" placeholder="dd-mm-jjjj"></div>
+        <div class="field narrow" style="flex:0 1 120px"><label for="pvTime">Tijd (voettekst)</label><input type="text" id="pvTime" placeholder="uu:mm"></div>
+        <div class="field" style="flex:0 1 220px"><label for="pvHash">Eerste 8 tekens hashcode</label><input type="text" id="pvHash" class="mono" placeholder="bijv. 5D6A 46CA" autocomplete="off"></div>
+        <div class="field" style="align-self:center"><span class="rowst" id="pvHashSt"></span></div>
+      </div>
+      <ul class="checks" id="resHist"></ul>
+    </div>
     <div class="row" id="contestRow" hidden>
       <div class="field"><label for="contestSel">Contest in de uitslag</label><select id="contestSel"></select></div>
     </div>
@@ -403,6 +444,8 @@ const fresh = () => ({
   files: [], level: "GSB", kk: "", contestIdx: 0, manualUnits: null, manualLists: null, demo: false, step: 1,
   draw: { mode: "steekproef", n: 3, method: "handmatig", picked: [], done: false, at: "", extended: false },
   entries: {}, enterDir: "row", note: "", place: "", chair: "",
+  entryMode: "online", imported: null, edits: {}, meta: null,
+  model: "2026", smeth: "DSO", resHistory: [],
 });
 let S = fresh();
 let M = null; // afgeleid model
@@ -448,7 +491,7 @@ function parse510(doc, eml) {
       units: kids(ct, "ReportingUnitVotes").map(r => { const ri = kids(r, "ReportingUnitIdentifier")[0]; return { id: ri?.getAttribute("Id") || "", name: ri?.textContent.trim() || "", votes: parseVotes(r) }; }),
     };
   });
-  return { eml, election: parseElectionId(doc), authority: auth ? { id: auth.getAttribute("Id") || "", name: auth.textContent.trim() } : null, contests };
+  return { eml, election: parseElectionId(doc), creation: txt(doc, "CreationDateTime"), authority: auth ? { id: auth.getAttribute("Id") || "", name: auth.textContent.trim() } : null, contests };
 }
 function parse110a(doc) {
   return { election: parseElectionId(doc), regions: all(doc, "Region").map(r => ({ number: r.getAttribute("RegionNumber") || "", category: (r.getAttribute("RegionCategory") || "").toUpperCase(), superior: r.getAttribute("SuperiorRegionNumber") || "", superiorCategory: (r.getAttribute("SuperiorRegionCategory") || "").toUpperCase(), name: txt(r, "RegionName") })) };
@@ -478,13 +521,21 @@ function canonKey(level, id) {
 }
 
 /* ============================== bestanden ============================== */
-async function addFiles(list, where) { for (const f of list) addText(f.name, await f.text(), where); afterFiles(); }
+async function addFiles(list, where) {
+  const xl = [...list].filter(f => /\.xlsx$/i.test(f.name)), rest = [...list].filter(f => !/\.xlsx$/i.test(f.name));
+  for (const f of rest) { const buf = await f.arrayBuffer(); addText(f.name, new TextDecoder().decode(buf), where, where === "res" ? await sha256hex(buf) : ""); }
+  if (rest.length) afterFiles();
+  if (xl.length) { if (where === "res") return toast("Hier hoort een uitslag-EML"); await handleExcel(xl[0]); }
+}
 /* where = "struct" (stap 1: 110a/110b/230b) of "res" (stap 4: 510b/c/d, pas na complete invoer) */
-function addText(name, text, where) {
+async function sha256hex(buf) { const h = new Uint8Array(await crypto.subtle.digest("SHA-256", buf)); return [...h].map(b => b.toString(16).padStart(2, "0")).join("").toUpperCase(); }
+const hashShort = h => h ? h.slice(0, 4) + " " + h.slice(4, 8) : "";
+const hashGroups = h => h ? h.match(/.{4}/g).join(" ") : "";
+function addText(name, text, where, hash) {
   let f; try { f = { name, text, ...parseFile(text) }; } catch (e) { f = { name, text: "", type: "fout", error: e.message }; }
   const isRes = /^510/.test(f.type);
   if (where === "struct" && isRes) { toast("De uitslag-EML lees je in bij stap 4, als alle invoer klaar is"); return false; }
-  if (where === "struct" && locked()) { toast("De uitslag is al ingelezen; haal die eerst weg bij stap 4"); return false; }
+  if (where === "struct" && structLocked()) { toast(locked() ? "De uitslag is al ingelezen; haal die eerst weg bij stap 4" : "De loting is vastgelegd; kies eerst ‘Loting opnieuw’ bij stap 2"); return false; }
   if (where === "res" && !isRes) { toast(f.type === "fout" ? "Dit bestand kon niet worden gelezen: " + f.error : "Hier hoort een uitslag-EML (510b, 510c of 510d)"); return false; }
   if (isRes) {
     if (!progress().complete) { toast("Rond eerst alle invoer af"); return false; }
@@ -492,13 +543,20 @@ function addText(name, text, where) {
     S.files = S.files.filter(x => !/^510/.test(x.type));
     const ci = f.data.contests.findIndex(c => c.id === S.kk);
     S.contestIdx = S.level === "HSB" && ci >= 0 ? ci : 0;
+    f.hash = hash || "";
+    const last = S.resHistory[S.resHistory.length - 1];
+    if (!last || last.hash !== f.hash || !f.hash) {
+      const cd = (f.data.creation || "").match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
+      S.resHistory.push({ name, hash: f.hash, at: nowTxt(), pvDate: cd ? `${cd[3]}-${cd[2]}-${cd[1]}` : "", pvTime: cd ? `${cd[4]}:${cd[5]}` : "", pvHash: "", state: "" });
+    }
   } else if (f.type !== "fout") S.files = S.files.filter(x => !(x.type === f.type && f.type !== "110b") && !(x.type === "110b" && f.type === "110b" && x.data.gemeente === f.data.gemeente));
   S.files.push(f);
   return true;
 }
 const locked = () => S.files.some(f => /^510/.test(f.type));
+const structLocked = () => S.draw.done || locked();
 function afterFiles() { renderAll(); save(); }
-function revive() { S.files = S.files.map(f => { if (f.type === "fout" || !f.text) return f; try { return { name: f.name, text: f.text, ...parseFile(f.text) }; } catch (e) { return { name: f.name, text: "", type: "fout", error: e.message }; } }); }
+function revive() { S.files = S.files.map(f => { if (f.type === "fout" || !f.text) return f; try { return { name: f.name, text: f.text, hash: f.hash, ...parseFile(f.text) }; } catch (e) { return { name: f.name, text: "", type: "fout", error: e.message }; } }); }
 
 /* ============================== model ============================== */
 function derive() {
@@ -509,8 +567,8 @@ function derive() {
   const d110b = S.files.filter(f => f.type === "110b").map(f => f.data);
   const d230b = S.files.filter(f => f.type === "230b").map(f => f.data);
   const level = S.level;
-  const L = LV[level];
-  const election = d110a?.election || d230b[0]?.election || d110b[0]?.election || res?.election || null;
+  const L = { ...LV[level] };
+  const election = d110a?.election || d230b[0]?.election || d110b[0]?.election || S.meta?.election || res?.election || null;
   const kks = (d110a?.regions || []).filter(r => r.category === "KIESKRING");
   let kk = S.kk;
   if (level === "HSB" && kks.length && !kks.find(k => k.number === kk)) kk = kks[0].number;
@@ -523,16 +581,25 @@ function derive() {
   if (level === "GSB") for (const b of d110b) for (const st of b.stations) struct.push({ key: canonKey("GSB", st.nr), nr: st.nr, name: st.name, gem: b.gemeenteName });
   if (level === "HSB" && d110a) struct = d110a.regions.filter(r => r.category === "GEMEENTE" && (!kks.length || (r.superiorCategory === "KIESKRING" && r.superior === kk))).map(r => ({ key: canonKey("HSB", r.number), nr: pad4(r.number), name: r.name }));
   if (level === "CSB" && d110a) struct = kks.map(k => ({ key: canonKey("CSB", k.number), nr: k.number, name: k.name || "Kieskring " + k.number }));
+  // Werkt deze verkiezing met hoofdstembureaus? Alleen bij meer dan één kieskring.
+  // Bij één kieskring (provincie met één kieskring, waterschap, Eerste Kamer) en zonder kieskringen (gemeenteraad)
+  // controleert het CSB direct de processen-verbaal van de gemeentelijk stembureaus.
+  const cat = (election?.category || "").toUpperCase();
+  const csbGem = level === "CSB" && kks.length <= 1 && (d110a?.regions || []).some(r => r.category === "GEMEENTE");
+  if (csbGem) struct = d110a.regions.filter(r => r.category === "GEMEENTE").map(r => ({ key: canonKey("CSB", r.number), nr: pad4(r.number), name: r.name }));
+  const hasHSB = kks.length > 1 ? true : kks.length === 1 || csbGem || ["GR", "ER", "BC", "GC", "AB", "EK"].includes(cat) ? false : ["TK", "EP"].includes(cat) ? true : null;
+  if (level === "CSB" && hasHSB) Object.assign(L, { unit: "hoofdstembureau", units: "hoofdstembureaus", Unit: "Hoofdstembureau (kieskring)", Units: "Hoofdstembureaus" });
+  if (level === "CSB" && hasHSB === false) Object.assign(L, { unit: "gemeentelijk stembureau", units: "gemeentelijk stembureaus", Unit: "Gemeentelijk stembureau", Units: "Gemeentelijk stembureaus", keyLbl: "Code" });
   if (level === "GSB" && d110b.length > 1) warn.push(["warn", "Er zijn stembureaus van meerdere gemeenten geladen."]);
   let units, unitSrc;
-  if (S.manualUnits) { units = S.manualUnits; unitSrc = "zelf ingevuld"; }
+  if (S.manualUnits) { units = S.manualUnits; unitSrc = S.meta ? "het Excel" : "zelf ingevuld"; }
   else { units = struct; unitSrc = struct.length ? (level === "GSB" ? "110b" : "110a") : ""; }
   const dupe = units.map(u => u.key).filter((k, i, a) => a.indexOf(k) !== i);
   if (dupe.length) warn.push(["bad", `Dubbele nummers: ${[...new Set(dupe)].join(", ")}. Geef elke ${L.unit} een eigen nummer.`]);
 
   // lijsten: uit 230b of zelf ingevuld
   let lists = [], listSrc = "";
-  if (S.manualLists) { lists = S.manualLists.map(l => ({ ...l })); listSrc = "zelf ingevuld"; }
+  if (S.manualLists) { lists = S.manualLists.map(l => ({ ...l })); listSrc = S.meta ? "het Excel" : "zelf ingevuld"; }
   else if (d230b.length) {
     const cts = d230b.flatMap(d => d.contests);
     const use = level === "HSB" && cts.find(c => c.id === kk) ? [cts.find(c => c.id === kk)] : cts;
@@ -560,30 +627,50 @@ function derive() {
   if (S.files.some(f => f.type !== "fout" && !/^510/.test(f.type) && f.data.election && election && f.data.election.id !== election.id)) warn.push(["bad", "Niet alle bestanden horen bij dezelfde verkiezing."]);
   if (S.files.some(f => f.type === "fout")) warn.push(["bad", "Niet alle bestanden konden worden gelezen (zie de rode bestanden)."]);
 
-  let authority = "";
-  if (level === "GSB") authority = d110b[0]?.gemeenteName || election?.domain?.name || "";
-  if (level === "HSB") authority = kks.find(k => k.number === kk)?.name || "";
-  if (level === "CSB") authority = election?.domain?.name || "";
+  let authority = S.meta?.authority || "";
+  if (!authority && level === "GSB") authority = d110b[0]?.gemeenteName || election?.domain?.name || "";
+  if (!authority && level === "HSB") authority = kks.find(k => k.number === kk)?.name || "";
+  if (!authority && level === "CSB") authority = election?.domain?.name || "";
   if (!authority) authority = res?.authority?.name || "";
-  return { level, L, election, authority, kk, kks, res, fRes, contest, units, unitSrc, lists, listSrc, ruByKey, warn, warnRes };
+  const pv = pvInfo(level, S.model, S.smeth, L, hasHSB, units.length);
+  L.pv = pv.src;
+  const forceAll = level === "CSB" || (level === "HSB" && units.length === 1);
+  return { level, L, pv, forceAll, election, authority, kk, kks, res, fRes, contest, units, unitSrc, lists, listSrc, ruByKey, warn, warnRes };
+}
+/* namen van de processen-verbaal volgens de controleprotocollen van de Kiesraad (GR26) */
+function pvInfo(level, model, smeth, L, hasHSB, n) {
+  const cso = smeth === "CSO";
+  if (level === "GSB") return { src: cso ? "bijlage 1 van het proces-verbaal Na 31-2" : "de processen-verbaal N 10-1 van de stembureaus", cmp: `rubriek 2.3 van het proces-verbaal ${cso ? "Na 31-2" : "Na 31-1"}`, done: `rubriek 2.5 van het proces-verbaal ${cso ? "Na 31-2" : "Na 31-1"}` };
+  if (level === "HSB") return { src: "de processen-verbaal Na 31-1 of Na 31-2 van de gemeentelijk stembureaus", cmp: "het proces-verbaal O 7", done: "het verslag van het hoofdstembureau" };
+  const done = "het Verslag controleprotocol centraal stembureau, onderdeel B", cmp = "de lijsttotalen in het proces-verbaal P 22-1";
+  if (hasHSB === true) return { src: "de processen-verbaal O 7 van de hoofdstembureaus", cmp, done };
+  const gsb = n === 1 ? "het proces-verbaal Na 31-1 of Na 31-2 van het gemeentelijk stembureau" : "de processen-verbaal Na 31-1 of Na 31-2 van de gemeentelijk stembureaus";
+  if (hasHSB === false) return { src: gsb + " (met eventueel corrigendum)", cmp, done };
+  return { src: `de processen-verbaal O 7 van de hoofdstembureaus (bij een verkiezing met één kieskring of zonder kieskringen, zoals gemeenteraad, waterschap of Eerste Kamer: ${gsb})`, cmp, done };
 }
 
+
 /* geselecteerde lijsten */
-const checkedLists = () => !S.draw.done ? [] : (S.draw.mode === "alle" || S.draw.extended) ? M.lists : S.draw.picked.map(id => M.lists.find(l => l.id === id) || { id, label: "Lijst " + id, name: "" });
+const byNr = (a, b) => (+a.id || 0) - (+b.id || 0) || String(a.id).localeCompare(String(b.id));
+/* gecontroleerde lijsten, altijd op volgorde van lijstnummer (de volgorde van trekken staat in S.draw.picked) */
+const checkedLists = () => !S.draw.done ? [] : [...((S.draw.mode === "alle" || S.draw.extended) ? M.lists : S.draw.picked.map(id => M.lists.find(l => l.id === id) || { id, label: "Lijst " + id, name: "" }))].sort(byNr);
 const val = (k, id) => { const v = S.entries[k]?.[id]; return v === undefined || v === "" ? null : +v; };
 
 /* ============================== render ============================== */
 function renderAll() { M = derive(); renderStep1(); renderStep2(); renderStep3(); renderStep4(); renderBadges(); showStep(S.step, true); }
 
 function renderStep1() {
-  const lk = locked();
+  const lk = structLocked();
   const shown = S.files.map((f, i) => [f, i]).filter(([f]) => !/^510/.test(f.type));
   $("loaded").innerHTML = shown.map(([f, i]) => `<span class="chip ${f.type === "fout" ? "bad" : "on"}" title="${esc(f.error || f.name)}"><b>${esc(f.type)}</b><span>${esc(f.name)}</span>${lk ? "" : `<button type="button" data-rm="${i}" aria-label="Verwijder ${esc(f.name)}">×</button>`}</span>`).join("");
   $("loaded").querySelectorAll("[data-rm]").forEach(b => b.onclick = () => { S.files.splice(+b.dataset.rm, 1); afterFiles(); });
-  $("openBtn").disabled = lk;
+  $("openBtn").disabled = false;
   for (const lv of ["GSB", "HSB", "CSB"]) { const r = $("lv" + lv); r.checked = M.level === lv; r.disabled = lk && M.level !== lv; }
-  $("levelHint").innerHTML = lk ? "De uitslag is ingelezen, daarom liggen de gegevens vast. Haal de uitslag bij stap 4 weg om iets te wijzigen." : `De invoer gaat per ${M.L.unit}. Bij stap 4 hoort hier een <code>${M.L.eml}</code> bij.`;
+  $("levelHint").innerHTML = locked() ? "De uitslag is ingelezen, daarom liggen de gegevens vast. Haal de uitslag bij stap 4 weg om iets te wijzigen." : lk ? "De loting is vastgelegd, daarom liggen de gegevens vast. Kies ‘Loting opnieuw’ bij stap 2 om iets te wijzigen." : `De invoer gaat per ${M.L.unit}. Bij stap 4 hoort hier een <code>${M.L.eml}</code> bij.`;
   $("kkRow").hidden = !(M.level === "HSB" && M.kks.length);
+  $("methRow").hidden = M.level !== "GSB";
+  $("smD").checked = S.smeth !== "CSO"; $("smC").checked = S.smeth === "CSO";
+  $("pvHint").innerHTML = `Invoer vanaf ${esc(M.pv.src)}; vergelijken met ${esc(M.pv.cmp)}.` + (M.forceAll ? ` <b>Het ${esc(M.L.org)} controleert hier alle lijsten, zonder loting.</b>` : "");
   $("kkSel").disabled = lk;
   $("kkSel").innerHTML = M.kks.map(k => `<option value="${esc(k.number)}" ${k.number === M.kk ? "selected" : ""}>${esc(k.number)} – ${esc(k.name)}</option>`).join("");
   $("fElection").textContent = M.election?.id || "–";
@@ -611,14 +698,19 @@ function renderStep1() {
 
 function renderStep2() {
   const d = S.draw;
+  if (M.forceAll && !d.done && d.mode !== "alle") { d.mode = "alle"; d.picked = []; }
+  $("dmS").closest(".seg").title = M.forceAll ? "Bij dit orgaan worden altijd alle lijsten gecontroleerd" : "";
   $("dmS").checked = d.mode === "steekproef"; $("dmA").checked = d.mode === "alle";
   $("dhH").checked = d.method === "handmatig"; $("dhD").checked = d.method === "digitaal";
   $("drawN").value = d.n; $("drawN").max = Math.max(1, M.lists.length);
   [$("dmS"), $("dmA"), $("dhH"), $("dhD"), $("drawN")].forEach(x => x.disabled = d.done);
+  if (M.forceAll) $("dmS").disabled = true;
   $("nRow").hidden = d.mode === "alle";
   const n = Math.min(d.n, M.lists.length);
-  $("drawHint").innerHTML = d.mode === "alle"
-    ? "Alle lijsten worden gecontroleerd. Dit adviseert de Kiesraad als je ook manipulatie binnen het orgaan wilt uitsluiten."
+  $("drawHint").innerHTML = M.forceAll
+    ? (M.level === "CSB" ? "Het centraal stembureau controleert de lijsttotalen van alle lijsten; er is geen loting." : "Onder dit hoofdstembureau valt één gemeentelijk stembureau. Dan worden alle lijsttotalen vergeleken, zonder steekproef.")
+    : d.mode === "alle"
+    ? "Alle lijsten worden gecontroleerd in plaats van een steekproef."
     : d.method === "handmatig"
       ? `Maak van elke lijst een lot en stop de loten in een pot. Trek ${n} loten en klik de getrokken lijsten hieronder aan, in de volgorde van trekken.`
       : `De app trekt ${n} lijsten met een cryptografisch veilige toevalsgenerator. Doe dit in het openbaar, op een scherm dat iedereen kan zien.`;
@@ -629,14 +721,14 @@ function renderStep2() {
   $("drawUndo").hidden = (!d.done && !d.picked.length) || locked();
   const st = $("drawStatus");
   if (!M.lists.length) { st.className = "status warn"; st.textContent = "Laad eerst een uitslag-EML of een kandidatenlijst (230b)."; }
-  else if (d.done) { st.className = "status ok"; st.textContent = d.mode === "alle" ? "Vastgelegd: alle lijsten worden gecontroleerd." : d.extended ? "Na een verschil uitgebreid naar alle lijsten." : `Loting vastgelegd op ${d.at}.`; }
+  else if (d.done) { st.className = "status ok"; st.innerHTML = esc(d.mode === "alle" ? "Vastgelegd: alle lijsten worden gecontroleerd." : d.extended ? "Na een verschil uitgebreid naar alle lijsten." : `Loting vastgelegd op ${d.at}.`) + (d.code ? `<small>Controlecode <b style="font-family:var(--font-mono)">${esc(d.code)}</b>. Noteer deze bij de loting; hij staat ook in het Excel en in het verslag.</small>` : ""); }
   else if (d.mode === "alle") { st.className = "status idle"; st.textContent = "Klik op ‘Loting vastleggen’ om te beginnen."; }
   else { st.className = "status idle"; st.textContent = `${d.picked.length} van ${n} lijsten getrokken.`; }
   const lotHtml = (l, i) => `<div class="lot ${i >= 0 ? "picked" : ""}" data-order="${i + 1}"><b>${esc(l.id)}</b><span>${esc(l.label)}</span></div>`;
   const shown = checkedLists();
-  const pickedShow = d.done ? shown : d.picked.map(id => M.lists.find(l => l.id === id)).filter(Boolean);
+  const pickedShow = d.done && (d.mode === "alle" || d.extended) ? shown : d.picked.map(id => M.lists.find(l => l.id === id)).filter(Boolean);
   $("drawn").innerHTML = pickedShow.length ? pickedShow.map((l, i) => lotHtml(l, d.mode === "alle" || d.extended ? -1 : i)).join("") : '<p class="hint">Nog geen lijsten getrokken.</p>';
-  $("drawMeta").textContent = d.done && d.extended && d.picked.length ? `Oorspronkelijke steekproef: lijst ${d.picked.join(", ")}.` : "";
+  $("drawMeta").textContent = d.done && d.extended && d.picked.length ? `Oorspronkelijke steekproef: lijst ${d.picked.join(", ")}.` : d.done && d.mode === "steekproef" ? "Hierboven in de volgorde van trekken. Bij de invoer staan ze op volgorde van lijstnummer." : "";
   const clickable = !d.done && d.mode === "steekproef" && d.method === "handmatig";
   $("lots").innerHTML = M.lists.map(l => { const i = d.picked.indexOf(l.id); return `<button type="button" class="lot ${i >= 0 ? "picked" : ""}" data-order="${i + 1}" data-lot="${esc(l.id)}" ${clickable ? "" : "disabled"} aria-pressed="${i >= 0}"><b>${esc(l.id)}</b><span>${esc(l.label)}</span></button>`; }).join("") || '<p class="hint">Geen lijsten geladen.</p>';
   if (clickable) $("lots").querySelectorAll("[data-lot]").forEach(b => b.onclick = () => {
@@ -652,9 +744,22 @@ function renderStep3() {
   $("entryTitle").textContent = `Lijsttotalen per ${M.L.unit} invoeren`;
   $("enterDir").value = S.enterDir;
   $("demoFillBox").hidden = !S.demo;
+  $("emOn").checked = S.entryMode !== "offline"; $("emOff").checked = S.entryMode === "offline";
+  const off = S.entryMode === "offline";
+  $("offlineBox").hidden = !off;
+  document.querySelectorAll("#offlineBox [data-units]").forEach(x => x.textContent = M.L.units);
+  document.querySelectorAll("#offlineBox [data-unit]").forEach(x => x.textContent = M.L.unit);
+  $("emodeHint").textContent = off ? "Je vult een Excel in op een losse computer en leest het daarna hier in." : "Je vult de aantallen hieronder direct in de app in.";
+  $("xlDown").disabled = !S.draw.done || !M.units.length;
+  const xs = $("xlStatus");
+  if (xlNote) { xs.hidden = false; xs.className = "status " + xlNote.cls; xs.innerHTML = xlNote.html; }
+  else if (S.imported) { xs.hidden = false; xs.className = "status ok"; xs.innerHTML = `Ingelezen: ${esc(S.imported.file)} (${esc(S.imported.at)}), ${S.imported.filled} van ${S.imported.total} vakken gevuld.` + (Object.keys(S.edits).length ? `<small>Daarna zijn ${Object.keys(S.edits).length} vakken in de app gewijzigd; dat komt in het verslag.</small>` : ""); }
+  else xs.hidden = true;
+  $("xlConfirm").hidden = !pendingXl;
   if (!S.draw.done) { $("gridWrap").innerHTML = '<p class="hint" style="padding:18px">Leg eerst de loting vast.</p>'; $("entryHint").textContent = ""; updateProgress(); return; }
+  if (off && !S.imported) { $("gridWrap").innerHTML = '<p class="hint" style="padding:18px">Nog geen ingevuld Excel ingelezen. Na het inlezen zie je de aantallen hier en kun je ze controleren.</p>'; $("entryHint").textContent = ""; updateProgress(); return; }
   if (!M.units.length) { $("gridWrap").innerHTML = `<p class="hint" style="padding:18px">Er zijn nog geen ${M.L.units}.</p>`; updateProgress(); return; }
-  $("entryHint").innerHTML = `Neem per ${M.L.unit} het totaal van de gecontroleerde lijsten over uit ${M.L.pv}. Doe dit op een andere computer dan die met de uitslagsoftware. <span class="kbd">Enter</span> gaat naar het volgende vak, <span class="kbd">↑</span> <span class="kbd">↓</span> naar de rij erboven of eronder.`;
+  $("entryHint").innerHTML = off ? `Dit zijn de aantallen uit het Excel. Je kunt een tikfout hier nog verbeteren; elke wijziging na het inlezen komt in het verslag.` : `Neem per ${M.L.unit} het totaal van de gecontroleerde lijsten over uit ${M.L.pv}. Doe dit op een andere computer dan die met de uitslagsoftware. <span class="kbd">Enter</span> gaat naar het volgende vak, <span class="kbd">↑</span> <span class="kbd">↓</span> naar de rij erboven of eronder.`;
   const head = `<thead><tr><th class="stick">${M.L.Unit}</th>${cols.map(l => `<th class="num" title="${esc(l.label)}">Lijst ${esc(l.id)}<small>${esc(l.label)}</small></th>`).join("")}<th></th></tr></thead>`;
   const body = M.units.map((u, r) => `<tr data-r="${r}"><td class="stick"><span class="rowst">${esc(u.nr)}</span> ${esc(u.name)}</td>${cols.map((l, c) => { const v = S.entries[u.key]?.[l.id]; return `<td class="cell"><input inputmode="numeric" autocomplete="off" placeholder=" " data-r="${r}" data-c="${c}" value="${v ?? ""}" aria-label="${esc(u.name)}, lijst ${esc(l.id)}"></td>`; }).join("")}<td class="rowst" data-rs="${r}"></td></tr>`).join("");
   const foot = `<tfoot><tr><td class="stick">Totaal ingevoerd</td>${cols.map((l, c) => `<td class="num" data-sum="${c}"></td>`).join("")}<td></td></tr></tfoot>`;
@@ -666,6 +771,7 @@ function renderStep3() {
       if (clean !== inp.value) inp.value = clean;
       const u = M.units[+inp.dataset.r], l = cols[+inp.dataset.c];
       (S.entries[u.key] ||= {})[l.id] = clean;
+      if (S.imported) { S.edits[u.key + "|" + l.id] = true; }
       updateRow(+inp.dataset.r); updateSum(+inp.dataset.c); updateProgress(); renderBadges(); saveSoon();
     });
     inp.addEventListener("keydown", e => {
@@ -715,12 +821,13 @@ function compare() {
 }
 function renderStep4() {
   const C = compare(), v = $("verdict");
+  const ch = curHist(); if (ch && (C.state === "ok" || C.state === "diff")) ch.state = C.state;
   const msgs = {
     nodraw: ["idle", "Nog geen loting vastgelegd.", ""],
     nores: ["idle", "Klaar om te vergelijken.", `Alle ${M.L.units} zijn ingevoerd. Lees hierboven de uitslag-EML in.`],
     incomplete: ["warn", "De invoer is nog niet compleet.", `${C.p.rows} van ${M.units.length} ${M.L.units} zijn helemaal ingevoerd. De vergelijking volgt als alles is ingevoerd${M.res ? "" : " en de uitslag-EML is ingelezen"}.`],
-    ok: ["ok", "De totalen komen overeen.", S.draw.extended ? "Na het eerdere verschil zijn alle lijsten gecontroleerd en de totalen komen nu overeen." : `De som van de ingevoerde ${M.L.units} is voor elke gecontroleerde lijst gelijk aan de uitslag-EML.`],
-    diff: ["bad", "Er is een verschil.", "Controleer eerst je invoer tegen de processen-verbaal. Blijft het verschil, controleer dan alle lijsten. Is het daarna nog steeds niet verklaard, neem dan contact op met de Kiesraad."],
+    ok: ["ok", "De totalen komen overeen.", (`De som van de ingevoerde ${M.L.units} is voor elke gecontroleerde lijst gelijk aan de uitslag-EML. `) + `Controleer ook dat de hashcode gelijk is aan de voettekst van ${M.pv.cmp.replace(/^rubriek [\d.]+ van /, "")}, en vul daarna ${M.pv.done} in.`],
+    diff: ["bad", "Er is een verschil.", `Bekijk bij welke lijst het verschil zit en controleer je invoer tegen ${M.pv.src}; corrigeer fouten in de invoer. Levert dat geen verklaring op, neem dan direct telefonisch contact op met de Kiesraad (Informatiepunt Verkiezingen, 070 426 73 29). Misschien is er een fout gemaakt bij het overnemen in de uitslagprogrammatuur, of werkt de software lokaal niet zoals verwacht.`],
   };
   const m = msgs[C.state]; v.className = "status big " + m[0]; v.innerHTML = esc(m[1]) + (m[2] ? `<small>${esc(m[2])}</small>` : "");
   renderRes(C);
@@ -731,7 +838,7 @@ function renderStep4() {
   $("diffTable").innerHTML = `<thead><tr><th>${M.L.Unit}</th><th>Lijst</th><th class="num">Ingevoerd</th><th class="num">In EML</th><th class="num">Verschil</th><th></th></tr></thead><tbody>${C.unitDiffs.map(d => `<tr><td>${esc(d.u.nr)} ${esc(d.u.name)}</td><td>${esc(d.l.id)}</td><td class="num">${nl(d.v)}</td><td class="num">${nl(d.e)}</td><td class="num diff">${sgn(d.v - d.e)}</td><td><button type="button" class="small" data-fix="${esc(d.u.key)}|${esc(d.l.id)}">Naar invoer</button></td></tr>`).join("")}</tbody>`;
   $("diffTable").querySelectorAll("[data-fix]").forEach(b => b.onclick = () => { const [k, id] = b.dataset.fix.split("|"); showStep(3); const r = M.units.findIndex(u => u.key === k), c = checkedLists().findIndex(l => l.id === id); const inp = $("gridWrap").querySelector(`input[data-r="${r}"][data-c="${c}"]`); inp?.focus(); inp?.select(); inp?.scrollIntoView({ block: "center" }); });
   const ns = $("nextSteps"); ns.innerHTML = "";
-  if (C.state === "diff" && S.draw.mode === "steekproef" && !S.draw.extended) {
+  if (false && C.state === "diff" && S.draw.mode === "steekproef" && !S.draw.extended) { /* uitbreiden naar alle lijsten zat in het protocol van 2023, niet meer in GR26 */
     ns.innerHTML = `<button type="button" class="primary" id="extendBtn">Alle lijsten controleren</button><span class="hint">De ingevoerde lijsten blijven staan; de overige lijsten komen erbij.</span>`;
     $("extendBtn").onclick = () => { S.draw.extended = true; renderAll(); showStep(3); save(); toast("Alle lijsten toegevoegd aan de invoer"); };
   }
@@ -761,6 +868,27 @@ function renderRes(C) {
   $("contestRow").hidden = !(M.res && M.res.contests.length > 1);
   if (M.res) $("contestSel").innerHTML = M.res.contests.map((c, i) => `<option value="${i}" ${i === Math.min(S.contestIdx, M.res.contests.length - 1) ? "selected" : ""}>${esc(c.id)}${c.name ? " – " + esc(c.name) : ""}</option>`).join("");
   $("checksRes").innerHTML = M.warnRes.map(c => `<li class="${c[0]}">${esc(c[1])}</li>`).join("");
+  const h = curHist();
+  $("resMeta").hidden = !(M.res && h);
+  if (M.res && h) {
+    $("resHash").innerHTML = h.hash ? `SHA-256 <b>${esc(hashShort(h.hash))}</b> ${esc(hashGroups(h.hash).slice(10))}` : "Hashcode niet beschikbaar.";
+    if (document.activeElement?.id !== "pvDate") $("pvDate").value = h.pvDate || "";
+    if (document.activeElement?.id !== "pvTime") $("pvTime").value = h.pvTime || "";
+    if (document.activeElement?.id !== "pvHash") $("pvHash").value = h.pvHash || "";
+    pvHashStatus();
+    const hist = S.resHistory;
+    $("resHist").innerHTML = hist.length > 1 ? hist.map((x, i) => `<li class="${i === hist.length - 1 ? "info" : "warn"}">${i === 0 ? "Eerste" : i === hist.length - 1 ? "Huidige" : `${i + 1}e`} uitslag: ${esc(x.name)} · ${esc(hashShort(x.hash))} · ingelezen ${esc(x.at)}${x.state ? " · " + (x.state === "ok" ? "totalen gelijk" : "verschil") : ""}</li>`).join("") : "";
+  }
+}
+const curHist = () => M.fRes ? [...S.resHistory].reverse().find(x => x.hash === M.fRes.hash) || S.resHistory[S.resHistory.length - 1] : null;
+function pvHashStatus() {
+  const h = curHist(), st = $("pvHashSt"); if (!h) return;
+  const typed = (h.pvHash || "").replace(/\s+/g, "").toUpperCase();
+  if (!typed) { st.className = "rowst"; st.textContent = "Neem over uit de voettekst om te vergelijken."; return; }
+  if (!h.hash) { st.className = "rowst"; st.textContent = ""; return; }
+  const ok = typed.length >= 4 && h.hash.startsWith(typed);
+  st.className = "rowst " + (ok ? "ok" : ""); st.style.color = ok ? "" : "var(--bad)";
+  st.textContent = ok ? (typed.length >= 8 ? "✓ gelijk aan de ingelezen uitslag" : "✓ klopt tot nu toe") : "✗ wijkt af: is dit het proces-verbaal van deze uitslag?";
 }
 function renderBadges() {
   const set = (id, cls, t) => { const b = $(id); b.className = "badge " + cls; b.textContent = t; };
@@ -790,11 +918,20 @@ async function digitalDraw() {
   }
   renderStep2(); renderBadges(); save();
 }
-function fixDraw() {
+async function fixDraw() {
   const d = S.draw;
   if (d.mode === "alle") d.picked = [];
   d.done = true; d.at = new Date().toLocaleString("nl-NL", { dateStyle: "long", timeStyle: "short" });
+  M = derive(); d.code = await sessionCode(sessionInfo());
   renderAll(); save(); toast("Loting vastgelegd");
+}
+/* controlecode: SHA-256 over verkiezing, orgaan, eenheden, lijsten en loting */
+const sessionInfo = () => ({ electionId: M.election?.id || "", level: M.level, kk: M.kk, authority: M.authority, units: M.units, lists: M.lists, draw: S.draw });
+async function sessionCode(o) {
+  const canon = JSON.stringify(["cp1", o.electionId || "", o.level, o.level === "HSB" ? o.kk || "" : "", o.authority || "", o.units.map(u => [u.key, String(u.nr), u.name]), o.lists.map(l => [l.id, l.name || ""]), o.draw.mode, o.draw.mode === "alle" ? [] : o.draw.picked, o.draw.at || ""]);
+  const h = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(canon)));
+  const x = [...h.slice(0, 4)].map(b => b.toString(16).padStart(2, "0")).join("").toUpperCase();
+  return x.slice(0, 4) + "-" + x.slice(4);
 }
 
 /* ============================== verslag ============================== */
@@ -802,26 +939,46 @@ function reportBody(C, forFile) {
   const e = M.election || {}, d = S.draw, now = new Date().toLocaleString("nl-NL", { dateStyle: "long", timeStyle: "short" });
   const verdict = C.state === "ok" ? ["ok", "De totalen komen overeen."] : C.state === "diff" ? ["bad", "De totalen komen niet overeen."] : ["warn", "De controle is nog niet afgerond."];
   const box = on => `<span class="box">${on ? "✕" : ""}</span>`;
-  const oa = C.state === "ok" && !d.extended, ob = C.state === "ok" && d.extended, oc = C.state === "diff" && (d.extended || d.mode === "alle");
-  const drawTxt = d.mode === "alle" ? "Alle lijsten zijn gecontroleerd." : `De controletelling is uitgevoerd aan de hand van de steekproef van de volgende ${d.picked.length} lijsten, die getrokken zijn middels een loting (${d.method === "digitaal" ? "digitaal getrokken" : "loten uit een pot"}${d.at ? ", " + esc(d.at) : ""}):`;
+  const hist = S.resHistory, first = hist[0], lastH = hist.length > 1 ? hist[hist.length - 1] : null;
+  const kenm = (h, title, none) => h ? `<p><b>${title}</b></p><table><tbody><tr><td style="width:40%">Bestand</td><td>${esc(h.name)}</td></tr><tr><td>Datum</td><td>${esc(h.pvDate || "–")}</td></tr><tr><td>Tijd</td><td>${esc(h.pvTime || "–")}</td></tr><tr><td>Eerste acht karakters SHA256-hashcode</td><td><b>${esc(hashShort(h.hash) || "–")}</b>${h.pvHash ? (h.hash.startsWith(h.pvHash.replace(/\s+/g, "").toUpperCase()) ? " (gelijk aan de voettekst)" : " (<b>wijkt af van de voettekst</b>)") : ""}</td></tr></tbody></table>` : `<p class="meta">${none || "Nog geen uitslag ingelezen."}</p>`;
+  const drawTxt = d.mode === "alle" ? (M.forceAll ? "Alle lijsten zijn gecontroleerd (bij dit orgaan zonder loting)." : "Alle lijsten zijn gecontroleerd.") : `De controletelling is uitgevoerd aan de hand van de steekproef van de volgende ${d.picked.length} lijsten, die getrokken zijn middels een loting (${d.method === "digitaal" ? "digitaal getrokken" : "loten uit een pot"}${d.at ? ", " + esc(d.at) : ""}):`;
+  const lijsten = C.cols.map(l => l.id).join(", ");
+  const anyDiff = C.state === "diff" || hist.some(x => x.state === "diff") || d.extended;
+  const isCSB = M.level === "CSB", is26gsb = M.level === "GSB";
+  const title = is26gsb ? "Uitkomst controleprotocol gemeentelijk stembureau" : isCSB ? "Verslag controleprotocol centraal stembureau – onderdeel B: controle lijsttotalen" : `Verslag controleprotocol ${M.L.org}`;
+  let keuze;
+  if (is26gsb) keuze = `<h2>Voor ${esc(M.pv.done)}</h2>
+<p>${C.state === "ok" ? `Het controleprotocol is uitgevoerd. De totalen van de gecontroleerde lijsten (lijst ${esc(lijsten)}) in de controletelling zijn gelijk aan ${esc(M.pv.cmp)}.` : C.state === "diff" ? `De totalen komen niet overeen. Volg stap 5 en 6 van het controleprotocol (invoer controleren, daarna contact met de Kiesraad) voordat ${esc(M.pv.done)} wordt ingevuld.` : "De controle is nog niet afgerond."}</p>`;
+  else if (isCSB) keuze = `<h2>Zijn bij de controle van de lijsttotalen verschillen aangetroffen?</h2>
+<p>${box(C.state === "ok" && !anyDiff)} Nee, de lijsttotalen komen overeen.</p>
+<p>${box(anyDiff)} Ja. Toelichting over de genomen stappen:</p><div class="note">${esc(S.note) || "&nbsp;"}</div>
+<p class="meta" style="margin-top:6px">De controle van de zetelverdeling (onderdeel B) staat niet in dit overzicht.</p>`;
+  else keuze = `<h2>Kruis aan wat van toepassing is</h2>
+<p>${box(C.state === "ok" && !anyDiff)} Er zijn geen verschillen geconstateerd tussen de optellingen in de uitslagprogrammatuur en de controletellingen.</p>
+<p>${box(anyDiff)} Er zijn wel verschillen geconstateerd tussen de optellingen in de uitslagprogrammatuur en de controletellingen.</p>
+${anyDiff ? `<p style="margin-left:22px">${box(C.state === "ok")} Na aantreffen van verschil is er een controletelling gedaan voor alle lijsten. Er is een nieuwe uitslag opgemaakt. De optellingen komen nu wel overeen. Verklaring voor de eerder ontstane verschillen: zie hieronder.</p>
+<p style="margin-left:22px">${box(C.state === "diff")} Na aantreffen van verschil is er een controletelling gedaan voor alle lijsten. Er is een nieuwe uitslag opgemaakt. De optellingen komen nog steeds niet overeen. Er is contact opgenomen met de Kiesraad over vervolgstappen.</p>
+${kenm(lastH, "Nieuw document (uitslag na het verschil)", "Er is (nog) geen nieuwe uitslag ingelezen. Lees na het corrigeren in de uitslagprogrammatuur de nieuwe uitslag-EML in bij stap 4.")}` : ""}`;
   return `
-<h1>Verslag controleprotocol ${esc(M.L.org)}</h1>
-<p class="meta">${esc(e.name || e.id || "Verkiezing")}${e.date ? " · " + esc(e.date) : ""} · ${esc(M.authority || "")}</p>
-<h2>Trekking van de steekproef</h2>
+<h1>${esc(title)}</h1>
+<p class="meta">${esc(e.name || e.id || "Verkiezing")}${e.date ? " · " + esc(e.date) : ""} · ${esc(M.authority || "")} · controleprotocol Kiesraad 2026</p>
+<h2>Gecontroleerd document</h2>
+${kenm(first, `Uitslag waarmee is vergeleken (${esc(M.pv.cmp)})`)}
+<h2>${d.mode === "alle" ? "Gecontroleerde lijsten" : "Trekking van de steekproef"}</h2>
 <p>${drawTxt}</p>
 ${d.mode === "alle" ? "" : `<ol>${d.picked.map(id => { const l = M.lists.find(x => x.id === id); return `<li>Lijst ${esc(id)} – ${esc(l?.label || "")}</li>`; }).join("")}</ol>`}
 ${d.extended ? "<p>Na het aantreffen van een verschil is de controle uitgebreid naar alle lijsten.</p>" : ""}
+${d.code ? `<p class="meta">Controlecode van de loting: <b>${esc(d.code)}</b></p>` : ""}
+<h2>Invoer</h2>
+<p>${entryText()}</p>
 <h2>Resultaat</h2>
 <div class="verdict ${verdict[0]}">${verdict[1]}</div>
-<table><thead><tr><th>Lijst</th><th class="num">Som ${esc(M.L.units)} (ingevoerd)</th><th class="num">Uitslag software</th><th class="num">Verschil</th></tr></thead>
+<table><thead><tr><th>Lijst</th><th class="num">Som ${esc(M.L.units)} (ingevoerd)</th><th class="num">Uitslagprogrammatuur</th><th class="num">Verschil</th></tr></thead>
 <tbody>${C.rows.map(r => `<tr><td>${esc(r.l.id)} – ${esc(r.l.label)}</td><td class="num">${nl(r.entered)}</td><td class="num">${nl(r.eml)}</td><td class="num">${r.diff === null ? "–" : r.diff === 0 ? "0" : sgn(r.diff)}</td></tr>`).join("")}</tbody></table>
-<p class="meta" style="margin-top:6px">${nl(M.units.length)} ${esc(M.L.units)} ingevoerd vanaf ${esc(M.L.pv)}. Vergeleken met ${esc(M.fRes?.name || "–")}.</p>
-<h2>Kruis aan wat van toepassing is</h2>
-<p>${box(oa)} De totalen komen overeen.</p>
-<p>${box(ob)} Na aantreffen van een verschil is er een controletelling gedaan voor alle lijsten. De totalen komen nu overeen.</p>
-<p>${box(oc)} Na aantreffen van een verschil is er een controletelling gedaan voor alle lijsten. De totalen komen nog steeds niet overeen. Er is contact opgenomen met de Kiesraad over vervolgstappen.</p>
-<h2>Verklaring of opmerkingen</h2>
-<div class="note">${esc(S.note) || "&nbsp;"}</div>
+<p class="meta" style="margin-top:6px">${nl(M.units.length)} ${esc(M.L.units)} ingevoerd vanaf ${esc(M.pv.src)}.</p>
+${keuze}
+${isCSB ? "" : `<h2>Verklaring of opmerkingen</h2>
+<div class="note">${esc(S.note) || "&nbsp;"}</div>`}
 ${forFile ? `<h2>Invoer per ${esc(M.L.unit)}</h2>
 <table><thead><tr><th>${esc(M.L.Unit)}</th>${C.cols.map(l => `<th class="num">Lijst ${esc(l.id)}</th>`).join("")}</tr></thead><tbody>
 ${M.units.map(u => `<tr><td>${esc(u.nr)} ${esc(u.name)}</td>${C.cols.map(l => `<td class="num">${nl(val(u.key, l.id))}</td>`).join("")}</tr>`).join("")}
@@ -830,7 +987,14 @@ ${M.units.map(u => `<tr><td>${esc(u.nr)} ${esc(u.name)}</td>${C.cols.map(l => `<
 <h2>Ondertekening voorzitter ${esc(M.L.org)}</h2>
 <p class="meta">Deze pagina niet publiceren.</p>
 <table><tbody><tr><td style="width:30%">Plaats</td><td>${esc(S.place)}</td></tr><tr><td>Datum en tijd</td><td>${esc(now)}</td></tr><tr><td>Naam voorzitter</td><td>${esc(S.chair)}</td></tr><tr><td style="height:70px">Handtekening</td><td></td></tr></tbody></table>` : ""}
-<p class="meta" style="margin-top:16px;font-size:12px">Opgemaakt met de app Controleprotocol op ${esc(now)}.</p>`;
+<p class="meta" style="margin-top:16px;font-size:12px">Opgemaakt met de app Controleprotocol op ${esc(now)}. Het officiële formulier van de Kiesraad blijft leidend.</p>`;
+}
+function entryText() {
+  const ed = Object.keys(S.edits || {});
+  const label = k => { const [uk, id] = k.split("|"); const u = M.units.find(x => x.key === uk); return `${M.L.unit} ${u ? u.nr : uk} lijst ${id}`; };
+  if (!S.imported) return `Online ingevoerd in de app, vanaf ${esc(M.L.pv)}.`;
+  return `Offline ingevoerd in Excel, vanaf ${esc(M.L.pv)}. Ingelezen uit ${esc(S.imported.file)} op ${esc(S.imported.at)} (${S.imported.filled} van ${S.imported.total} vakken gevuld).` +
+    (ed.length ? ` Na het inlezen ${ed.length === 1 ? "is 1 vak" : `zijn ${ed.length} vakken`} in de app gewijzigd: ${esc(ed.slice(0, 20).map(label).join("; "))}${ed.length > 20 ? " …" : ""}.` : " Na het inlezen is niets in de app gewijzigd.");
 }
 function reportFile() {
   const C = compare();
@@ -841,24 +1005,228 @@ function tableRows() {
   const C = compare(), cols = C.cols;
   const invoer = [[M.L.keyLbl, M.L.Unit, ...cols.map(l => `Lijst ${l.id} ${l.label}`)], ...M.units.map(u => [u.nr, u.name, ...cols.map(l => val(u.key, l.id))]), ["", "Totaal ingevoerd", ...C.rows.map(r => r.entered)], ["", "Uitslag-EML", ...C.rows.map(r => r.eml)], ["", "Verschil", ...C.rows.map(r => r.diff)]];
   const cmp = [["Lijst", "Naam", "Ingevoerd", "Uitslag-EML", "Verschil"], ...C.rows.map(r => [r.l.id, r.l.label, r.entered, r.eml, r.diff])];
-  const info = [["Verkiezing", M.election?.id || ""], ["Orgaan", `${M.L.org} ${M.authority || ""}`], ["Uitslag-EML", M.fRes?.name || ""], ["Loting", S.draw.mode === "alle" ? "alle lijsten" : S.draw.picked.join(", ")], ["Uitgebreid naar alle lijsten", S.draw.extended ? "ja" : "nee"], ["Moment loting", S.draw.at], ["Conclusie", C.state === "ok" ? "totalen komen overeen" : C.state === "diff" ? "verschil" : "niet afgerond"], ["Opmerkingen", S.note]];
+  const info = [["Verkiezing", M.election?.id || ""], ["Orgaan", `${M.L.org} ${M.authority || ""}`], ["Uitslag-EML", M.fRes?.name || ""], ["Loting", S.draw.mode === "alle" ? "alle lijsten" : S.draw.picked.join(", ")], ["Uitgebreid naar alle lijsten", S.draw.extended ? "ja" : "nee"], ["Moment loting", S.draw.at], ["Controlecode", S.draw.code || ""], ["Invoer", entryText()], ["Conclusie", C.state === "ok" ? "totalen komen overeen" : C.state === "diff" ? "verschil" : "niet afgerond"], ["Opmerkingen", S.note]];
   return { invoer, cmp, info };
 }
 function csvText() {
   const { invoer } = tableRows();
   return "﻿" + invoer.map(r => r.map(c => { const s = c === null || c === undefined ? "" : String(c); return /[;"\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; }).join(";")).join("\r\n");
 }
-let xlsxP = null;
-function loadXLSX() { return xlsxP ||= new Promise((ok, no) => { if (window.XLSX) return ok(window.XLSX); const s = document.createElement("script"); s.src = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"; s.onload = () => ok(window.XLSX); s.onerror = () => { xlsxP = null; no(new Error("xlsx-bibliotheek niet geladen")); }; document.head.appendChild(s); }); }
 async function xlsxBytes() {
-  const X = await loadXLSX(), { invoer, cmp, info } = tableRows(), wb = X.utils.book_new();
-  const ws1 = X.utils.aoa_to_sheet(invoer); ws1["!cols"] = [{ wch: 10 }, { wch: 36 }, ...invoer[0].slice(2).map(() => ({ wch: 16 }))];
-  X.utils.book_append_sheet(wb, ws1, "Invoer");
-  X.utils.book_append_sheet(wb, X.utils.aoa_to_sheet(cmp), "Vergelijking");
-  X.utils.book_append_sheet(wb, X.utils.aoa_to_sheet(info), "Verslag");
-  return new Uint8Array(X.write(wb, { type: "array", bookType: "xlsx" }));
+  const { invoer, cmp, info } = tableRows();
+  const aoa = (rows, widths) => sheetXml({ rows: rows.map((r, i) => r.map(c => ({ v: c, s: i === 0 ? 3 : typeof c === "number" ? 9 : 8 }))), cols: widths, freeze: { x: 0, y: 1 } });
+  return xlsxFile([
+    { name: "Invoer", xml: aoa(invoer, [10, 36, ...invoer[0].slice(2).map(() => 16)]) },
+    { name: "Vergelijking", xml: aoa(cmp, [8, 32, 14, 14, 12]) },
+    { name: "Verslag", xml: aoa(info, [26, 80]) },
+  ]);
 }
 const baseName = () => `Controleprotocol_${safe(M.election?.id || "verkiezing")}_${M.level}_${safe(M.authority || "orgaan")}`;
+
+/* ============================== xlsx schrijven ============================== */
+const CRC = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+function crc32(u8) { let c = 0xFFFFFFFF; for (let i = 0; i < u8.length; i++) c = CRC[(c ^ u8[i]) & 0xFF] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+function zipBytes(entries) {
+  const enc = new TextEncoder(), parts = [], central = []; let off = 0;
+  const d = new Date(), time = (d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1), date = ((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate();
+  for (const e of entries) {
+    const name = enc.encode(e.name), data = typeof e.data === "string" ? enc.encode(e.data) : e.data, crc = crc32(data);
+    const h = new DataView(new ArrayBuffer(30));
+    h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true); h.setUint16(10, time, true); h.setUint16(12, date, true);
+    h.setUint32(14, crc, true); h.setUint32(18, data.length, true); h.setUint32(22, data.length, true); h.setUint16(26, name.length, true);
+    parts.push(new Uint8Array(h.buffer), name, data);
+    const c = new DataView(new ArrayBuffer(46));
+    c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true); c.setUint16(12, time, true); c.setUint16(14, date, true);
+    c.setUint32(16, crc, true); c.setUint32(20, data.length, true); c.setUint32(24, data.length, true); c.setUint16(28, name.length, true); c.setUint32(42, off, true);
+    central.push(new Uint8Array(c.buffer), name);
+    off += 30 + name.length + data.length;
+  }
+  const cs = central.reduce((a, b) => a + b.length, 0), end = new DataView(new ArrayBuffer(22));
+  end.setUint32(0, 0x06054b50, true); end.setUint16(8, entries.length, true); end.setUint16(10, entries.length, true); end.setUint32(12, cs, true); end.setUint32(16, off, true);
+  const all = [...parts, ...central, new Uint8Array(end.buffer)], out = new Uint8Array(all.reduce((a, p) => a + p.length, 0)); let o = 0;
+  for (const p of all) { out.set(p, o); o += p.length; }
+  return out;
+}
+const colL = n => { let s = ""; n++; while (n) { const m = (n - 1) % 26; s = String.fromCharCode(65 + m) + s; n = Math.floor((n - 1) / 26); } return s; };
+const xesc = s => String(s ?? "").replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const NS_MAIN = "http://schemas.openxmlformats.org/spreadsheetml/2006/main", NS_REL = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
+/* stijlen: 0 normaal · 1 titel · 2 label · 3 kop · 4 invoervak (niet vergrendeld) · 5 totaal · 6 code · 7 toelichting · 8 tekst met rand · 9 getal met rand */
+const XL_STYLES = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<styleSheet xmlns="${NS_MAIN}"><fonts count="5"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="14"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font><font><i/><sz val="10"/><color rgb="FF5B6673"/><name val="Calibri"/></font><font><b/><sz val="12"/><color rgb="FFC4122F"/><name val="Calibri"/></font></fonts>
+<fills count="4"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFE8EAE6"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFFFF6D5"/><bgColor indexed="64"/></patternFill></fill></fills>
+<borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border><border><left style="thin"><color rgb="FFB0B5AE"/></left><right style="thin"><color rgb="FFB0B5AE"/></right><top style="thin"><color rgb="FFB0B5AE"/></top><bottom style="thin"><color rgb="FFB0B5AE"/></bottom><diagonal/></border></borders>
+<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
+<cellXfs count="10"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/><xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyFont="1"/><xf numFmtId="0" fontId="2" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment wrapText="1" vertical="bottom"/></xf><xf numFmtId="1" fontId="0" fillId="3" borderId="1" xfId="0" applyNumberFormat="1" applyFill="1" applyBorder="1" applyProtection="1"><protection locked="0"/></xf><xf numFmtId="3" fontId="2" fillId="2" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1"/><xf numFmtId="0" fontId="4" fillId="0" borderId="0" xfId="0" applyFont="1"/><xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyFont="1"/><xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1"/><xf numFmtId="3" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1"/></cellXfs>
+<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`;
+function sheetXml({ rows, cols, freeze, protect, validation, heights, landscape }) {
+  const data = rows.map((row, r) => {
+    const cells = (row || []).map((c, ci) => {
+      if (c === null || c === undefined) return "";
+      if (typeof c !== "object") c = { v: c };
+      const ref = colL(ci) + (r + 1), st = c.s ? ` s="${c.s}"` : "";
+      if (c.f) return `<c r="${ref}"${st}><f>${xesc(c.f)}</f></c>`;
+      if (c.v === null || c.v === undefined || c.v === "") return c.s ? `<c r="${ref}"${st}/>` : "";
+      if (typeof c.v === "number") return `<c r="${ref}"${st}><v>${c.v}</v></c>`;
+      return `<c r="${ref}"${st} t="inlineStr"><is><t xml:space="preserve">${xesc(c.v)}</t></is></c>`;
+    }).join("");
+    const ht = heights?.[r] ? ` ht="${heights[r]}" customHeight="1"` : "";
+    return `<row r="${r + 1}"${ht}>${cells}</row>`;
+  }).join("");
+  let pane = "";
+  if (freeze && (freeze.x || freeze.y)) {
+    const tl = colL(freeze.x || 0) + ((freeze.y || 0) + 1);
+    pane = `<pane${freeze.x ? ` xSplit="${freeze.x}"` : ""}${freeze.y ? ` ySplit="${freeze.y}"` : ""} topLeftCell="${tl}" activePane="${freeze.x && freeze.y ? "bottomRight" : freeze.y ? "bottomLeft" : "topRight"}" state="frozen"/>`;
+  }
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="${NS_MAIN}" xmlns:r="${NS_REL}">${landscape ? '<sheetPr><pageSetUpPr fitToPage="1"/></sheetPr>' : ""}<sheetViews><sheetView workbookViewId="0">${pane}</sheetView></sheetViews>${cols ? `<cols>${cols.map((w, i) => `<col min="${i + 1}" max="${i + 1}" width="${w}" customWidth="1"/>`).join("")}</cols>` : ""}<sheetData>${data}</sheetData>${protect ? '<sheetProtection sheet="1" objects="1" scenarios="1" formatColumns="0" formatRows="0" selectLockedCells="1"/>' : ""}${validation ? `<dataValidations count="1"><dataValidation type="whole" operator="greaterThanOrEqual" allowBlank="1" showErrorMessage="1" errorTitle="Ongeldig aantal" error="Vul een heel getal van 0 of hoger in." sqref="${validation}"><formula1>0</formula1></dataValidation></dataValidations>` : ""}<pageMargins left="0.5" right="0.5" top="0.6" bottom="0.6" header="0.3" footer="0.3"/>${landscape ? '<pageSetup orientation="landscape" fitToWidth="1" fitToHeight="0"/>' : ""}</worksheet>`;
+}
+function xlsxFile(sheets, lockStructure) {
+  const n = sheets.length;
+  const wb = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<workbook xmlns="${NS_MAIN}" xmlns:r="${NS_REL}"><workbookPr/>${lockStructure ? '<workbookProtection lockStructure="1"/>' : ""}<bookViews><workbookView activeTab="0"/></bookViews><sheets>${sheets.map((s, i) => `<sheet name="${xesc(s.name)}" sheetId="${i + 1}"${s.state ? ` state="${s.state}"` : ""} r:id="rId${i + 1}"/>`).join("")}</sheets><calcPr calcId="191029" fullCalcOnLoad="1"/></workbook>`;
+  const rels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${sheets.map((s, i) => `<Relationship Id="rId${i + 1}" Type="${NS_REL}/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`).join("")}<Relationship Id="rId${n + 1}" Type="${NS_REL}/styles" Target="styles.xml"/></Relationships>`;
+  const ct = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>${sheets.map((s, i) => `<Override PartName="/xl/worksheets/sheet${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join("")}<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>`;
+  const root = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="${NS_REL}/officeDocument" Target="xl/workbook.xml"/></Relationships>`;
+  return zipBytes([{ name: "[Content_Types].xml", data: ct }, { name: "_rels/.rels", data: root }, { name: "xl/workbook.xml", data: wb }, { name: "xl/_rels/workbook.xml.rels", data: rels }, { name: "xl/styles.xml", data: XL_STYLES }, ...sheets.map((s, i) => ({ name: `xl/worksheets/sheet${i + 1}.xml`, data: s.xml }))]);
+}
+
+/* ============================== offline invoer: Excel ============================== */
+const XL_FORMAT = "controleprotocol-excel/1";
+const XL_LAYOUT = { headerRow: 8, firstRow: 9, firstCol: 2 };
+function invoerXlsx() {
+  const cols = checkedLists(), d = S.draw, e = M.election || {}, L = XL_LAYOUT;
+  const drawTxt = d.mode === "alle" ? "Alle lijsten" : `Lijst ${d.picked.join(", ")} (in volgorde van trekken)${d.extended ? ", uitgebreid naar alle lijsten" : ""}`;
+  const rows = [
+    [{ v: "Controleprotocol – invoer lijsttotalen", s: 1 }],
+    [{ v: "Verkiezing", s: 2 }, null, e.name || e.id || ""],
+    [{ v: "Orgaan", s: 2 }, null, `${M.L.org[0].toUpperCase() + M.L.org.slice(1)} ${M.authority || ""}`.trim()],
+    [{ v: "Loting", s: 2 }, null, `${drawTxt} · ${d.at || ""}`],
+    [{ v: "Controlecode", s: 2 }, null, { v: d.code, s: 6 }],
+    [{ v: `Vul per ${M.L.unit} het aantal stemmen per lijst in uit ${M.L.pv}. Alleen de gele vakken zijn invulbaar. Lees het bestand daarna in de app in.`, s: 7 }],
+    [],
+    [{ v: M.L.keyLbl, s: 3 }, { v: M.L.Unit, s: 3 }, ...cols.map(l => ({ v: `Lijst ${l.id}\n${l.label}`, s: 3 }))],
+  ];
+  for (const u of M.units) rows.push([{ v: String(u.nr), s: 8 }, { v: u.name, s: 8 }, ...cols.map(l => ({ v: val(u.key, l.id) ?? "", s: 4 }))]);
+  const first = L.firstRow, last = L.firstRow + M.units.length - 1;
+  rows.push([{ v: "", s: 5 }, { v: "Totaal", s: 5 }, ...cols.map((l, j) => ({ f: `SUM(${colL(L.firstCol + j)}${first}:${colL(L.firstCol + j)}${last})`, s: 5 }))]);
+  const stamp = { format: XL_FORMAT, code: d.code, created: new Date().toISOString(), layout: L, electionId: e.id || "", election: M.election, level: M.level, kk: M.kk, authority: M.authority,
+    units: M.units.map(u => ({ key: u.key, nr: String(u.nr), name: u.name })), lists: M.lists.map(l => ({ id: l.id, name: l.name || "" })), cols: cols.map(l => l.id),
+    draw: { mode: d.mode, n: d.n, method: d.method, picked: d.picked, at: d.at, extended: !!d.extended } };
+  const json = JSON.stringify(stamp), chunks = [[XL_FORMAT]];
+  for (let i = 0; i < json.length; i += 30000) chunks.push([json.slice(i, i + 30000)]);
+  const invoer = sheetXml({ rows, cols: [10, 38, ...cols.map(() => 16)], freeze: { x: 2, y: L.headerRow }, protect: true, landscape: true,
+    validation: M.units.length && cols.length ? `${colL(L.firstCol)}${first}:${colL(L.firstCol + cols.length - 1)}${last}` : "", heights: { [L.headerRow - 1]: 45 } });
+  return xlsxFile([{ name: "Invoer", xml: invoer }, { name: "_sessie", xml: sheetXml({ rows: chunks }), state: "veryHidden" }], true);
+}
+
+/* ============================== xlsx lezen ============================== */
+async function unzip(buf) {
+  const u8 = new Uint8Array(buf), dv = new DataView(u8.buffer, u8.byteOffset, u8.byteLength);
+  let e = -1;
+  for (let i = u8.length - 22; i >= Math.max(0, u8.length - 65557); i--) if (dv.getUint32(i, true) === 0x06054b50) { e = i; break; }
+  if (e < 0) throw new Error("dit is geen Excel-bestand (.xlsx)");
+  const n = dv.getUint16(e + 10, true); let p = dv.getUint32(e + 16, true); const files = new Map(), dec = new TextDecoder();
+  for (let k = 0; k < n; k++) {
+    if (dv.getUint32(p, true) !== 0x02014b50) throw new Error("het Excel-bestand is beschadigd");
+    const method = dv.getUint16(p + 10, true), csize = dv.getUint32(p + 20, true), nlen = dv.getUint16(p + 28, true), xlen = dv.getUint16(p + 30, true), clen = dv.getUint16(p + 32, true), off = dv.getUint32(p + 42, true);
+    const name = dec.decode(u8.subarray(p + 46, p + 46 + nlen)); p += 46 + nlen + xlen + clen;
+    const start = off + 30 + dv.getUint16(off + 26, true) + dv.getUint16(off + 28, true);
+    files.set(name.replace(/^\//, ""), { method, data: u8.subarray(start, start + csize) });
+  }
+  return {
+    has: name => files.has(name),
+    async text(name) {
+      const f = files.get(name); if (!f) return null;
+      let d = f.data;
+      if (f.method === 8) d = new Uint8Array(await new Response(new Blob([d]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).arrayBuffer());
+      else if (f.method !== 0) throw new Error("onbekende compressie in het Excel-bestand");
+      return dec.decode(d);
+    },
+  };
+}
+async function readWorkbook(z) {
+  const X = s => new DOMParser().parseFromString(s, "application/xml");
+  const wbx = await z.text("xl/workbook.xml"), relx = await z.text("xl/_rels/workbook.xml.rels");
+  if (!wbx || !relx) throw new Error("dit is geen Excel-werkmap");
+  const wb = X(wbx), rels = X(relx), relMap = {};
+  for (const r of all(rels, "Relationship")) { const t = r.getAttribute("Target") || ""; relMap[r.getAttribute("Id")] = t.startsWith("/") ? t.slice(1) : "xl/" + t.replace(/^\.\//, ""); }
+  const ss = [];
+  const ssx = await z.text("xl/sharedStrings.xml");
+  if (ssx) for (const si of all(X(ssx), "si")) ss.push(Array.from(si.getElementsByTagNameNS("*", "t")).filter(t => t.parentNode.localName !== "rPh").map(t => t.textContent).join(""));
+  const sheets = all(wb, "sheet").map(s => ({ name: s.getAttribute("name"), state: s.getAttribute("state") || "", path: relMap[s.getAttributeNS(NS_REL, "id") || s.getAttribute("r:id")] }));
+  return {
+    sheets,
+    async read(path) {
+      const doc = X(await z.text(path) || "<x/>"), out = new Map();
+      for (const c of all(doc, "c")) {
+        const r = c.getAttribute("r"), t = c.getAttribute("t"); if (!r) continue;
+        let v;
+        if (t === "s") v = ss[+(kids(c, "v")[0]?.textContent || 0)] ?? "";
+        else if (t === "inlineStr") v = Array.from(c.getElementsByTagNameNS("*", "t")).map(x => x.textContent).join("");
+        else v = kids(c, "v")[0]?.textContent ?? "";
+        out.set(r, v);
+      }
+      return out;
+    },
+  };
+}
+async function readExcel(file) {
+  const wb = await readWorkbook(await unzip(await file.arrayBuffer()));
+  const hid = wb.sheets.find(s => s.name === "_sessie");
+  if (!hid) throw new Error("dit Excel is niet door deze app gemaakt");
+  const hc = await wb.read(hid.path);
+  if (hc.get("A1") !== XL_FORMAT) throw new Error("dit Excel is niet door deze app gemaakt");
+  let json = ""; for (let i = 2; hc.has("A" + i); i++) json += hc.get("A" + i);
+  let st; try { st = JSON.parse(json); } catch { throw new Error("de sessiegegevens in het Excel zijn beschadigd"); }
+  const code = await sessionCode(st);
+  if (code !== st.code) throw new Error("de sessiegegevens in het Excel zijn gewijzigd of beschadigd (controlecode klopt niet)");
+  const inv = wb.sheets.find(s => s.name === "Invoer"); if (!inv) throw new Error("het tabblad ‘Invoer’ ontbreekt");
+  const ic = await wb.read(inv.path), L = st.layout;
+  if ((ic.get("C5") || "").trim() !== code) throw new Error(`de controlecode op het invoerblad is gewijzigd (verwacht ${code})`);
+  st.cols.forEach((id, j) => { const ref = colL(L.firstCol + j) + L.headerRow, h = ic.get(ref) || ""; if (!h.startsWith("Lijst " + id)) throw new Error(`kolom ${colL(L.firstCol + j)} hoort bij lijst ${id}, maar de kop is gewijzigd`); });
+  st.units.forEach((u, i) => { const r = L.firstRow + i; if ((ic.get("A" + r) || "") !== u.nr || (ic.get("B" + r) || "") !== u.name) throw new Error(`rij ${r} hoort bij ${u.name}, maar is gewijzigd`); });
+  const vals = {}, bad = []; let filled = 0;
+  st.units.forEach((u, i) => st.cols.forEach((id, j) => {
+    const ref = colL(L.firstCol + j) + (L.firstRow + i), raw = String(ic.get(ref) ?? "").trim();
+    let v = "";
+    if (raw !== "") { const n = Number(raw.replace(",", ".")); if (Number.isInteger(n) && n >= 0) { v = String(n); filled++; } else bad.push(`${ref} (${u.name}, lijst ${id}): “${raw}”`); }
+    (vals[u.key] ||= {})[id] = v;
+  }));
+  return { st, code, vals, bad, filled, total: st.units.length * st.cols.length, name: file.name };
+}
+let pendingXl = null, xlNote = null;
+const nowTxt = () => new Date().toLocaleString("nl-NL", { dateStyle: "long", timeStyle: "short" });
+async function handleExcel(file) {
+  pendingXl = null; xlNote = null; S.entryMode = "offline";
+  let r;
+  try { r = await readExcel(file); }
+  catch (e) { xlNote = { cls: "bad", html: `${esc(file.name)} kan niet worden ingelezen: ${esc(e.message)}.` }; renderAll(); showStep(3); return; }
+  if (r.bad.length) { xlNote = { cls: "bad", html: `${esc(file.name)} is niet ingelezen: ${r.bad.length} ${r.bad.length === 1 ? "vak bevat" : "vakken bevatten"} geen heel getal.<small>${r.bad.slice(0, 12).map(esc).join("<br>")}${r.bad.length > 12 ? "<br>…" : ""}</small><small>Verbeter dit in het Excel en lees het opnieuw in.</small>` }; renderAll(); showStep(3); return; }
+  if (S.draw.done && S.draw.code === r.code) { applyExcel(r); return; }
+  if (locked()) { xlNote = { cls: "bad", html: `${esc(file.name)} hoort bij een andere loting (code ${esc(r.code)}), en de uitslag is al ingelezen. Haal eerst de uitslag weg bij stap 4.` }; renderAll(); showStep(3); return; }
+  const empty = !S.draw.done && !S.files.length && !S.manualUnits && !S.manualLists && !Object.values(S.entries).some(o => Object.values(o).some(v => v !== ""));
+  if (empty) { replaceFromExcel(r); return; }
+  pendingXl = r;
+  xlNote = { cls: "warn", html: `${esc(file.name)} hoort bij een andere sessie.<small>Excel: ${esc(r.st.electionId)} · ${esc(LV[r.st.level]?.org || r.st.level)} ${esc(r.st.authority)} · loting ${esc(r.st.draw.at)} · code ${esc(r.code)}<br>Huidige sessie: ${esc(M.election?.id || "–")} · ${esc(M.L.org)} ${esc(M.authority)} · ${S.draw.done ? `code ${esc(S.draw.code || "–")}` : "nog geen loting"}<br>Wil je verder met de sessie uit het Excel? De huidige sessie wordt dan vervangen.</small>` };
+  renderAll(); showStep(3);
+}
+function replaceFromExcel(r) {
+  const st = r.st, keep = { enterDir: S.enterDir };
+  S = { ...fresh(), ...keep, level: st.level, kk: st.kk || "", manualUnits: st.units.map(u => ({ key: u.key, nr: u.nr, name: u.name })), manualLists: st.lists.map(l => ({ id: l.id, name: l.name })),
+    meta: { election: st.election, authority: st.authority }, draw: { ...fresh().draw, ...st.draw, done: true, code: st.code } };
+  applyExcel(r, true);
+}
+function applyExcel(r, restored) {
+  for (const k in r.vals) for (const id in r.vals[k]) (S.entries[k] ||= {})[id] = r.vals[k][id];
+  if (r.st.draw.extended && !S.draw.extended) S.draw.extended = true;
+  S.imported = { file: r.name, at: nowTxt(), code: r.code, filled: r.filled, total: r.total }; S.edits = {};
+  S.entryMode = "offline"; pendingXl = null; xlNote = null;
+  renderAll(); showStep(3); save();
+  toast(restored ? "Sessie hersteld uit het Excel" : "Excel ingelezen");
+}
 
 /* ============================== opslaan ============================== */
 let downloads = null;
@@ -868,13 +1236,13 @@ async function saveFile(filename, data, type) {
   if (downloads) { try { await downloads.save({ filename, data: blob }); toast(filename + " opgeslagen"); } catch (e) { if (e?.code !== "declined") toast("Opslaan lukte niet (" + (e?.code || e?.message || e) + ")"); } return; }
   try { const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = filename; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); } catch { toast("Downloaden is hier niet beschikbaar"); }
 }
-function snapshot(withFiles = true) { return { format: "controleprotocol/1", saved: new Date().toISOString(), ...S, files: withFiles ? S.files.map(f => ({ name: f.name, text: f.text, type: f.type, error: f.error })) : [] }; }
+function snapshot(withFiles = true) { return { format: "controleprotocol/1", saved: new Date().toISOString(), ...S, files: withFiles ? S.files.map(f => ({ name: f.name, text: f.text, type: f.type, error: f.error, hash: f.hash })) : [] }; }
 function save() {
   try { localStorage.setItem(STORE, JSON.stringify(snapshot(true))); }
   catch { try { localStorage.setItem(STORE, JSON.stringify(snapshot(false))); toast("Bestanden te groot om in de browser te bewaren; de invoer wordt wel bewaard"); } catch {} }
 }
 function saveSoon() { clearTimeout(saveSoon.t); saveSoon.t = setTimeout(save, 400); }
-function restore(obj) { S = { ...fresh(), ...obj, draw: { ...fresh().draw, ...(obj.draw || {}) } }; delete S.format; delete S.saved; revive(); }
+function restore(obj) { S = { ...fresh(), ...obj, model: "2026", draw: { ...fresh().draw, ...(obj.draw || {}) } }; delete S.format; delete S.saved; revive(); }
 
 /* ============================== voorbeeld ============================== */
 const DEMO_NS = 'xmlns="urn:oasis:names:tc:evs:schema:eml" xmlns:kr="http://www.kiesraad.nl/extensions" xmlns:xal="urn:oasis:names:tc:ciq:xsdschema:xAL:2.0"';
@@ -922,11 +1290,14 @@ rIn.onchange = () => { addFiles(rIn.files, "res"); rIn.value = ""; };
 rDrop.ondragover = e => { e.preventDefault(); if (!$("resBtn").disabled) rDrop.classList.add("over"); };
 rDrop.ondragleave = () => rDrop.classList.remove("over");
 rDrop.ondrop = e => { e.preventDefault(); rDrop.classList.remove("over"); if ($("resBtn").disabled) return toast("Rond eerst alle invoer af"); addFiles([e.dataTransfer.files[0]].filter(Boolean), "res"); };
-$("demoRes").onclick = () => { if (addText("Telling_GR2026_Juinen_gemeente_Juinen.eml.xml", demo510b(), "res")) afterFiles(); };
+$("demoRes").onclick = async () => { const t = demo510b(); if (addText("Telling_GR2026_Juinen_gemeente_Juinen.eml.xml", t, "res", await sha256hex(new TextEncoder().encode(t)))) afterFiles(); };
 document.querySelectorAll("nav.steps [data-step]").forEach(b => b.onclick = () => showStep(+b.dataset.step));
 document.querySelectorAll("[data-goto]").forEach(b => b.addEventListener("click", () => showStep(+b.dataset.goto)));
 document.querySelectorAll('input[name="level"]').forEach(r => r.onchange = () => { S.level = r.value; afterFiles(); });
 $("kkSel").onchange = () => { S.kk = $("kkSel").value; afterFiles(); };
+document.querySelectorAll('input[name="smeth"]').forEach(r => r.onchange = () => { S.smeth = r.value; afterFiles(); });
+const histField = (id, key) => $(id).addEventListener("input", () => { const h = curHist(); if (!h) return; h[key] = $(id).value; if (key === "pvHash") pvHashStatus(); saveSoon(); clearTimeout(histField.t); histField.t = setTimeout(() => $("reportView").innerHTML = `<div class="report">${reportBody(compare(), false)}</div>`, 300); });
+histField("pvDate", "pvDate"); histField("pvTime", "pvTime"); histField("pvHash", "pvHash");
 $("contestSel").onchange = () => { S.contestIdx = +$("contestSel").value; afterFiles(); };
 $("pasteToggle").onclick = () => { const b = $("pasteBox"); b.hidden = !b.hidden; if (!b.hidden && !$("pasteArea").value && M.units.length) $("pasteArea").value = M.units.map(u => `${u.nr}\t${u.name}`).join("\n"); };
 $("pasteApply").onclick = () => {
@@ -947,8 +1318,18 @@ document.querySelectorAll('input[name="dmeth"]').forEach(r => r.onchange = () =>
 $("drawN").onchange = () => { S.draw.n = Math.max(1, Math.min(M.lists.length || 1, parseInt($("drawN").value, 10) || 3)); S.draw.picked = S.draw.picked.slice(0, S.draw.n); renderStep2(); save(); };
 $("drawBtn").onclick = digitalDraw;
 $("drawFix").onclick = fixDraw;
-armed($("drawUndo"), "Zeker? Klik nogmaals", () => { S.draw = { ...S.draw, picked: [], done: false, at: "", extended: false }; renderAll(); save(); });
+armed($("drawUndo"), "Zeker? Klik nogmaals", () => { S.draw = { ...S.draw, picked: [], done: false, at: "", extended: false, code: "" }; S.imported = null; S.edits = {}; S.resHistory = []; renderAll(); save(); });
 $("enterDir").onchange = () => { S.enterDir = $("enterDir").value; save(); };
+document.querySelectorAll('input[name="emode"]').forEach(r => r.onchange = () => { S.entryMode = r.value; xlNote = null; pendingXl = null; renderStep3(); save(); });
+$("xlDown").onclick = () => { if (!S.draw.code) return toast("Leg eerst de loting vast"); saveFile(`${baseName()}_invoer_${S.draw.code}.xlsx`, invoerXlsx(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"); };
+$("xlUp").onclick = () => $("xlFile").click();
+$("xlFile").onchange = () => { const f = $("xlFile").files[0]; $("xlFile").value = ""; if (f) handleExcel(f); };
+const xd = $("xlDrop");
+xd.ondragover = e => { e.preventDefault(); xd.classList.add("over"); };
+xd.ondragleave = () => xd.classList.remove("over");
+xd.ondrop = e => { e.preventDefault(); xd.classList.remove("over"); const f = e.dataTransfer.files[0]; if (f) handleExcel(f); };
+armed($("xlReplace"), "Zeker? Klik nogmaals", () => { if (pendingXl) replaceFromExcel(pendingXl); });
+$("xlCancel").onclick = () => { pendingXl = null; xlNote = null; renderStep3(); };
 $("testFill").onclick = () => {
   const cols = checkedLists(); if (!cols.length) return toast("Leg eerst de loting vast");
   const { data } = demoData();
@@ -962,7 +1343,7 @@ $("placeTxt").oninput = () => { S.place = $("placeTxt").value; saveSoon(); };
 $("chairTxt").oninput = () => { S.chair = $("chairTxt").value; saveSoon(); };
 $("dlReport").onclick = () => saveFile(baseName() + "_verslag.html", reportFile(), "text/html");
 $("dlCsv").onclick = () => saveFile(baseName() + ".csv", csvText(), "text/csv");
-$("dlXlsx").onclick = async () => { try { saveFile(baseName() + ".xlsx", await xlsxBytes(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"); } catch { toast("Excel lukt niet; de CSV wordt opgeslagen"); saveFile(baseName() + ".csv", csvText(), "text/csv"); } };
+$("dlXlsx").onclick = async () => saveFile(baseName() + ".xlsx", await xlsxBytes(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 $("sessSave").onclick = () => saveFile(baseName() + "_sessie.json", JSON.stringify(snapshot(true)), "application/json");
 $("sessLoad").onclick = () => $("sessFile").click();
 $("sessFile").onchange = async () => { const f = $("sessFile").files[0]; $("sessFile").value = ""; if (!f) return; try { const j = JSON.parse(await f.text()); if (j.format !== "controleprotocol/1") throw 0; restore(j); renderAll(); save(); toast("Sessie geladen"); } catch { toast("Dit is geen sessiebestand van deze app"); } };
@@ -971,6 +1352,7 @@ armed($("resetBtn"), "Alles wissen? Klik nogmaals", () => { S = fresh(); renderA
 
 try { const j = JSON.parse(localStorage.getItem(STORE) || "null"); if (j && j.format === "controleprotocol/1") restore(j); } catch {}
 renderAll();
+if (S.draw.done && !S.draw.code) sessionCode(sessionInfo()).then(c => { S.draw.code = c; renderAll(); save(); });
 </script>
 </body>
 </html>

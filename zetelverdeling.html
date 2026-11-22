@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Controle zetelverdeling</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#17202b; --muted:#5b6673; --paper:#f5f6f4; --panel:#ffffff; --line:#d9ddd8;
+  --accent:#c4122f; --accent-soft:#fbe7ea;
+  --ok:#1f7a4a; --warn:#a15c00; --bad:#b3122a; --ok-soft:#e3f3ea; --warn-soft:#fdf0dc; --bad-soft:#fbe4e8;
+  --font-display:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;
+  --font-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --ink:#e6e9ec; --muted:#9aa4ae; --paper:#12161b; --panel:#1a2027; --line:#2e3640;
+    --accent:#ff5468; --accent-soft:#3a1d23;
+    --ok:#5fd398; --warn:#f0b357; --bad:#ff7a8a; --ok-soft:#163026; --warn-soft:#33260f; --bad-soft:#3a1a20;
+    color-scheme:dark;
+  }
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font:15px/1.5 var(--font-body)}
+header.top{padding:22px 24px 14px;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px 24px;align-items:end;justify-content:space-between}
+header.top h1{font:600 26px/1.1 var(--font-display);margin:0;text-wrap:balance}
+header.top h1 .tag{font:500 12px/1 var(--font-mono);color:var(--accent);border:1px solid var(--accent);border-radius:3px;padding:3px 6px;margin-left:8px;vertical-align:4px}
+header.top p{margin:4px 0 0;color:var(--muted);max-width:72ch}
+nav.steps{display:flex;gap:0;padding:0 24px;border-bottom:1px solid var(--line);overflow-x:auto;background:var(--panel)}
+nav.steps button{border:0;border-bottom:3px solid transparent;border-radius:0;background:none;padding:13px 16px 11px;display:flex;gap:9px;align-items:center;white-space:nowrap;color:var(--muted);font-weight:600}
+nav.steps button:hover{color:var(--ink);border-color:var(--line)}
+nav.steps button[aria-current="step"]{color:var(--ink);border-bottom-color:var(--accent)}
+nav.steps .n{font:500 12px/1 var(--font-mono);color:#fff;background:var(--muted);border-radius:3px;padding:3px 6px}
+nav.steps [aria-current="step"] .n{background:var(--accent)}
+nav.steps .badge{font:500 11.5px/1 var(--font-mono);border-radius:999px;padding:3px 7px;background:var(--paper);border:1px solid var(--line);color:var(--muted)}
+nav.steps .badge.ok{background:var(--ok-soft);border-color:transparent;color:var(--ok)}
+nav.steps .badge.bad{background:var(--bad-soft);border-color:transparent;color:var(--bad)}
+nav.steps .badge.warn{background:var(--warn-soft);border-color:transparent;color:var(--warn)}
+main{padding:20px 24px 40px;display:grid;gap:16px;max-width:1500px}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:980px){.cols{grid-template-columns:1fr}}
+.q{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:16px 18px;display:grid;gap:12px;min-width:0;align-content:start}
+.q h2{margin:0;font:600 17px/1.25 var(--font-display)}
+.q h3{margin:0;font:600 15px/1.25 var(--font-display)}
+.hint{color:var(--muted);font-size:13.5px;margin:0}
+.hint code{font:500 12.5px var(--font-mono)}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:end}
+.field{display:grid;gap:4px;flex:1 1 180px;min-width:0}
+.field.narrow{flex:0 1 120px}
+label{font-size:13px;font-weight:600;color:var(--muted)}
+label.inline{display:flex;gap:6px;align-items:center;color:var(--ink);font-weight:500;font-size:14px}
+input[type=text],input[type=number],select,textarea{font:inherit;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:7px 9px;width:100%}
+textarea{min-height:90px;resize:vertical}
+textarea.mono{font:13px/1.45 var(--font-mono)}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+button{font:500 14px/1 var(--font-body);border-radius:4px;padding:9px 13px;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+button:hover{border-color:var(--ink)}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button.primary:hover{filter:brightness(1.08)}
+button:disabled{opacity:.5;cursor:not-allowed;filter:none}
+button.small{padding:6px 9px;font-size:12.5px}
+button.armed{background:var(--bad);border-color:var(--bad);color:#fff}
+.btns{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btns.end{justify-content:flex-end}
+.drop{border:1.5px dashed var(--line);border-radius:6px;padding:16px;text-align:center;display:grid;gap:10px;justify-items:center;background:var(--paper)}
+.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:500 12px/1 var(--font-mono);border-radius:999px;padding:5px 9px;background:var(--paper);border:1px solid var(--line);display:inline-flex;gap:6px;align-items:center;max-width:100%}
+.chip.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.chip.bad{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip button{border:0;background:none;padding:0;font-size:13px;line-height:1;color:inherit}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:5px;overflow:hidden;flex-wrap:wrap}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label{padding:8px 12px;cursor:pointer;color:var(--ink);font-weight:500;font-size:14px;border-left:1px solid var(--line);background:var(--paper)}
+.seg label:first-of-type{border-left:0}
+.seg input:checked+label{background:var(--accent);color:#fff}
+.seg input:focus-visible+label{outline:2px solid var(--accent);outline-offset:-2px}
+.seg input:disabled+label{opacity:.55;cursor:not-allowed}
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:620px){.facts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.fact small{display:block;color:var(--muted);font-size:12px}
+.fact strong{font:600 17px/1.25 var(--font-display);font-variant-numeric:tabular-nums;word-break:break-word}
+.fact strong.mono{font:500 13px/1.35 var(--font-mono)}
+.status{font-weight:600;font-size:14px;padding:9px 11px;border-radius:4px}
+.status.ok{background:var(--ok-soft);color:var(--ok)} .status.warn{background:var(--warn-soft);color:var(--warn)} .status.bad{background:var(--bad-soft);color:var(--bad)}
+.status.idle{background:var(--paper);color:var(--muted)}
+.status.big{font:600 20px/1.3 var(--font-display);padding:14px 16px}
+.status small{display:block;font:400 14px/1.45 var(--font-body);margin-top:4px}
+ul.checks{margin:0;padding:0;list-style:none;display:grid;gap:4px;font-size:13.5px}
+ul.checks li{padding-left:16px;position:relative}
+ul.checks li::before{content:"";position:absolute;left:2px;top:.55em;width:7px;height:7px;border-radius:50%}
+ul.checks li.bad::before{background:var(--bad)} ul.checks li.warn::before{background:var(--warn)} ul.checks li.info::before{background:var(--muted)} ul.checks li.ok::before{background:var(--ok)}
+.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:5px;max-height:70vh;background:var(--panel)}
+table{border-collapse:separate;border-spacing:0;width:100%;font-size:14px}
+th,td{padding:6px 9px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+thead th{position:sticky;top:0;background:var(--panel);z-index:2;font:600 13px/1.25 var(--font-body);color:var(--muted);vertical-align:bottom;border-bottom:1.5px solid var(--ink)}
+thead th small{display:block;font-weight:400;max-width:16ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+thead th.num small{margin-left:auto}
+tfoot td{position:sticky;bottom:0;background:var(--panel);font-weight:600;border-top:1.5px solid var(--ink);border-bottom:0;z-index:2}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+td.mono{font:500 12.5px var(--font-mono);color:var(--muted);white-space:nowrap}
+.grid th.stick,.grid td.stick{position:sticky;left:0;background:var(--panel);z-index:1;min-width:200px;max-width:320px}
+.grid thead th.stick{z-index:3}
+.grid tfoot td.stick{z-index:3}
+.grid td.cell{padding:3px 4px;min-width:92px}
+.grid input{width:100%;text-align:right;font:500 15px var(--font-mono);font-variant-numeric:tabular-nums;padding:6px 7px;background:var(--paper)}
+.grid input:not(:placeholder-shown){background:var(--panel)}
+.grid tr.done td.stick{box-shadow:inset 3px 0 0 var(--ok)}
+.grid tr.cur td{background:var(--accent-soft)}
+.grid tr.cur td.stick{background:var(--accent-soft)}
+.rowst{font:500 12px var(--font-mono);color:var(--muted);white-space:nowrap}
+.rowst.ok{color:var(--ok)}
+td.diff{color:var(--bad);font-weight:600}
+td.okc{color:var(--ok);font-weight:600}
+.progress{height:8px;border-radius:99px;background:var(--paper);border:1px solid var(--line);overflow:hidden}
+.progress i{display:block;height:100%;background:var(--ok);width:0;transition:width .2s}
+.lots{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}
+.lot{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;align-items:center;text-align:left;padding:10px 12px;border:1px solid var(--line);border-radius:5px;background:var(--paper);font-weight:500;line-height:1.25;position:relative}
+.lot b{font:600 20px/1 var(--font-display);color:var(--accent);min-width:28px}
+.lot span{font-size:13.5px;overflow:hidden;text-overflow:ellipsis}
+.lot.picked{border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 3px 0 0 var(--accent)}
+.lot.picked::after{content:attr(data-order);position:absolute;top:-8px;right:-8px;background:var(--accent);color:#fff;font:600 12px/1 var(--font-mono);border-radius:99px;padding:4px 7px}
+.lot.flash{animation:flash .6s ease}
+@keyframes flash{0%{transform:scale(1.08)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.lot.flash{animation:none}.progress i{transition:none}}
+.drawn{display:flex;flex-wrap:wrap;gap:10px}
+.drawn .lot{min-width:200px}
+.report{background:#fff;color:#17202b;border:1px solid var(--line);border-radius:6px;padding:28px 32px;font:14px/1.5 var(--font-body);max-width:860px}
+.report h1{font:600 22px/1.2 var(--font-display);margin:0 0 4px}
+.report h2{font:600 16px/1.25 var(--font-display);margin:20px 0 6px}
+.report table{font-size:13.5px}
+.report th,.report td{border-bottom:1px solid #d9ddd8}
+.report .meta{color:#5b6673;margin:0}
+.report .verdict{padding:10px 12px;border-radius:4px;font-weight:600;margin:12px 0}
+.report .verdict.ok{background:#e3f3ea;color:#1f7a4a} .report .verdict.bad{background:#fbe4e8;color:#b3122a} .report .verdict.warn{background:#fdf0dc;color:#a15c00}
+.report .box{border:1px solid #17202b;display:inline-block;width:13px;height:13px;vertical-align:-2px;margin-right:6px;text-align:center;font:700 11px/12px var(--font-mono)}
+.report .note{white-space:pre-wrap;border:1px solid #d9ddd8;border-radius:4px;padding:8px 10px;min-height:40px}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:9px 14px;border-radius:4px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw;z-index:10}
+.toast.show{opacity:1}
+footer{padding:0 24px 30px;color:var(--muted);font-size:12.5px;max-width:110ch}
+details summary{cursor:pointer;font-weight:600;font-size:14px}
+details[open] summary{margin-bottom:10px}
+.kbd{font:500 11.5px var(--font-mono);border:1px solid var(--line);border-bottom-width:2px;border-radius:3px;padding:1px 5px;background:var(--paper)}
+.art{font:500 12px/1 var(--font-mono);color:var(--accent);border:1px solid var(--accent);border-radius:3px;padding:3px 5px;margin-left:6px;vertical-align:2px}
+table.edit td{padding:3px 5px}
+table.edit input[type=text],table.edit input[type=number]{padding:5px 7px;background:var(--panel)}
+table.edit input.num{text-align:right;font:500 14px var(--font-mono);font-variant-numeric:tabular-nums}
+table.edit input.changed{border-color:var(--warn);box-shadow:inset 0 0 0 1px var(--warn)}
+table.edit td.w-nr{width:84px} table.edit td.w-v{width:130px} table.edit td.w-c{width:110px} table.edit td.w-x{width:40px}
+td.frac,th.frac{text-align:right;font:500 13.5px var(--font-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+td.hit{background:var(--accent-soft);color:var(--accent);font-weight:600;box-shadow:inset 0 0 0 1.5px var(--accent)}
+td.hit small{display:block;font:500 10.5px var(--font-mono);color:var(--accent)}
+td.na{color:var(--muted)}
+tr.zero td{color:var(--muted)}
+td.badc{color:var(--bad);font-weight:600} td.okc{color:var(--ok);font-weight:600}
+.quota{font:600 24px/1.25 var(--font-display);font-variant-numeric:tabular-nums}
+.quota small{display:block;font:400 13.5px/1.45 var(--font-body);color:var(--muted);margin-top:4px}
+ol.steplog{margin:6px 0 0;padding-left:22px;display:grid;gap:5px;font-size:14px}
+ol.steplog li small{color:var(--muted)}
+.lotopts{display:flex;flex-wrap:wrap;gap:8px}
+.lotopts button{display:grid;gap:2px;text-align:left;line-height:1.2}
+.lotopts button b{font:600 18px/1 var(--font-display);color:var(--accent)}
+.kv{display:grid;grid-template-columns:max-content 1fr;gap:4px 14px;font-size:13.5px}
+.kv dt{color:var(--muted)} .kv dd{margin:0;word-break:break-all}
+.kv dd.mono{font:500 12.5px/1.45 var(--font-mono)}
+@media print{header.top .btns,nav.steps,footer,.drop,.btns{display:none!important}section[hidden]{display:block!important}}
+main>section{min-width:0}.cols>*{min-width:0}
+.report thead th,.report tfoot td{position:static}
+header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace);color:var(--accent,#c8102e);text-decoration:none;margin-bottom:10px}header.top .back:hover{text-decoration:underline}header.top .nk{font:400 12px/1 var(--font-mono,monospace);color:var(--muted,#666)}
+</style>
+</head>
+<body>
+<header class="top">
+  <div>
+    <a class="back" href="index.html">← Alle hulpmiddelen</a><span class="nk"> · Onafhankelijk hulpmiddel, niet van de Kiesraad</span>
+    <h1>Controle zetelverdeling <span class="tag">CSB · P 5–P 10</span></h1>
+    <p>Bereken de zetelverdeling zelf volgens artikel P 5 tot en met P 10 van de Kieswet en vergelijk de uitkomst met die van de programmatuur. Voor het Verslag controleprotocol CSB, onderdeel B.</p>
+  </div>
+  <div class="btns">
+    <input type="file" id="sessFile" accept=".json,application/json" hidden>
+    <button type="button" id="sessSave">Sessie opslaan</button>
+    <button type="button" id="sessLoad">Sessie laden</button>
+    <select id="demoSel" aria-label="Voorbeeld laden" style="width:auto">
+      <option value="">Voorbeeld…</option>
+      <option value="bosch">'s-Hertogenbosch GR26 (39 zetels)</option>
+      <option value="klein">Kleine gemeente (13 zetels)</option>
+      <option value="lid3">Minder dan 19 zetels: P 8 lid 3</option>
+      <option value="uitput">Lijstuitputting (P 10)</option>
+      <option value="lot">Gelijke stand (loting)</option>
+      <option value="p9">Meerderheidsregel (P 9)</option>
+    </select>
+    <button type="button" id="resetBtn">Opnieuw beginnen</button>
+  </div>
+</header>
+
+<nav class="steps" aria-label="Stappen">
+  <button type="button" data-step="1"><span class="n">1</span>Gegevens <span class="badge" id="b1">–</span></button>
+  <button type="button" data-step="2"><span class="n">2</span>Berekening <span class="badge" id="b2">–</span></button>
+  <button type="button" data-step="3"><span class="n">3</span>Vergelijking en verslag <span class="badge" id="b3">–</span></button>
+</nav>
+
+<main>
+<!-- ======================= STAP 1 ======================= -->
+<section data-pane="1">
+  <div class="cols">
+    <div class="q">
+      <h2>EML-bestanden inladen</h2>
+      <div class="drop" id="drop">
+        <div>Sleep hier de EML-bestanden heen. De app herkent het soort bestand zelf.</div>
+        <div class="btns"><input type="file" id="openFile" accept=".xml,.eml,text/xml" multiple hidden><button type="button" class="primary" id="openBtn">Kies bestanden</button></div>
+      </div>
+      <div class="chips" id="loaded"></div>
+      <ul class="checks">
+        <li class="info"><b>510b, 510c of 510d</b>: de stemtotalen per lijst (de stemcijfers).</li>
+        <li class="info"><b>110a</b>: het aantal te verdelen zetels (kr:NumberOfSeats).</li>
+        <li class="info"><b>230b</b>: de lijstnamen en het aantal kandidaten per lijst (nodig voor lijstuitputting, P 10).</li>
+        <li class="info"><b>520</b> (als die er is): de uitkomst van de programmatuur. Je kunt die ook bij stap 3 inlezen of overtikken.</li>
+      </ul>
+    </div>
+
+    <div class="q">
+      <h2>Verkiezing</h2>
+      <div class="facts">
+        <div class="fact"><small>Verkiezing</small><strong class="mono" id="fElection">–</strong></div>
+        <div class="fact"><small>Stemcijfers</small><strong id="fTotal">–</strong></div>
+        <div class="fact"><small>Lijsten</small><strong id="fLists">–</strong></div>
+        <div class="fact"><small>Stelsel restzetels</small><strong id="fMethod">–</strong></div>
+      </div>
+      <div class="row">
+        <div class="field narrow" style="flex:0 1 160px"><label for="seats">Aantal zetels</label><input type="number" id="seats" min="1" max="500" inputmode="numeric"></div>
+        <div class="field" style="flex:1 1 220px"><label for="category">Soort verkiezing</label>
+          <select id="category">
+            <option value="GR">Gemeenteraad (GR)</option>
+            <option value="AB">Algemeen bestuur waterschap (AB)</option>
+            <option value="PS">Provinciale Staten (PS)</option>
+            <option value="ER">Eilandsraad (ER)</option>
+            <option value="BC">Kiescollege Bonaire e.a. (BC/GC)</option>
+            <option value="TK">Tweede Kamer (TK)</option>
+            <option value="EP">Europees Parlement (EP)</option>
+            <option value="EK">Eerste Kamer (EK)</option>
+          </select></div>
+      </div>
+      <label class="inline"><input type="checkbox" id="kdDrempel"> Restzetels alleen voor lijsten met een stemcijfer van ten minste de kiesdeler (P 7 lid 2)</label>
+      <ul class="checks" id="checks1"></ul>
+    </div>
+  </div>
+
+  <div class="q" style="margin-top:16px">
+    <div class="row" style="justify-content:space-between;align-items:center">
+      <h2>Lijsten en stemcijfers</h2>
+      <div class="btns">
+        <button type="button" class="small" id="addList">Lijst toevoegen</button>
+        <button type="button" class="small" id="pasteToggle">Plakken uit Excel</button>
+        <button type="button" class="small" id="clearLists">Lijsten wissen</button>
+      </div>
+    </div>
+    <div id="pasteBox" hidden>
+      <p class="hint">Eén lijst per regel: lijstnummer, naam en stemcijfer, gescheiden door tabs (zo plak je kolom C, D en H uit de spreadsheet van de Kiesraad). Een vierde getal is het aantal kandidaten. Bestaande lijsten worden vervangen.</p>
+      <textarea class="mono" id="pasteArea" placeholder="1	GROENLINKS / Partij van de Arbeid	11313&#10;2	D66	11987"></textarea>
+      <div class="btns" style="margin-top:8px"><button type="button" class="primary small" id="pasteApply">Lijsten overnemen</button></div>
+    </div>
+    <p class="hint">Het stemcijfer is het aantal geldige stemmen op de kandidaten van de lijst (P 5). Velden met een gekleurde rand wijken af van het ingelezen EML-bestand.</p>
+    <div class="tablewrap" style="max-height:60vh"><table id="listTable" class="edit"></table></div>
+    <div class="btns end"><button type="button" class="primary" data-goto="2">Naar de berekening →</button></div>
+  </div>
+</section>
+
+<!-- ======================= STAP 2 ======================= -->
+<section data-pane="2" hidden>
+  <div class="status big idle" id="calcStatus"></div>
+  <div class="q" id="lotBox" hidden style="margin-top:16px;border-color:var(--warn)"></div>
+  <div class="cols" style="margin-top:16px">
+    <div class="q">
+      <h2>1. Kiesdeler <span class="art">P 5</span></h2>
+      <div id="quotaBox"></div>
+    </div>
+    <div class="q">
+      <h2>Uitkomst</h2>
+      <div class="tablewrap" style="max-height:none"><table id="finalTable"></table></div>
+    </div>
+  </div>
+  <div class="q" style="margin-top:16px">
+    <h2>2. Volle zetels <span class="art">P 6</span></h2>
+    <div class="tablewrap" style="max-height:none"><table id="fullTable"></table></div>
+  </div>
+  <div class="q" style="margin-top:16px">
+    <h2 id="resTitle">3. Restzetels</h2>
+    <p class="hint" id="resHint"></p>
+    <div id="resBox"></div>
+  </div>
+  <div class="cols" style="margin-top:16px">
+    <div class="q"><h2>4. Meerderheid van stemmen <span class="art">P 9</span></h2><div id="p9Box"></div></div>
+    <div class="q"><h2>5. Lijstuitputting <span class="art">P 10</span></h2><div id="p10Box"></div></div>
+  </div>
+  <div class="q" style="margin-top:16px">
+    <details><summary>Alle stappen op volgorde</summary><ol id="stepLog" class="steplog"></ol></details>
+    <div class="btns end"><button type="button" id="dlCsv">Berekening als CSV</button><button type="button" class="primary" data-goto="3">Naar de vergelijking →</button></div>
+  </div>
+</section>
+
+<!-- ======================= STAP 3 ======================= -->
+<section data-pane="3" hidden>
+  <div class="cols">
+    <div class="q">
+      <h2>Uitkomst van de programmatuur</h2>
+      <div class="seg" role="radiogroup" aria-label="Bron">
+        <input type="radio" name="psrc" id="psEml" value="eml"><label for="psEml">520 inlezen</label>
+        <input type="radio" name="psrc" id="psMan" value="manual"><label for="psMan">Overtikken van het proces-verbaal</label>
+      </div>
+      <div id="psEmlBox">
+        <div class="drop" id="drop520">
+          <div>Sleep hier de 520 (uitslag met gekozen kandidaten) heen.</div>
+          <div class="btns"><input type="file" id="file520" accept=".xml,.eml,text/xml" hidden><button type="button" class="primary" id="btn520">Kies de 520</button></div>
+        </div>
+      </div>
+      <p class="hint" id="psManHint" hidden>Tik per lijst het totaal aantal zetels over uit het proces-verbaal van de programmatuur (P 22-1, onderdeel zetelverdeling). Vol en rest zijn optioneel; vul je ze in, dan worden ze ook vergeleken.</p>
+      <div class="tablewrap" style="max-height:none"><table id="cmpTable"></table></div>
+    </div>
+    <div class="q">
+      <h2>Is de uitkomst gelijk aan die van de programmatuur?</h2>
+      <div class="status big idle" id="verdict"></div>
+      <ul class="checks" id="checks3"></ul>
+      <div id="kenmBox"></div>
+    </div>
+  </div>
+  <div class="q" style="margin-top:16px">
+    <h2>Verslag</h2>
+    <div class="field"><label for="noteTxt">Toelichting (verplicht bij een verschil: welk nader onderzoek is gedaan en wat is de uitkomst)</label><textarea id="noteTxt" placeholder="Bijvoorbeeld: verschil verklaard door een tikfout in het stemcijfer van lijst 4 bij de controle; na correctie gelijk."></textarea></div>
+    <div class="row">
+      <div class="field"><label for="authTxt">Centraal stembureau</label><input type="text" id="authTxt" placeholder="bijv. 's-Hertogenbosch"></div>
+      <div class="field"><label for="placeTxt">Plaats</label><input type="text" id="placeTxt"></div>
+      <div class="field"><label for="chairTxt">Voorzitter</label><input type="text" id="chairTxt"></div>
+    </div>
+    <div class="btns">
+      <button type="button" class="primary" id="dlReport">Verslag downloaden (.html)</button>
+      <button type="button" id="copyTxt">Tekst kopiëren</button>
+    </div>
+    <p class="hint">Het verslag volgt de vraag uit het Verslag controleprotocol CSB (onderdeel B, controle zetelverdeling). Open het .html-bestand in je browser om het af te drukken of als pdf te bewaren. Het formulier van de Kiesraad blijft leidend.</p>
+    <div id="reportView"></div>
+  </div>
+</section>
+</main>
+
+<footer>
+  Alles gebeurt in je browser; er gaan geen gegevens naar een server. De sessie wordt in deze browser bewaard. De berekening gebruikt exacte breuken en volgt de rekenregels van artikel P 5 tot en met P 10 Kieswet (geldende tekst per 1 oktober 2026), in dezelfde volgorde als de programmatuur Abacus: volle zetels, restzetels, dan de meerderheidsregel (P 9) en daarna lijstuitputting (P 10). Deze controle is geen formele berekening; de vaststelling gebeurt in de openbare zitting van het centraal stembureau.
+</footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+/* Rekenkern zetelverdeling, Kieswet P 5 t/m P 10.
+   De volgorde en de keuzes volgen de zetelverdeling van Abacus (kiesraad/abacus, crate apportionment),
+   zodat de controle dezelfde regels toepast als de programmatuur. Alles in exacte breuken (BigInt).
+   Uitbreiding t.o.v. Abacus: optie kdDrempel (P 7 lid 2, Tweede Kamer; ook bij het EP): restzetels via
+   grootste gemiddelden alleen voor lijsten met een stemcijfer van ten minste de kiesdeler. */
+const ZV = (() => {
+  "use strict";
+  const LARGE = 19;
+  const babs = x => (x < 0n ? -x : x);
+  const gcd = (a, b) => { a = babs(a); b = babs(b); while (b) { [a, b] = [b, a % b]; } return a; };
+  class Frac {
+    constructor(n, d = 1n) {
+      n = BigInt(n); d = BigInt(d);
+      if (d === 0n) throw new Error("deling door nul");
+      if (d < 0n) { n = -n; d = -d; }
+      const g = gcd(n, d) || 1n; this.n = n / g; this.d = d / g;
+    }
+    cmp(o) { const a = this.n * o.d, b = o.n * this.d; return a < b ? -1 : a > b ? 1 : 0; }
+    gt(o) { return this.cmp(o) > 0; } eq(o) { return this.cmp(o) === 0; } ge(o) { return this.cmp(o) >= 0; }
+    mul(o) { return new Frac(this.n * o.n, this.d * o.d); }
+    sub(o) { return new Frac(this.n * o.d - o.n * this.d, this.d * o.d); }
+    div(o) { return new Frac(this.n * o.d, this.d * o.n); }
+    int() { return this.n / this.d; } // naar beneden voor n >= 0
+    num() { return Number(this.n) / Number(this.d); }
+    /* gemengde breuk zoals op het PV: "1711 17/39" */
+    mixed() {
+      const w = this.n / this.d, r = this.n % this.d;
+      if (r === 0n) return w.toString();
+      return (w ? w.toString() + " " : "") + r.toString() + "/" + this.d.toString();
+    }
+  }
+  const fr = (n, d) => new Frac(n, d);
+  const ZERO = fr(0);
+
+  /* ---------- standen ---------- */
+  function initialStandings(lists, seats, quota, kdDrempel) {
+    return lists.map(l => {
+      const v = fr(l.votes);
+      const full = (l.votes > 0 && quota.n > 0n) ? Number(v.div(quota).int()) : 0;
+      return {
+        nr: l.nr, votes: l.votes, cands: (l.cands === null || l.cands === undefined) ? Infinity : l.cands,
+        full, res: 0,
+        remainder: v.sub(fr(full).mul(quota)),
+        meetsThr: v.ge(quota.mul(fr(3, 4))),       // P 8 lid 2: 75% van de kiesdeler
+        meetsKd: v.ge(quota),                        // P 7 lid 2 (TK/EP)
+        kdDrempel: !!kdDrempel,
+      };
+    });
+  }
+  const clone = st => st.map(s => ({ ...s }));
+  const total = s => s.full + s.res;
+  const nextAvg = s => fr(s.votes, total(s) + 1);
+  const byNr = (st, nr) => st.find(s => s.nr === nr);
+  const snap = st => st.map(s => ({ nr: s.nr, full: s.full, res: s.res }));
+
+  /* ---------- hulpfuncties uit Abacus ---------- */
+  const isLR = st => st.kind === "LR", isHA = st => st.kind === "HA", isUHA = st => st.kind === "UHA";
+  function extendAssigned(sel, prev, matcher) {
+    let a = [];
+    const last = prev[prev.length - 1];
+    if (last && matcher(last) && last.options.includes(sel)) a = last.assigned.slice();
+    a.push(sel); return a;
+  }
+  const countSteps = (prev, matcher, nr) => prev.filter(p => matcher(p) && p.nr === nr).length;
+  function qualifiesExtra(prev, nr, unique) {
+    const nLR = countSteps(prev, isLR, nr);
+    const amRetracted = prev.some(p => p.kind === "AM" && p.retracted === nr);
+    if (unique) {
+      const nU = countSteps(prev, isUHA, nr);
+      return nU === 0 || (amRetracted && nU === 1 && nLR <= 1);
+    }
+    return nLR === 0 || (amRetracted && nLR === 1);
+  }
+  const exhaustedNrs = st => st.filter(s => s.cands <= total(s)).map(s => s.nr);
+
+  /* Lot: lots is een rij getrokken lijstnummers, die op volgorde wordt verbruikt. */
+  function draw(ctx, variant) {
+    const i = ctx.lotIdx;
+    if (i < ctx.lots.length) {
+      const d = ctx.lots[i];
+      if (variant.options.includes(d)) { ctx.lotIdx++; variant.drawn = d; ctx.lotLog.push(variant); return d; }
+      ctx.badLot = { at: i, drawn: d, options: variant.options };
+    }
+    ctx.required = variant; return null;
+  }
+
+  function pickMax(cands, valueOf, avail, ctx, variantBase) {
+    let max = ZERO, set = [];
+    for (const s of cands) {
+      const v = valueOf(s), c = v.cmp(max);
+      if (c > 0) { max = v; set = [s]; } else if (c === 0) set.push(s);
+    }
+    if (set.length > avail) {
+      const variant = { ...variantBase, value: max, options: set.map(s => s.nr), seatsAvailable: avail };
+      const d = draw(ctx, variant);
+      if (d === null) return null;
+      return { sel: set.find(s => s.nr === d), options: variant.options, value: max, drawing: variant };
+    }
+    return { sel: set[0], options: set.map(s => s.nr), value: max, drawing: null };
+  }
+
+  function stepHA(st, avail, prev, exh, unique, resNo, ctx) {
+    let q = [];
+    let u = false;
+    if (unique) {
+      q = st.filter(s => s.votes > 0 && !exh.includes(s.nr) && qualifiesExtra(prev, s.nr, true));
+      u = q.length > 0;
+    }
+    if (!u) {
+      q = st.filter(s => s.votes > 0 && !exh.includes(s.nr));
+      // P 7 lid 2 (TK, EP): niet aan lijsten met een stemcijfer onder de kiesdeler
+      if (q.length && q[0].kdDrempel) q = q.filter(s => s.meetsKd);
+    }
+    if (!q.length) return { none: true };
+    const r = pickMax(q, nextAvg, avail, ctx, { type: u ? "UHA" : "HA", resNo, resNos: range(resNo, avail) });
+    if (!r) return null;
+    const kind = u ? "UHA" : "HA";
+    return { kind, nr: r.sel.nr, options: r.options, value: r.value, drawing: r.drawing, exhausted: exh.slice(),
+      assigned: extendAssigned(r.sel.nr, prev, u ? isUHA : isHA) };
+  }
+  function stepLR(st, avail, prev, exh, resNo, ctx) {
+    const q = st.filter(s => s.votes > 0 && s.meetsThr && !exh.includes(s.nr) && qualifiesExtra(prev, s.nr, false));
+    if (!q.length) return stepHA(st, avail, prev, exh, true, resNo, ctx);
+    const r = pickMax(q, s => s.remainder, avail, ctx, { type: "LR", resNo, resNos: range(resNo, avail) });
+    if (!r) return null;
+    return { kind: "LR", nr: r.sel.nr, options: r.options, value: r.value, drawing: r.drawing, exhausted: exh.slice(),
+      assigned: extendAssigned(r.sel.nr, prev, isLR) };
+  }
+  const range = (a, n) => Array.from({ length: n }, (_, i) => a + i);
+
+  function assignRemainder(st0, seats, totalRes, curNo, prevSteps, excludeExh, ctx) {
+    const steps = prevSteps.slice();
+    const st = clone(st0);
+    let no = curNo;
+    while (no !== totalRes) {
+      const exh = excludeExh ? exhaustedNrs(st) : [];
+      if (!st.some(s => s.votes > 0 && !exh.includes(s.nr))) { ctx.unassigned = totalRes - no; break; }
+      const avail = totalRes - no; no++;
+      const ch = seats >= LARGE ? stepHA(st, avail, steps, exh, false, no, ctx) : stepLR(st, avail, steps, exh, no, ctx);
+      if (ch === null) return { lots: true, steps, st };
+      if (ch.none) { ctx.unassigned = totalRes - no + 1; break; } // alleen mogelijk met de kiesdelerdrempel
+      const before = snap(st);
+      byNr(st, ch.nr).res++;
+      steps.push({ ...ch, resNo: no, before });
+    }
+    return { lots: false, steps, st };
+  }
+
+  /* P 9 */
+  function absoluteMajority(seats, T, lists, lastStep, st0, ctx) {
+    const half = fr(T, 2);
+    const ml = lists.find(l => fr(l.votes).gt(half));
+    if (!ml) return { st: st0, change: null };
+    const s = byNr(st0, ml.nr);
+    if (fr(total(s)).gt(fr(seats, 2))) return { st: st0, change: null };
+    const group = lastStep.assigned;
+    let retr, drawing = null;
+    if (group.length === 1) retr = group[0];
+    else {
+      const variant = { type: "AM", assignTo: ml.nr, options: group.slice(), base: lastStep.kind };
+      const d = draw(ctx, variant);
+      if (d === null) return null;
+      retr = d; drawing = variant;
+    }
+    const st = clone(st0);
+    const before = snap(st);
+    byNr(st, retr).res--; byNr(st, ml.nr).res++;
+    return { st, change: { kind: "AM", retracted: retr, nr: ml.nr, drawing, before } };
+  }
+
+  /* P 10 */
+  function exhaustion(st0, seats, assignedRes, steps0, ctx) {
+    const ex = st0.filter(s => s.cands < total(s)).map(s => [s.nr, total(s) - s.cands]);
+    if (!ex.length) return { lots: false, steps: steps0, st: st0 };
+    const st = clone(st0), steps = steps0.slice();
+    let n = 0;
+    for (const [nr, k] of ex) {
+      n += k;
+      for (let i = 0; i < k; i++) {
+        const before = snap(st), s = byNr(st, nr);
+        let fullSeat;
+        if (s.res > 0) { s.res--; fullSeat = false; } else { s.full--; fullSeat = true; }
+        steps.push({ kind: "EX", retracted: nr, fullSeat, before });
+      }
+    }
+    return assignRemainder(st, seats, assignedRes + n, assignedRes, steps, true, ctx);
+  }
+
+  /* ---------- hoofdfunctie ---------- */
+  /* input: { seats, lists:[{nr,name,votes,cands}], kdDrempel:bool, lots:[nr,...] } */
+  function apportion(input) {
+    const seats = input.seats | 0;
+    const lists = input.lists.map(l => ({ ...l, votes: Math.max(0, Math.floor(+l.votes || 0)) }));
+    if (!(seats > 0)) throw new Error("aantal zetels ontbreekt");
+    if (new Set(lists.map(l => l.nr)).size !== lists.length) throw new Error("dubbel lijstnummer");
+    const ctx = { lots: (input.lots || []).slice(), lotIdx: 0, lotLog: [], required: null, badLot: null, unassigned: 0 };
+    const T = lists.reduce((a, l) => a + l.votes, 0);
+    const quota = fr(T, seats);
+    const init = initialStandings(lists, seats, quota, input.kdDrempel);
+    const fullSeats = init.reduce((a, s) => a + s.full, 0);
+    const residual = seats - fullSeats;
+    const base = { seats, T, quota, fullSeats, residual, method: seats >= LARGE ? "HA" : "LR", init: clone(init), lists, kdDrempel: !!input.kdDrempel };
+    const done = (steps, st, extra) => {
+      const finalSt = st.map(s => ({ nr: s.nr, full: s.full, res: s.res, total: total(s) }));
+      const warnings = [];
+      const p9 = steps.some(s => s.kind === "AM"), p10 = steps.some(s => s.kind === "EX");
+      if (p9 && p10) warnings.push("P9P10");
+      const assigned = finalSt.reduce((a, s) => a + s.total, 0);
+      if (assigned < seats) warnings.push("ONBEZET");
+      return { ...base, steps, standings: finalSt, warnings, unassigned: seats - assigned, lotLog: ctx.lotLog, badLot: ctx.badLot, lotsUsed: ctx.lotIdx, ...extra };
+    };
+    const needLots = (steps, st) => done(steps, st, { status: "lot", required: ctx.required });
+
+    let steps = [], cur = init;
+    if (residual > 0) {
+      const r = assignRemainder(init, seats, residual, 0, [], false, ctx);
+      if (r.lots) return needLots(r.steps, r.st);
+      steps = r.steps; cur = r.st;
+    }
+    let cum = cur;
+    if (steps.length) {
+      const am = absoluteMajority(seats, T, lists, steps[steps.length - 1], cur, ctx);
+      if (am === null) return needLots(steps, cur);
+      cum = am.st;
+      if (am.change) steps.push(am.change);
+    }
+    const ex = exhaustion(cum, seats, residual, steps, ctx);
+    if (ex.lots) return needLots(ex.steps, ex.st);
+    return done(ex.steps, ex.st, { status: "ok" });
+  }
+
+  /* Tabel met gemiddelden per ronde (voor de weergave bij >= 19 zetels): de restzetels zoals
+     verdeeld, met per ronde het gemiddelde dat elke lijst bij één zetel erbij zou hebben. */
+  function averagesTable(res) {
+    return res.steps.filter(s => s.kind === "HA" || s.kind === "UHA").map(s => ({
+      resNo: s.resNo, nr: s.nr, value: s.value, kind: s.kind, drawing: s.drawing,
+      avgs: s.before.map(b => { const l = res.init.find(x => x.nr === b.nr); return { nr: b.nr, avg: fr(l.votes, b.full + b.res + 1) }; }),
+    }));
+  }
+
+  return { apportion, averagesTable, Frac, fr };
+})();
+"use strict";
+/* ============================== helpers ============================== */
+const $ = id => document.getElementById(id);
+const all = (el, n) => Array.from(el.getElementsByTagNameNS("*", n));
+const one = (el, n) => { const l = el.getElementsByTagNameNS("*", n); return l.length ? l[0] : null; };
+const txt = (el, n) => { const e = el && one(el, n); return e ? e.textContent.trim() : ""; };
+const kids = (el, n) => Array.from(el.children).filter(c => c.localName === n);
+const esc = s => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const nl = x => (x === null || x === undefined || x === "" || Number.isNaN(x)) ? "–" : Number(x).toLocaleString("nl-NL");
+const safe = s => String(s).replace(/[\\/:*?"<>|]+/g, "_").replace(/\s+/g, "_");
+function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("show"), 2800); }
+function armed(btn, label, fn) {
+  btn.onclick = () => {
+    if (btn.classList.contains("armed")) { btn.classList.remove("armed"); btn.textContent = btn.dataset.l; clearTimeout(btn.t); fn(); return; }
+    btn.dataset.l = btn.textContent; btn.textContent = label; btn.classList.add("armed");
+    btn.t = setTimeout(() => { btn.classList.remove("armed"); btn.textContent = btn.dataset.l; }, 4000);
+  };
+}
+/* breuk als gemengd getal, zoals op het proces-verbaal: 1.711 17/39 */
+function ff(f) {
+  if (!f) return "–";
+  const w = f.n / f.d, r = f.n % f.d;
+  const ws = w.toLocaleString("nl-NL");
+  return r === 0n ? ws : (w ? ws + " " : "") + r.toString() + "/" + f.d.toString();
+}
+async function sha256hex(buf) { const h = new Uint8Array(await crypto.subtle.digest("SHA-256", buf)); return [...h].map(b => b.toString(16).padStart(2, "0")).join("").toUpperCase(); }
+const hashShort = h => h ? h.slice(0, 4) + " " + h.slice(4, 8) : "";
+const hashGroups = h => h ? h.match(/.{1,4}/g).join(" ") : "";
+const listNr = id => { const m = String(id || "").match(/(\d+)\s*$/); return m ? +m[1] : NaN; };
+
+const CAT = {
+  GR: "Gemeenteraad", AB: "Algemeen bestuur waterschap", PS: "Provinciale Staten", ER: "Eilandsraad", BC: "Kiescollege", GC: "Kiescollege",
+  TK: "Tweede Kamer", EP: "Europees Parlement", EK: "Eerste Kamer",
+};
+const kdDefault = cat => cat === "TK" || cat === "EP";
+
+/* ============================== state ============================== */
+const STORE = "zetelverdeling.session.v1";
+const fresh = () => ({
+  step: 1, seats: null, category: "GR", kd: null, lists: [], emlRef: null, files: [], election: null,
+  lots: [], prog: { src: "eml", eml: null, man: {} }, note: "", auth: "", place: "", chair: "", demo: "",
+});
+let S = fresh();
+let R = null, Rerr = "";
+const saveLocal = () => { try { localStorage.setItem(STORE, JSON.stringify(S)); } catch (e) { /* geen opslag */ } };
+function loadLocal() { try { const j = localStorage.getItem(STORE); if (j) S = Object.assign(fresh(), JSON.parse(j)); } catch (e) { S = fresh(); } }
+
+/* ============================== EML ============================== */
+function parseElectionId(doc) {
+  const e = one(doc, "ElectionIdentifier"); if (!e) return null;
+  const dom = one(e, "ElectionDomain");
+  return { id: e.getAttribute("Id") || "", name: txt(e, "ElectionName"), category: txt(e, "ElectionCategory").toUpperCase(), sub: txt(e, "ElectionSubcategory"), domain: dom ? dom.textContent.trim() : "", date: txt(e, "ElectionDate") };
+}
+function parseFile(text) {
+  const doc = new DOMParser().parseFromString(text, "application/xml");
+  if (doc.getElementsByTagName("parsererror").length) throw new Error("geen geldige XML");
+  const root = doc.documentElement;
+  if (root.localName !== "EML") throw new Error("geen EML-document");
+  const id = (root.getAttribute("Id") || "").toLowerCase();
+  const base = { election: parseElectionId(doc), created: txt(doc, "CreationDateTime") };
+  if (/^510[bcd]$/.test(id)) return { type: id, ...base, ...parse510(doc) };
+  if (id === "110a") return { type: id, ...base, ...parse110a(doc) };
+  if (id === "230b") return { type: id, ...base, ...parse230b(doc) };
+  if (id === "520") return { type: id, ...base, ...parse520(doc) };
+  if (id === "510a") throw new Error("510a is een stembureau-uitslag; gebruik de 510b, 510c of 510d");
+  if (id === "110b") throw new Error("de 110b (stembureaus) is voor de zetelverdeling niet nodig");
+  throw new Error("EML " + (id || "?") + " wordt hier niet gebruikt");
+}
+function parse510(doc) {
+  const auth = one(doc, "AuthorityIdentifier");
+  const affs = new Map();
+  for (const ct of all(doc, "Contest")) {
+    const tv = kids(ct, "TotalVotes")[0]; if (!tv) continue;
+    let cur = null, nc = 0;
+    const flush = () => { if (cur) { const a = affs.get(cur); a.candMax = Math.max(a.candMax, nc); } };
+    for (const sel of kids(tv, "Selection")) {
+      const ai = kids(sel, "AffiliationIdentifier")[0];
+      const v = parseInt(kids(sel, "ValidVotes")[0]?.textContent || "0", 10) || 0;
+      if (ai) {
+        flush(); cur = ai.getAttribute("Id") || ""; nc = 0;
+        // P 3: lijsten met hetzelfde nummer in verschillende kieskringen tellen als één lijst
+        if (!affs.has(cur)) affs.set(cur, { name: txt(ai, "RegisteredName"), votes: 0, candMax: 0 });
+        affs.get(cur).votes += v;
+      } else if (cur && kids(sel, "Candidate").length) nc++;
+    }
+    flush();
+  }
+  return { authority: auth ? auth.textContent.trim() : "", affs: [...affs].map(([id, a]) => ({ id, nr: listNr(id), ...a })) };
+}
+function parse110a(doc) {
+  const ns = one(doc, "NumberOfSeats") || one(doc, "NumberOfPositions");
+  const seats = ns ? parseInt(ns.textContent, 10) : NaN;
+  const kk = all(doc, "Region").filter(r => (r.getAttribute("RegionCategory") || "").toUpperCase() === "KIESKRING").length;
+  return { seats: Number.isFinite(seats) ? seats : null, kieskringen: kk };
+}
+function candKey(c) {
+  const parts = ["NameLine", "FirstName", "NamePrefix", "LastName", "DateOfBirth", "LocalityName"].map(n => txt(c, n));
+  return parts.join("|").toLowerCase();
+}
+function parse230b(doc) {
+  const affs = new Map();
+  for (const ct of all(doc, "Contest")) for (const a of kids(ct, "Affiliation")) {
+    const ai = one(a, "AffiliationIdentifier"); if (!ai) continue;
+    const id = ai.getAttribute("Id") || "";
+    if (!affs.has(id)) affs.set(id, { name: txt(ai, "RegisteredName"), keys: new Set(), max: 0 });
+    const x = affs.get(id), cs = kids(a, "Candidate");
+    x.max = Math.max(x.max, cs.length);
+    cs.forEach((c, i) => { const k = candKey(c); x.keys.add(k.replace(/\|/g, "") ? k : "pos" + i); });
+  }
+  return { affs: [...affs].map(([id, a]) => ({ id, nr: listNr(id), name: a.name, cands: Math.max(a.keys.size, a.max) })) };
+}
+/* 520: per lijst het aantal kandidaten met Elected = yes */
+function parse520(doc) {
+  const res = new Map(); let any = false;
+  const isYes = el => { const e = kids(el, "Elected")[0]; return e && /^(yes|true|1|ja)$/i.test(e.textContent.trim()); };
+  for (const ct of all(doc, "Contest")) {
+    let cur = null;
+    for (const sel of all(ct, "Selection")) {
+      const ai = kids(sel, "AffiliationIdentifier")[0];
+      if (ai) { cur = ai.getAttribute("Id") || ""; if (!res.has(cur)) res.set(cur, { name: txt(ai, "RegisteredName"), elected: 0 }); continue; }
+      const c = kids(sel, "Candidate")[0]; if (!c) continue;
+      const inner = one(c, "AffiliationIdentifier");
+      const aff = inner ? inner.getAttribute("Id") || "" : cur;
+      if (aff === null) continue;
+      if (!res.has(aff)) res.set(aff, { name: inner ? txt(inner, "RegisteredName") : "", elected: 0 });
+      if (isYes(sel)) { res.get(aff).elected++; any = true; }
+    }
+  }
+  return { affs: [...res].map(([id, a]) => ({ id, nr: listNr(id), ...a })), anyElected: any };
+}
+
+async function addFiles(list, where) {
+  for (const f of [...list]) {
+    const buf = await f.arrayBuffer();
+    const text = new TextDecoder().decode(buf), hash = await sha256hex(buf);
+    let p;
+    try { p = parseFile(text); } catch (e) { toast(f.name + ": " + e.message); continue; }
+    if (where === "520" && p.type !== "520") { toast("Hier hoort de 520 (uitslag met gekozen kandidaten)"); continue; }
+    if (p.type === "520" && !p.anyElected) { toast("In deze 520 staan geen gekozen kandidaten (Elected)"); continue; }
+    const fileRec = { type: p.type, name: f.name, hash, created: p.created, election: p.election, pvDate: "", pvTime: "", pvHash: "" };
+    if (p.created) { const m = p.created.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/); if (m) { fileRec.pvDate = `${m[3]}-${m[2]}-${m[1]}`; fileRec.pvTime = `${m[4]}:${m[5]}`; } }
+    const kind = p.type.startsWith("510") ? "510" : p.type;
+    S.files = S.files.filter(x => (x.type.startsWith("510") ? "510" : x.type) !== kind);
+    S.files.push(fileRec);
+    S.demo = "";
+    if (kind === "510") { S.eml510 = p.affs; S.authority510 = p.authority; }
+    if (kind === "110a") { S.eml110a = p; if (p.seats) S.seats = p.seats; }
+    if (kind === "230b") S.eml230b = p.affs;
+    if (kind === "520") { S.prog.eml = Object.fromEntries(p.affs.map(a => [a.nr, a.elected])); S.prog.emlNames = Object.fromEntries(p.affs.map(a => [a.nr, a.name])); S.prog.src = "eml"; }
+    if (p.election) {
+      S.election = S.election && S.election.id ? S.election : p.election;
+      if (p.election.category && CAT[p.election.category]) { S.category = p.election.category === "GC" ? "BC" : p.election.category; S.kd = null; }
+    }
+    if (kind === "510" || kind === "230b") rebuildFromEml();
+    if (!S.auth && (p.election?.domain || p.authority)) S.auth = p.election?.domain || p.authority || "";
+    toast(`${p.type} ingelezen: ${f.name}`);
+  }
+  S.lots = S.lots || [];
+  update();
+}
+function rebuildFromEml() {
+  const src = S.eml510 || S.eml230b; if (!src) return;
+  const byNr = new Map();
+  if (S.eml510) for (const a of S.eml510) byNr.set(a.nr, { nr: a.nr, name: a.name, votes: a.votes, cands: a.candMax || null, candSrc: a.candMax ? "510" : "" });
+  if (S.eml230b) for (const a of S.eml230b) {
+    const x = byNr.get(a.nr) || (S.eml510 ? null : { nr: a.nr, name: a.name, votes: null, cands: null });
+    if (!x) continue;
+    x.cands = a.cands; x.candSrc = "230b"; if (!x.name) x.name = a.name;
+    byNr.set(a.nr, x);
+  }
+  S.lists = [...byNr.values()].sort((a, b) => a.nr - b.nr);
+  S.emlRef = Object.fromEntries(S.lists.map(l => [l.nr, { name: l.name, votes: l.votes, cands: l.cands }]));
+  S.lots = [];
+}
+
+/* ============================== berekening ============================== */
+const kdOn = () => S.kd === null || S.kd === undefined ? kdDefault(S.category) : !!S.kd;
+function validLists() { return S.lists.filter(l => Number.isFinite(+l.nr) && l.nr !== "" && l.votes !== null && l.votes !== "" && Number.isFinite(+l.votes)); }
+function inputProblems() {
+  const p = [];
+  if (!(S.seats > 0)) p.push("Vul het aantal zetels in.");
+  if (!S.lists.length) p.push("Er zijn nog geen lijsten.");
+  const nrs = S.lists.map(l => +l.nr);
+  if (S.lists.some(l => l.nr === "" || l.nr === null || !Number.isInteger(+l.nr) || +l.nr < 1)) p.push("Elke lijst heeft een lijstnummer nodig.");
+  if (new Set(nrs).size !== nrs.length) p.push("Een lijstnummer komt dubbel voor.");
+  if (S.lists.some(l => l.votes === null || l.votes === "" || !Number.isInteger(+l.votes) || +l.votes < 0)) p.push("Vul bij elke lijst een stemcijfer in (een heel getal vanaf 0).");
+  if (S.lists.length && S.lists.every(l => !(+l.votes > 0))) p.push("Er zijn geen stemmen.");
+  return p;
+}
+function compute() {
+  R = null; Rerr = "";
+  const p = inputProblems();
+  if (p.length) { Rerr = p.join(" "); return; }
+  const input = { seats: +S.seats, kdDrempel: kdOn(), lists: S.lists.map(l => ({ nr: +l.nr, name: l.name, votes: +l.votes, cands: (l.cands === null || l.cands === "" || l.cands === undefined) ? null : +l.cands })), lots: S.lots };
+  try {
+    R = ZV.apportion(input);
+    if (R.badLot) { S.lots = S.lots.slice(0, R.badLot.at); input.lots = S.lots; R = ZV.apportion(input); toast("De ingevoerde loting past niet meer bij deze gegevens en is weggehaald"); }
+  } catch (e) { Rerr = e.message; R = null; }
+}
+const nameOf = nr => (S.lists.find(l => +l.nr === nr) || {}).name || "";
+const lijst = nr => `lijst ${nr}`;
+const candsKnown = () => S.lists.length && S.lists.every(l => l.cands !== null && l.cands !== "" && l.cands !== undefined);
+
+/* ============================== stap 1 ============================== */
+function renderStep1() {
+  const e = S.election;
+  $("fElection").textContent = e ? (e.id || e.name) : "–";
+  const T = S.lists.reduce((a, l) => a + (+l.votes || 0), 0);
+  $("fTotal").textContent = S.lists.length ? nl(T) : "–";
+  $("fLists").textContent = S.lists.length || "–";
+  $("fMethod").textContent = S.seats > 0 ? (S.seats >= 19 ? "Grootste gemiddelden (P 7)" : "Grootste overschotten (P 8)") : "–";
+  if (document.activeElement !== $("seats")) $("seats").value = S.seats ?? "";
+  $("category").value = S.category;
+  $("kdDrempel").checked = kdOn();
+  const ch = [];
+  const f510 = S.files.find(f => f.type.startsWith("510")), f110 = S.files.find(f => f.type === "110a"), f230 = S.files.find(f => f.type === "230b");
+  if (S.demo) ch.push(["info", "Voorbeeldgegevens: " + esc(DEMOS[S.demo]?.label || S.demo) + "."]);
+  if (f510) ch.push(["ok", `Stemcijfers uit de ${esc(f510.type)} (${esc(f510.name)}).`]); else if (!S.demo && S.lists.length) ch.push(["info", "De stemcijfers zijn handmatig ingevoerd."]);
+  if (f110) ch.push([S.eml110a?.seats ? "ok" : "warn", S.eml110a?.seats ? `Aantal zetels uit de 110a: ${S.eml110a.seats}.` : "In de 110a staat geen aantal zetels (kr:NumberOfSeats); vul het zelf in."]);
+  if (S.eml110a?.seats && S.seats && +S.seats !== S.eml110a.seats) ch.push(["warn", `Het aantal zetels (${S.seats}) wijkt af van de 110a (${S.eml110a.seats}).`]);
+  if (f230) ch.push(["ok", `Lijstnamen en kandidaten uit de 230b (${esc(f230.name)}).`]);
+  const ids = [...new Set(S.files.map(f => f.election?.id).filter(Boolean))];
+  if (ids.length > 1) ch.push(["bad", "De bestanden horen niet bij dezelfde verkiezing: " + ids.map(esc).join(", ") + "."]);
+  if (S.lists.length && !candsKnown()) ch.push(["warn", "Niet bij elke lijst is het aantal kandidaten bekend. Lijstuitputting (P 10) wordt dan niet gecontroleerd. Lees de 230b in of vul de kandidaten in."]);
+  else if (S.lists.some(l => l.candSrc === "510")) ch.push(["info", "Het aantal kandidaten komt uit de 510 (de kandidaten met een stemmenregel). Lees de 230b in voor de kandidatenlijsten zelf."]);
+  if (S.category === "EK") ch.push(["warn", "De Eerste Kamer verdeelt de zetels volgens hoofdstuk U met stemwaarden. Deze app volgt P 5 tot en met P 10; controleer de uitkomst ook met het proces-verbaal."]);
+  if (S.category === "TK" || S.category === "EP") ch.push(["info", "Bij deze verkiezing krijgen lijsten onder de kiesdeler geen restzetel (P 7 lid 2)."]);
+  if (S.kd !== null && S.kd !== undefined && S.kd !== kdDefault(S.category)) ch.push(["warn", `De kiesdelerdrempel staat ${S.kd ? "aan" : "uit"}, anders dan gebruikelijk bij deze verkiezing.`]);
+  const ed = editedCells();
+  if (ed.length) ch.push(["warn", `${ed.length} ${ed.length === 1 ? "waarde wijkt" : "waarden wijken"} af van het ingelezen EML-bestand.`]);
+  inputProblems().forEach(p => ch.push(["bad", esc(p)]));
+  $("checks1").innerHTML = ch.map(([c, t]) => `<li class="${c}">${t}</li>`).join("");
+  renderListTable();
+}
+function editedCells() {
+  if (!S.emlRef) return [];
+  const out = [];
+  for (const l of S.lists) {
+    const r = S.emlRef[l.nr];
+    if (!r) { out.push({ nr: l.nr, f: "nieuw" }); continue; }
+    for (const f of ["votes", "cands"]) if (String(r[f] ?? "") !== String(l[f] ?? "")) out.push({ nr: l.nr, f, from: r[f], to: l[f] });
+  }
+  for (const nr of Object.keys(S.emlRef)) if (!S.lists.some(l => String(l.nr) === nr)) out.push({ nr, f: "verwijderd" });
+  return out;
+}
+function renderListTable() {
+  const t = $("listTable");
+  const ed = editedCells();
+  const isEd = (nr, f) => ed.some(x => String(x.nr) === String(nr) && x.f === f);
+  const T = S.lists.reduce((a, l) => a + (+l.votes || 0), 0);
+  const rows = S.lists.map((l, i) => `<tr data-i="${i}">
+    <td class="w-nr"><input type="number" class="num" data-f="nr" min="1" value="${esc(l.nr)}" aria-label="Lijstnummer"></td>
+    <td><input type="text" data-f="name" value="${esc(l.name)}" aria-label="Naam lijst ${esc(l.nr)}"></td>
+    <td class="w-v"><input type="number" class="num${isEd(l.nr, "votes") ? " changed" : ""}" data-f="votes" min="0" value="${esc(l.votes ?? "")}" aria-label="Stemcijfer lijst ${esc(l.nr)}"></td>
+    <td class="w-c"><input type="number" class="num${isEd(l.nr, "cands") ? " changed" : ""}" data-f="cands" min="0" value="${esc(l.cands ?? "")}" placeholder="?" aria-label="Kandidaten lijst ${esc(l.nr)}"></td>
+    <td class="w-x"><button type="button" class="small" data-del="${i}" aria-label="Lijst ${esc(l.nr)} weghalen">✕</button></td></tr>`).join("");
+  const active = document.activeElement && t.contains(document.activeElement) ? [document.activeElement.closest("tr")?.dataset.i, document.activeElement.dataset.f] : null;
+  t.innerHTML = `<thead><tr><th>Lijst</th><th>Naam</th><th class="num">Stemcijfer</th><th class="num">Kandidaten</th><th></th></tr></thead><tbody>${rows || `<tr><td colspan="5" class="hint">Nog geen lijsten. Lees een 510 in, plak uit Excel of voeg een lijst toe.</td></tr>`}</tbody>
+  <tfoot><tr><td></td><td>Totaal</td><td class="num">${nl(T)}</td><td></td><td></td></tr></tfoot>`;
+  if (active && active[0] !== undefined) { const el = t.querySelector(`tr[data-i="${active[0]}"] [data-f="${active[1]}"]`); if (el) { el.focus(); } }
+}
+
+/* ============================== stap 2 ============================== */
+function renderStep2() {
+  const st = $("calcStatus");
+  ["quotaBox", "fullTable", "resBox", "p9Box", "p10Box", "finalTable", "stepLog"].forEach(id => $(id).innerHTML = "");
+  $("lotBox").hidden = true;
+  if (!R) { st.className = "status big bad"; st.innerHTML = "Nog geen berekening mogelijk<small>" + esc(Rerr) + "</small>"; $("resHint").textContent = ""; return; }
+  if (R.status === "lot") { st.className = "status big warn"; st.innerHTML = `Er moet worden geloot<small>Bij een gelijke stand beslist het lot. Voer hieronder de uitkomst van de loting van het centraal stembureau in om verder te rekenen.</small>`; renderLot(); }
+  else if (R.unassigned > 0) { st.className = "status big warn"; st.innerHTML = `${R.seats - R.unassigned} van de ${R.seats} zetels verdeeld<small>${R.unassigned} ${R.unassigned === 1 ? "zetel blijft" : "zetels blijven"} onbezet: geen enkele lijst heeft nog kandidaten zonder zetel.</small>`; }
+  else st.className = "status big ok", st.innerHTML = `${R.fullSeats} volle zetels en ${R.residual} restzetels<small>${R.method === "HA" ? "Restzetels volgens het stelsel van de grootste gemiddelden (P 7), want er zijn 19 of meer zetels." : "Restzetels volgens het stelsel van de grootste overschotten (P 8), want er zijn minder dan 19 zetels."}${R.lotLog.length ? ` Met ${R.lotLog.length === 1 ? "één loting" : R.lotLog.length + " lotingen"}.` : ""}</small>`;
+
+  $("quotaBox").innerHTML = `<div class="quota">${nl(R.T)} : ${nl(R.seats)} = ${ff(R.quota)}<small>Kiesdeler = de som van de stemcijfers gedeeld door het aantal zetels. Als decimaal getal: ${R.quota.num().toLocaleString("nl-NL", { maximumFractionDigits: 4 })}.</small></div>
+    ${R.method === "LR" ? `<p class="hint" style="margin-top:8px">75% van de kiesdeler (drempel voor restzetels, P 8 lid 2): <b>${ff(R.quota.mul(ZV.fr(3, 4)))}</b></p>` : R.kdDrempel ? `<p class="hint" style="margin-top:8px">Restzetels alleen voor lijsten met ten minste de kiesdeler (P 7 lid 2).</p>` : ""}`;
+
+  const init = R.init;
+  $("fullTable").innerHTML = `<thead><tr><th>Lijst</th><th>Naam</th><th class="num">Stemcijfer</th><th class="frac">: kiesdeler</th><th class="num">Volle zetels</th><th class="frac">Overschot</th></tr></thead><tbody>${init.map(s => `<tr${s.votes ? "" : ' class="zero"'}><td class="mono">${s.nr}</td><td>${esc(nameOf(s.nr))}</td><td class="num">${nl(s.votes)}</td><td class="frac">${R.quota.n ? ZV.fr(s.votes).div(R.quota).num().toLocaleString("nl-NL", { minimumFractionDigits: 4, maximumFractionDigits: 4 }) : "–"}</td><td class="num"><b>${s.full}</b></td><td class="frac">${ff(s.remainder)}</td></tr>`).join("")}</tbody>
+  <tfoot><tr><td></td><td>Totaal</td><td class="num">${nl(R.T)}</td><td></td><td class="num">${R.fullSeats}</td><td></td></tr><tr><td></td><td colspan="3">Restzetels: ${R.seats} − ${R.fullSeats} =</td><td class="num">${R.residual}</td><td></td></tr></tfoot>`;
+
+  renderResidual();
+  renderP9P10();
+  renderFinal($("finalTable"));
+  $("stepLog").innerHTML = R.steps.map(s => `<li>${stepText(s)}</li>`).join("") || "<li>Er zijn geen restzetels.</li>";
+}
+function lotText(v) {
+  if (v.type === "AM") return `P 9: lijst ${v.assignTo} heeft de volstrekte meerderheid van de stemmen maar niet van de zetels. De laatste restzetel ging met hetzelfde ${v.base === "LR" ? "overschot" : "gemiddelde"} naar de lijsten ${v.options.join(", ")}. Het lot bepaalt van welke lijst die zetel vervalt.`;
+  const what = v.type === "LR" ? "overschot" : "gemiddelde";
+  return `Restzetel ${v.resNo}${v.seatsAvailable > 1 ? ` (en verder)` : ""}: de lijsten ${v.options.join(", ")} hebben hetzelfde ${v.type === "LR" ? "grootste overschot" : "grootste gemiddelde"} (${ff(v.value)}), maar er ${v.seatsAvailable === 1 ? "is nog 1 restzetel" : "zijn nog " + v.seatsAvailable + " restzetels"} voor ${v.options.length} lijsten. Het lot bepaalt welke lijst de${v.seatsAvailable > 1 ? " eerstvolgende" : ""} zetel krijgt (${v.type === "LR" ? "P 8 lid 1" : "P 7 lid 1"}).`;
+}
+function renderLot() {
+  const v = R.required, box = $("lotBox");
+  box.hidden = false;
+  box.innerHTML = `<h2>Loting nodig</h2><p>${esc(lotText(v))}</p>
+    <p class="hint">Voer de uitkomst in van de loting die het centraal stembureau in de openbare zitting houdt (dezelfde als in de programmatuur). ${v.type === "AM" ? "Kies de lijst waarvan de zetel vervalt." : "Kies de lijst die de zetel krijgt."}</p>
+    <div class="lotopts">${v.options.map(nr => `<button type="button" data-lot="${nr}"><b>${nr}</b><span>${esc(nameOf(nr) || lijst(nr))}</span></button>`).join("")}</div>
+    ${S.lots.length ? `<div class="btns"><button type="button" class="small" id="lotUndo">Vorige loting ongedaan maken</button></div>` : ""}`;
+}
+function stepText(s) {
+  const d = s.drawing ? ` <small>(na loting tussen de lijsten ${s.drawing.options.join(", ")})</small>` : "";
+  const tie = !s.drawing && s.options && s.options.length > 1 ? ` <small>(gelijk met lijst ${s.options.filter(x => x !== s.nr).join(", ")}; genoeg zetels, dus geen loting)</small>` : "";
+  if (s.kind === "LR") return `Restzetel ${s.resNo}: <b>${lijst(s.nr)}</b>, grootste overschot ${ff(s.value)}${d}${tie}`;
+  if (s.kind === "HA") return `Restzetel ${s.resNo}: <b>${lijst(s.nr)}</b>, grootste gemiddelde ${ff(s.value)}${d}${tie}`;
+  if (s.kind === "UHA") return `Restzetel ${s.resNo}: <b>${lijst(s.nr)}</b>, grootste gemiddelde ${ff(s.value)} <small>(P 8 lid 3: hoogstens één zetel per lijst)</small>${d}${tie}`;
+  if (s.kind === "AM") return `P 9: <b>${lijst(s.nr)}</b> heeft de volstrekte meerderheid van de stemmen maar niet van de zetels; de restzetel van ${lijst(s.retracted)} vervalt en gaat naar ${lijst(s.nr)}${s.drawing ? ` <small>(lijst ${s.retracted} aangewezen door loting)</small>` : ""}`;
+  if (s.kind === "EX") return `P 10: ${lijst(s.retracted)} heeft meer zetels dan kandidaten; een ${s.fullSeat ? "volle zetel" : "restzetel"} vervalt en gaat naar een andere lijst`;
+  return s.kind;
+}
+function renderResidual() {
+  const box = $("resBox"), steps = R.steps;
+  $("resTitle").innerHTML = R.method === "HA" ? `3. Restzetels: grootste gemiddelden <span class="art">P 7</span>` : `3. Restzetels: grootste overschotten <span class="art">P 8</span>`;
+  if (!R.residual && !steps.length) { $("resHint").textContent = "Alle zetels zijn volle zetels; er zijn geen restzetels."; return; }
+  let html = "";
+  if (R.method === "LR") {
+    $("resHint").innerHTML = "De restzetels gaan één voor één naar de lijsten met de grootste overschotten. Lijsten met een stemcijfer onder 75% van de kiesdeler doen niet mee. Elke lijst krijgt zo hoogstens één restzetel. Hebben alle lijsten die meedoen een restzetel en zijn er nog zetels over, dan gaan die volgens de grootste gemiddelden, met hoogstens één zetel per lijst (P 8 lid 3).";
+    const lr = steps.filter(s => s.kind === "LR");
+    const order = R.init.filter(s => s.votes > 0).slice().sort((a, b) => b.remainder.cmp(a.remainder) || a.nr - b.nr);
+    html += `<div class="tablewrap" style="max-height:none"><table><thead><tr><th>Lijst</th><th>Naam</th><th class="num">Stemcijfer</th><th>≥ 75% kiesdeler</th><th class="frac">Overschot</th><th class="num">Restzetel</th></tr></thead><tbody>${order.map(s => {
+      const got = lr.filter(x => x.nr === s.nr);
+      return `<tr><td class="mono">${s.nr}</td><td>${esc(nameOf(s.nr))}</td><td class="num">${nl(s.votes)}</td><td class="${s.meetsThr ? "okc" : "na"}">${s.meetsThr ? "ja" : "nee, doet niet mee"}</td><td class="frac">${ff(s.remainder)}</td>${got.length ? `<td class="num hit">${got.map(g => "nr. " + g.resNo).join(", ")}${got.some(g => g.drawing) ? "<small>loting</small>" : ""}</td>` : `<td class="num na">–</td>`}</tr>`;
+    }).join("")}</tbody></table></div>`;
+  } else {
+    $("resHint").innerHTML = `Elke restzetel gaat naar de lijst die met die zetel erbij het grootste gemiddelde aantal stemmen per zetel heeft: stemcijfer gedeeld door (zetels + 1). In elke kolom staat het gemiddelde van die ronde; het gekleurde vak krijgt de zetel.${R.kdDrempel ? " Lijsten onder de kiesdeler doen niet mee (P 7 lid 2)." : ""}`;
+  }
+  const ha = steps.filter(s => s.kind === "HA" || s.kind === "UHA");
+  if (ha.length) {
+    if (R.method === "LR") html += `<h3 style="margin-top:14px">Overige restzetels: grootste gemiddelden, hoogstens één per lijst <span class="art">P 8 lid 3</span></h3>`;
+    const rows = R.init.filter(s => s.votes > 0);
+    const uhaBefore = (s, i) => ha.slice(0, i).some(x => x.kind === "UHA" && x.nr === s.nr);
+    html += `<div class="tablewrap" style="max-height:none"><table><thead><tr><th>Lijst</th><th class="num">Stemcijfer</th>${ha.map(s => `<th class="frac">Rest&shy;zetel ${s.resNo}</th>`).join("")}</tr></thead><tbody>${rows.map(r => `<tr><td class="mono">${r.nr} <span class="hint">${esc(nameOf(r.nr)).slice(0, 26)}</span></td><td class="num">${nl(r.votes)}</td>${ha.map((s, i) => {
+      const b = s.before.find(x => x.nr === r.nr), avg = ZV.fr(r.votes, b.full + b.res + 1);
+      const excl = (s.exhausted || []).includes(r.nr) || (R.kdDrempel && s.kind === "HA" && !r.meetsKd) || (s.kind === "UHA" && uhaBefore(r, i));
+      if (s.nr === r.nr) return `<td class="frac hit">${ff(avg)}${s.drawing ? "<small>loting</small>" : ""}</td>`;
+      return `<td class="frac${excl ? " na" : ""}">${excl ? "–" : ff(avg)}</td>`;
+    }).join("")}</tr>`).join("")}</tbody></table></div>`;
+    const last = ha[ha.length - 1];
+    html += `<p class="hint">Het laagste gemiddelde dat een restzetel kreeg: <b>${ff(last.value)}</b> (${lijst(last.nr)}, restzetel ${last.resNo}). Een streepje betekent dat de lijst in die ronde niet meedoet.</p>`;
+  }
+  box.innerHTML = html;
+}
+function renderP9P10() {
+  const half = ZV.fr(R.T, 2);
+  const ml = R.init.find(s => ZV.fr(s.votes).gt(half));
+  const am = R.steps.find(s => s.kind === "AM");
+  let p9;
+  if (!ml) p9 = `<p>Geen lijst heeft de volstrekte meerderheid (meer dan de helft) van de stemmen. Niet van toepassing.</p>`;
+  else if (am) p9 = `<p class="status warn">Toegepast. ${lijst(ml.nr)} heeft ${nl(ml.votes)} van de ${nl(R.T)} stemmen, maar kreeg eerst niet meer dan de helft van de zetels. De laatst toegewezen restzetel (van ${lijst(am.retracted)}) gaat naar ${lijst(ml.nr)}.</p>`;
+  else if (R.status === "lot") p9 = `<p class="hint">Wordt beoordeeld als de restzetels verdeeld zijn.</p>`;
+  else p9 = `<p>${lijst(ml.nr)} heeft de volstrekte meerderheid van de stemmen en ook meer dan de helft van de zetels. Niet van toepassing.</p>`;
+  $("p9Box").innerHTML = p9;
+  const ex = R.steps.filter(s => s.kind === "EX");
+  let p10;
+  if (!candsKnown()) p10 = `<p class="status warn">Niet gecontroleerd: niet bij elke lijst is het aantal kandidaten bekend.</p>`;
+  else if (ex.length) {
+    const per = {}; ex.forEach(s => per[s.retracted] = (per[s.retracted] || 0) + 1);
+    p10 = `<p class="status warn">Toegepast. ${Object.entries(per).map(([nr, n]) => `${lijst(nr)} heeft ${n} ${n === 1 ? "zetel" : "zetels"} meer dan kandidaten`).join("; ")}. Die zetels gaan door voortgezette toepassing van P 7 of P 8 naar andere lijsten.</p>`;
+  } else p10 = `<p>Geen lijst krijgt meer zetels dan zij kandidaten heeft. Niet van toepassing.</p>`;
+  if (R.unassigned > 0) p10 += `<p class="status bad">${R.unassigned} ${R.unassigned === 1 ? "zetel blijft" : "zetels blijven"} onbezet.</p>`;
+  if (R.warnings.includes("P9P10")) p10 += `<p class="status warn">Zowel P 9 als P 10 is toegepast. Overleg bij twijfel met de Kiesraad.</p>`;
+  $("p10Box").innerHTML = p10;
+}
+function renderFinal(t) {
+  const fin = R.standings;
+  t.innerHTML = `<thead><tr><th>Lijst</th><th>Naam</th><th class="num">Volle</th><th class="num">Rest</th><th class="num">Totaal</th></tr></thead><tbody>${fin.map(s => `<tr${s.total ? "" : ' class="zero"'}><td class="mono">${s.nr}</td><td>${esc(nameOf(s.nr))}</td><td class="num">${s.full}</td><td class="num">${s.res}</td><td class="num"><b>${s.total}</b></td></tr>`).join("")}</tbody>
+  <tfoot><tr><td></td><td>Totaal${R.status === "lot" ? " (voorlopig)" : ""}</td><td class="num">${fin.reduce((a, s) => a + s.full, 0)}</td><td class="num">${fin.reduce((a, s) => a + s.res, 0)}</td><td class="num">${fin.reduce((a, s) => a + s.total, 0)}</td></tr></tfoot>`;
+}
+
+/* ============================== stap 3 ============================== */
+function progValues() {
+  if (S.prog.src === "eml") return S.prog.eml ? Object.fromEntries(Object.entries(S.prog.eml).map(([k, v]) => [k, { total: v }])) : null;
+  const m = S.prog.man || {};
+  const has = Object.values(m).some(v => v && v.total !== "" && v.total !== null && v.total !== undefined);
+  return has ? m : null;
+}
+function compareRes() {
+  if (!R) return { state: "none", rows: [] };
+  const pv = progValues();
+  const eml = S.prog.src === "eml";
+  const nrs = [...new Set([...R.standings.map(s => s.nr), ...(pv ? Object.keys(pv).map(Number) : [])])].sort((a, b) => a - b);
+  const num = x => (x === "" || x === null || x === undefined) ? null : +x;
+  const rows = nrs.map(nr => {
+    const c = R.standings.find(s => s.nr === nr) || null;
+    const p = pv ? pv[nr] : null;
+    // in de 520 staat een lijst zonder gekozen kandidaten soms niet: dat telt als 0
+    const pt = pv ? (p ? num(p.total) : (eml ? 0 : null)) : null;
+    const pf = p ? num(p.full) : null, pr = p ? num(p.res) : null;
+    const missing = !!pv && !eml && pt === null;
+    const dT = !pv || pt === null ? null : c ? pt !== c.total : pt > 0;
+    const dF = !!(c && pf !== null && pf !== c.full), dR = !!(c && pr !== null && pr !== c.res);
+    return { nr, c, pt, pf, pr, dT, dF, dR, missing };
+  });
+  let state;
+  if (!pv) state = "none";
+  else if (R.status === "lot") state = "lot";
+  else if (rows.some(r => r.missing)) state = "incomplete";
+  else state = rows.some(r => r.dT || r.dF || r.dR) ? "diff" : "ok";
+  return { state, rows, pv };
+}
+function renderStep3() {
+  const src = S.prog.src;
+  $("psEml").checked = src === "eml"; $("psMan").checked = src === "manual";
+  $("psEmlBox").hidden = src !== "eml"; $("psManHint").hidden = src !== "manual";
+  const C = compareRes(), t = $("cmpTable");
+  if (!R) { t.innerHTML = `<tbody><tr><td class="hint">Eerst moet de berekening bij stap 2 lukken.</td></tr></tbody>`; }
+  else {
+    const man = src === "manual";
+    const m = S.prog.man || {};
+    const inp = (nr, f) => `<input type="number" class="num" min="0" data-man="${nr}" data-f="${f}" value="${esc(m[nr]?.[f] ?? "")}" aria-label="Programmatuur ${f} lijst ${nr}" style="width:70px">`;
+    t.className = man ? "edit" : "";
+    t.innerHTML = `<thead><tr><th>Lijst</th><th>Naam</th><th class="num">Berekend</th>${man ? `<th class="num">Vol</th><th class="num">Rest</th>` : ""}<th class="num">Programmatuur</th><th class="num">Verschil</th></tr></thead><tbody>${C.rows.map(r => {
+      const calc = r.c ? (man ? `${r.c.total} <span class="hint">(${r.c.full}+${r.c.res})</span>` : r.c.total) : "–";
+      const prog = man ? inp(r.nr, "total") : (C.pv ? r.pt : "–");
+      const d = r.dT === null || !C.pv ? "" : (r.dT || r.dF || r.dR) ? (r.pt !== null && r.c ? (r.pt - r.c.total > 0 ? "+" : "") + (r.pt - r.c.total) : "≠") : "0";
+      const cls = !C.pv || r.dT === null ? "" : (r.dT || r.dF || r.dR) ? "badc" : "okc";
+      return `<tr><td class="mono">${r.nr}</td><td>${esc(nameOf(r.nr) || S.prog.emlNames?.[r.nr] || "")}</td><td class="num">${calc}</td>${man ? `<td>${inp(r.nr, "full")}</td><td>${inp(r.nr, "res")}</td>` : ""}<td class="num">${prog}</td><td class="num ${cls}">${d}${r.dF || r.dR ? " <small>(vol/rest)</small>" : ""}</td></tr>`;
+    }).join("")}</tbody><tfoot><tr><td></td><td>Totaal</td><td class="num">${R.standings.reduce((a, s) => a + s.total, 0)}</td>${man ? "<td></td><td></td>" : ""}<td class="num">${C.pv ? C.rows.reduce((a, r) => a + (+r.pt || 0), 0) : "–"}</td><td></td></tr></tfoot>`;
+  }
+  const v = $("verdict");
+  const V = {
+    none: ["idle", "Nog geen uitkomst van de programmatuur", "Lees de 520 in of tik de zetels per lijst over van het proces-verbaal."],
+    lot: ["warn", "De berekening is nog niet af", "Voer bij stap 2 eerst de uitkomst van de loting in."],
+    incomplete: ["warn", "Nog niet alle lijsten zijn ingevuld", "Vul bij elke lijst het aantal zetels van de programmatuur in (ook 0)."],
+    ok: ["ok", "Ja, de uitkomst is gelijk aan die van de programmatuur", "De berekende zetelverdeling komt per lijst overeen."],
+    diff: ["bad", "Nee, de uitkomst wijkt af van de programmatuur", "Doe nader onderzoek: controleer de stemcijfers en het aantal zetels, en de loting. Leg de uitkomst vast in de toelichting."],
+  }[C.state];
+  if (!R) { v.className = "status big idle"; v.innerHTML = "Eerst rekenen<small>De berekening bij stap 2 is nog niet gelukt.</small>"; }
+  else { v.className = "status big " + V[0]; v.innerHTML = `${V[1]}<small>${V[2]}</small>`; }
+  const ch = [];
+  if (R && R.unassigned > 0) ch.push(["warn", `${R.unassigned} zetel(s) onbezet door lijstuitputting.`]);
+  if (C.state === "diff" && !S.note.trim()) ch.push(["bad", "Bij een verschil is een toelichting nodig."]);
+  if (R && S.prog.src === "eml" && S.prog.eml) { const sum = Object.values(S.prog.eml).reduce((a, b) => a + b, 0); if (sum !== R.seats) ch.push(["warn", `In de 520 zijn ${sum} kandidaten gekozen, terwijl er ${R.seats} zetels zijn.`]); }
+  const ed = editedCells();
+  if (ed.length) ch.push(["warn", `De berekening gebruikt ${ed.length} ${ed.length === 1 ? "waarde die afwijkt" : "waarden die afwijken"} van het EML-bestand; dit komt in het verslag.`]);
+  $("checks3").innerHTML = ch.map(([c, t]) => `<li class="${c}">${t}</li>`).join("");
+  renderKenm();
+  if ($("noteTxt") !== document.activeElement) $("noteTxt").value = S.note;
+  for (const [id, k] of [["authTxt", "auth"], ["placeTxt", "place"], ["chairTxt", "chair"]]) if ($(id) !== document.activeElement) $(id).value = S[k] || "";
+  $("reportView").innerHTML = `<div class="report">${reportBody(C)}</div>`;
+}
+function renderKenm() {
+  const fs = S.files.filter(f => f.type.startsWith("510") || f.type === "520");
+  $("kenmBox").innerHTML = fs.length ? `<h3>Kenmerken van de ingelezen bestanden</h3><p class="hint">De SHA-256 van het bestand is gelijk aan de hashcode in de voettekst van het proces-verbaal. Vergelijk de eerste 8 tekens.</p>` + fs.map((f, i) => {
+    const okh = f.pvHash ? f.hash.startsWith(f.pvHash.replace(/\s+/g, "").toUpperCase()) : null;
+    return `<dl class="kv" style="margin:10px 0 4px"><dt>${esc(f.type)}</dt><dd>${esc(f.name)}</dd><dt>SHA-256</dt><dd class="mono"><b>${esc(hashShort(f.hash))}</b> ${esc(hashGroups(f.hash).slice(10))}</dd></dl>
+    <div class="row"><div class="field narrow" style="flex:0 1 140px"><label>Datum (voettekst)</label><input type="text" data-k="${i}" data-kf="pvDate" value="${esc(f.pvDate)}" placeholder="dd-mm-jjjj"></div>
+    <div class="field narrow" style="flex:0 1 110px"><label>Tijd</label><input type="text" data-k="${i}" data-kf="pvTime" value="${esc(f.pvTime)}" placeholder="uu:mm"></div>
+    <div class="field" style="flex:0 1 200px"><label>Eerste 8 tekens hashcode</label><input type="text" class="mono" data-k="${i}" data-kf="pvHash" value="${esc(f.pvHash)}" placeholder="bijv. 5D6A 46CA" autocomplete="off"></div>
+    <div class="field" style="align-self:center"><span class="rowst ${okh ? "ok" : ""}">${okh === null ? "" : okh ? "✓ gelijk" : "✕ wijkt af"}</span></div></div>`;
+  }).join("") : "";
+}
+const kenmFiles = () => S.files.filter(f => f.type.startsWith("510") || f.type === "520");
+
+/* ============================== verslag ============================== */
+function bijzonderheden() {
+  if (!R) return [];
+  const b = [];
+  if (R.lotLog.length) b.push(`Er is ${R.lotLog.length === 1 ? "één keer" : R.lotLog.length + " keer"} geloot: ` + R.lotLog.map(v => v.type === "AM" ? `bij P 9 tussen de lijsten ${v.options.join(", ")}, getrokken lijst ${v.drawn} (zetel vervalt)` : `voor restzetel ${v.resNo} tussen de lijsten ${v.options.join(", ")}, getrokken lijst ${v.drawn}`).join("; ") + ".");
+  const am = R.steps.find(s => s.kind === "AM"); if (am) b.push(`Artikel P 9 is toegepast: de restzetel van lijst ${am.retracted} is toegewezen aan lijst ${am.nr}.`);
+  const ex = R.steps.filter(s => s.kind === "EX"); if (ex.length) b.push(`Artikel P 10 (lijstuitputting) is toegepast bij lijst ${[...new Set(ex.map(s => s.retracted))].join(", ")}.`);
+  if (R.unassigned) b.push(`${R.unassigned} zetel(s) blijven onbezet.`);
+  if (R.kdDrempel) b.push("Lijsten met een stemcijfer onder de kiesdeler kwamen niet in aanmerking voor restzetels (P 7 lid 2).");
+  if (!candsKnown()) b.push("Lijstuitputting (P 10) is niet gecontroleerd: niet bij elke lijst was het aantal kandidaten bekend.");
+  const ed = editedCells(); if (ed.length) b.push("Afwijkend van het EML-bestand ingevoerd: " + ed.map(x => x.f === "nieuw" ? `lijst ${x.nr} toegevoegd` : x.f === "verwijderd" ? `lijst ${x.nr} weggehaald` : `lijst ${x.nr} ${x.f === "votes" ? "stemcijfer" : "kandidaten"} ${x.from ?? "leeg"} → ${x.to ?? "leeg"}`).join("; ") + ".");
+  return b;
+}
+function reportBody(C) {
+  const e = S.election || {}, now = new Date().toLocaleString("nl-NL", { dateStyle: "long", timeStyle: "short" });
+  const box = on => `<span class="box">${on ? "✕" : ""}</span>`;
+  const src = S.files.find(f => f.type.startsWith("510"));
+  const fin = R ? R.standings : [];
+  const progCol = C.pv ? `<th class="num">Programmatuur</th>` : "";
+  const table = R ? `<table><thead><tr><th>Lijst</th><th>Naam</th><th class="num">Stemcijfer</th><th class="num">Volle zetels</th><th class="num">Restzetels</th><th class="num">Totaal</th>${progCol}</tr></thead><tbody>${fin.map(s => { const r = C.rows.find(x => x.nr === s.nr); return `<tr><td>${s.nr}</td><td>${esc(nameOf(s.nr))}</td><td class="num">${nl(R.init.find(x => x.nr === s.nr).votes)}</td><td class="num">${s.full}</td><td class="num">${s.res}</td><td class="num"><b>${s.total}</b></td>${C.pv ? `<td class="num">${r && r.pt !== null ? r.pt : "–"}</td>` : ""}</tr>`; }).join("")}</tbody><tfoot><tr><td></td><td>Totaal</td><td class="num">${nl(R.T)}</td><td class="num">${R.standings.reduce((a, s) => a + s.full, 0)}</td><td class="num">${R.standings.reduce((a, s) => a + s.res, 0)}</td><td class="num">${R.standings.reduce((a, s) => a + s.total, 0)}</td>${C.pv ? `<td class="num">${C.rows.reduce((a, r) => a + (+r.pt || 0), 0)}</td>` : ""}</tr></tfoot></table>` : `<p class="meta">Nog geen berekening.</p>`;
+  const kenm = kenmFiles().map(f => `<tr><td>${esc(f.type)}</td><td>${esc(f.name)}</td><td>${esc(f.pvDate || "–")} ${esc(f.pvTime || "")}</td><td><b>${esc(hashShort(f.hash))}</b>${f.pvHash ? (f.hash.startsWith(f.pvHash.replace(/\s+/g, "").toUpperCase()) ? " (gelijk aan de voettekst)" : " (<b>wijkt af van de voettekst</b>)") : ""}</td></tr>`).join("");
+  const b = bijzonderheden();
+  const lastHA = R ? [...R.steps].reverse().find(s => s.kind === "HA" || s.kind === "UHA") : null;
+  return `<h1>Verslag controleprotocol centraal stembureau – onderdeel B: controle zetelverdeling</h1>
+<p class="meta">${esc(e.name || e.id || "Verkiezing")}${e.date ? " · " + esc(e.date) : ""}${S.auth ? " · centraal stembureau " + esc(S.auth) : ""}</p>
+<h2>Berekening</h2>
+<p>Het centraal stembureau heeft de zetelverdeling zelf berekend volgens artikel P 5 tot en met P 10 van de Kieswet: eerst de volle zetels, daarna de restzetels${R ? (R.method === "HA" ? " volgens het stelsel van de grootste gemiddelden (19 of meer zetels)" : " volgens het stelsel van de grootste overschotten (minder dan 19 zetels)") : ""}.${src ? ` De stemcijfers komen uit ${esc(src.type)} (${esc(src.name)}).` : " De stemcijfers zijn ingevoerd vanaf het proces-verbaal."}</p>
+${R ? `<p>Totaal stemcijfers ${nl(R.T)} : ${R.seats} zetels = kiesdeler <b>${ff(R.quota)}</b>. Volle zetels: ${R.fullSeats}. Restzetels: ${R.residual}.${lastHA ? ` Laagste gemiddelde met een restzetel: ${ff(lastHA.value)}.` : ""}</p>` : ""}
+${table}
+${b.length ? `<h2>Bijzonderheden</h2><ul>${b.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+<h2>Is de uitkomst van de berekening gelijk aan de uitkomst van de programmatuur?</h2>
+<p>${box(C.state === "ok")} Ja.</p>
+<p>${box(C.state === "diff")} Nee. Toelichting op het nader onderzoek:</p>
+<div class="note">${esc(S.note) || "&nbsp;"}</div>
+${C.state !== "ok" && C.state !== "diff" ? `<p class="verdict warn">De vergelijking is nog niet afgerond.</p>` : ""}
+${kenm ? `<h2>Kenmerken van de gebruikte bestanden</h2><table><thead><tr><th>Soort</th><th>Bestand</th><th>Datum en tijd</th><th>Hashcode (eerste 8)</th></tr></thead><tbody>${kenm}</tbody></table>` : ""}
+<p class="meta" style="margin-top:18px">${S.place ? esc(S.place) + ", " : ""}${esc(now)}${S.chair ? " · voorzitter: " + esc(S.chair) : ""}</p>
+<p class="meta">Gemaakt met de app Controle zetelverdeling. Dit verslag is een hulpmiddel; het formulier Verslag controleprotocol CSB van de Kiesraad is leidend.</p>`;
+}
+function reportHtml() {
+  const css = `body{font:14px/1.5 "IBM Plex Sans",system-ui,sans-serif;color:#17202b;max-width:860px;margin:32px auto;padding:0 24px}h1{font:600 22px/1.2 "IBM Plex Sans Condensed","Arial Narrow",sans-serif}h2{font:600 16px/1.25 "IBM Plex Sans Condensed","Arial Narrow",sans-serif;margin:20px 0 6px}table{border-collapse:collapse;width:100%;font-size:13.5px}th,td{border-bottom:1px solid #d9ddd8;padding:5px 8px;text-align:left}.num{text-align:right;font-variant-numeric:tabular-nums}.meta{color:#5b6673}.box{border:1px solid #17202b;display:inline-block;width:13px;height:13px;vertical-align:-2px;margin-right:6px;text-align:center;font:700 11px/12px monospace}.note{white-space:pre-wrap;border:1px solid #d9ddd8;border-radius:4px;padding:8px 10px;min-height:40px}.verdict{padding:10px 12px;border-radius:4px;font-weight:600}.verdict.warn{background:#fdf0dc;color:#a15c00}`;
+  return `<!DOCTYPE html><html lang="nl"><head><meta charset="utf-8"><title>Verslag controle zetelverdeling ${esc(S.auth || "")}</title><style>${css}</style></head><body>${reportBody(compareRes())}</body></html>`;
+}
+function reportText() {
+  const C = compareRes();
+  const lines = ["Controle zetelverdeling (Verslag controleprotocol CSB, onderdeel B)", ""];
+  if (R) lines.push(`Kiesdeler: ${nl(R.T)} : ${R.seats} = ${ff(R.quota)}. Volle zetels ${R.fullSeats}, restzetels ${R.residual} (${R.method === "HA" ? "grootste gemiddelden" : "grootste overschotten"}).`);
+  lines.push("Is de uitkomst gelijk aan die van de programmatuur? " + (C.state === "ok" ? "Ja." : C.state === "diff" ? "Nee." : "Nog niet vergeleken."));
+  if (R) lines.push("", ...R.standings.map(s => `Lijst ${s.nr} ${nameOf(s.nr)}: ${s.total} (${s.full} vol + ${s.res} rest)`));
+  const b = bijzonderheden(); if (b.length) lines.push("", ...b);
+  if (S.note.trim()) lines.push("", "Toelichting: " + S.note.trim());
+  return lines.join("\n");
+}
+let DL = null;
+try { if (window.claude && window.claude.use) window.claude.use("downloads").then(d => { DL = d; }).catch(() => {}); } catch (e) { /* geen platform */ }
+async function download(name, data, type) {
+  if (DL) {
+    try { await DL.save({ filename: name, data }); toast("Opgeslagen: " + name); }
+    catch (e) { const c = e && e.code; toast(c === "declined" ? "Opslaan geannuleerd" : c === "rate_limited" ? "Er staat al een vraag open; probeer het zo opnieuw" : "Opslaan lukt hier niet. Gebruik ‘Tekst kopiëren’."); }
+    return;
+  }
+  const blob = new Blob([data], { type }); const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+function csv() {
+  if (!R) return "";
+  const q = v => /[;"\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : String(v);
+  const rows = [["Lijst", "Naam", "Stemcijfer", "Volle zetels", "Overschot", "Restzetels", "Totaal"]];
+  for (const s of R.standings) { const i = R.init.find(x => x.nr === s.nr); rows.push([s.nr, nameOf(s.nr), i.votes, s.full, ff(i.remainder), s.res, s.total]); }
+  rows.push([], ["Kiesdeler", ff(R.quota)], ["Zetels", R.seats], [], ["Stappen"]);
+  R.steps.forEach(s => rows.push([stepText(s).replace(/<[^>]+>/g, "")]));
+  return "﻿" + rows.map(r => r.map(q).join(";")).join("\r\n");
+}
+
+/* ============================== voorbeelden ============================== */
+const BOSCH = [["GROENLINKS / Partij van de Arbeid", 11313], ["D66", 11987], ["VVD", 5889], ["Rosmalens Belang", 5377], ["CDA", 4642], ["De Bossche Groenen", 4734], ["Leefbaar 's-Hertogenbosch", 5814], ["SP (Socialistische Partij)", 2605], ["Partij voor de Dieren", 1570], ["Volt", 1115], ["RAADSGROEPERING \"BOSCH-BELANG\"", 651], ["gewoon ge-DREVEN", 2144], ["PVV (Partij voor de Vrijheid)", 2455], ["VOOR Den Bosch Joep Gersjes", 1155], ["50PLUS", 1769], ["Forum voor Democratie", 2689], ["Keerpunt Alliantie '26 (Knillis)", 86], ["Senioren 's-Hertogenbosch", 751]];
+const BOSCH_PROG = [8, 8, 4, 3, 3, 3, 4, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0];
+const DEMOS = {
+  bosch: { label: "'s-Hertogenbosch GR26, ingevulde controlesheet van de Kiesraad", seats: 39, cat: "GR", lists: BOSCH.map(([n, v], i) => [n, v, null]), prog: BOSCH_PROG, auth: "'s-Hertogenbosch", election: { id: "GR2026_'s-Hertogenbosch", name: "Gemeenteraad 's-Hertogenbosch 2026", date: "2026-03-18" } },
+  klein: { label: "fictieve gemeente met 13 zetels", seats: 13, cat: "GR", lists: [["Dorpsbelang", 2915, 20], ["CDA", 2104, 18], ["VVD", 1650, 15], ["PvdA", 980, 12], ["GroenLinks", 640, 10], ["Lokaal Nu", 410, 6]] },
+  lid3: { label: "fictieve gemeente met 9 zetels waar P 8 lid 3 nodig is", seats: 9, cat: "GR", lists: [["Gemeentebelangen", 4780, 15], ["CDA", 400, 8], ["VVD", 370, 8], ["D66", 310, 6], ["Groen Lokaal", 300, 6]] },
+  uitput: { label: "fictieve gemeente met 23 zetels; lijst 2 heeft te weinig kandidaten", seats: 23, cat: "GR", lists: [["Stadspartij", 7000, 30], ["Nieuw Lokaal", 4400, 4], ["CDA", 2300, 25], ["VVD", 1700, 25], ["SP", 600, 12]] },
+  lot: { label: "fictieve gemeente met 19 zetels en een gelijke stand", seats: 19, cat: "GR", lists: [["Lokaal Belang", 5000, 30], ["CDA", 3400, 25], ["VVD", 1400, 25], ["D66", 1700, 25], ["PvdA", 800, 20]] },
+  p9: { label: "gemeente met 15 zetels waar P 9 geldt (geval uit GR2022, uit de tests van Abacus)", seats: 15, cat: "GR", lists: [["Grote Partij", 2571, 30], ["Partij B", 977, 15], ["Partij C", 567, 15], ["Partij D", 536, 15], ["Partij E", 453, 15]] },
+};
+function loadDemo(k) {
+  const d = DEMOS[k]; if (!d) return;
+  S = fresh(); S.demo = k; S.seats = d.seats; S.category = d.cat; S.election = d.election || { id: "Voorbeeld", name: d.label };
+  S.lists = d.lists.map(([name, votes, cands], i) => ({ nr: i + 1, name, votes, cands }));
+  S.auth = d.auth || "";
+  if (d.prog) { S.prog.src = "manual"; S.prog.man = Object.fromEntries(d.prog.map((v, i) => [i + 1, { total: v }])); }
+  S.step = 2; update(); toast("Voorbeeld geladen: " + d.label);
+}
+
+/* ============================== UI ============================== */
+function goto(n) { S.step = n; update(); scrollTo({ top: 0 }); }
+function update() {
+  compute();
+  document.querySelectorAll("[data-pane]").forEach(p => p.hidden = +p.dataset.pane !== S.step);
+  document.querySelectorAll("nav.steps button").forEach(b => +b.dataset.step === S.step ? b.setAttribute("aria-current", "step") : b.removeAttribute("aria-current"));
+  const b1 = $("b1"), b2 = $("b2"), b3 = $("b3");
+  const p = inputProblems();
+  b1.className = "badge " + (p.length ? (S.lists.length ? "warn" : "") : "ok"); b1.textContent = p.length ? (S.lists.length ? "onvolledig" : "–") : `${S.lists.length} lijsten`;
+  b2.className = "badge " + (!R ? "" : R.status === "lot" ? "warn" : "ok"); b2.textContent = !R ? "–" : R.status === "lot" ? "loting" : `${R.seats} zetels`;
+  const C = compareRes();
+  b3.className = "badge " + ({ ok: "ok", diff: "bad", lot: "warn", incomplete: "warn" }[C.state] || ""); b3.textContent = { ok: "gelijk", diff: "verschil", lot: "loting", incomplete: "onvolledig" }[C.state] || "–";
+  if (S.step === 1) renderStep1();
+  if (S.step === 2) renderStep2();
+  if (S.step === 3) renderStep3();
+  $("loaded").innerHTML = S.files.map(f => `<span class="chip on" title="SHA-256 ${esc(f.hash)}"><span>${esc(f.type)} · ${esc(f.name)}</span><span>${esc(hashShort(f.hash))}</span></span>`).join("");
+  saveLocal();
+}
+function bind() {
+  document.querySelectorAll("nav.steps button").forEach(b => b.onclick = () => goto(+b.dataset.step));
+  document.querySelectorAll("[data-goto]").forEach(b => b.onclick = () => goto(+b.dataset.goto));
+  $("openBtn").onclick = () => $("openFile").click();
+  $("openFile").onchange = e => { addFiles(e.target.files, "struct"); e.target.value = ""; };
+  $("btn520").onclick = () => $("file520").click();
+  $("file520").onchange = e => { addFiles(e.target.files, "520"); e.target.value = ""; };
+  for (const [id, where] of [["drop", "struct"], ["drop520", "520"]]) {
+    const d = $(id);
+    d.ondragover = e => { e.preventDefault(); d.classList.add("over"); };
+    d.ondragleave = () => d.classList.remove("over");
+    d.ondrop = e => { e.preventDefault(); d.classList.remove("over"); addFiles(e.dataTransfer.files, where); };
+  }
+  $("seats").oninput = e => { S.seats = e.target.value === "" ? null : +e.target.value; S.lots = []; update(); };
+  $("category").onchange = e => { S.category = e.target.value; S.kd = null; S.lots = []; update(); };
+  $("kdDrempel").onchange = e => { S.kd = e.target.checked; S.lots = []; update(); };
+  const lt = $("listTable");
+  lt.addEventListener("change", e => {
+    const tr = e.target.closest("tr[data-i]"); if (!tr || !e.target.dataset.f) return;
+    const l = S.lists[+tr.dataset.i], f = e.target.dataset.f, v = e.target.value;
+    l[f] = f === "name" ? v : (v === "" ? null : +v);
+    S.lots = []; update();
+  });
+  lt.addEventListener("click", e => { const b = e.target.closest("[data-del]"); if (!b) return; S.lists.splice(+b.dataset.del, 1); S.lots = []; update(); });
+  $("addList").onclick = () => { const nr = S.lists.reduce((a, l) => Math.max(a, +l.nr || 0), 0) + 1; S.lists.push({ nr, name: "", votes: null, cands: null }); update(); const r = lt.querySelector(`tr[data-i="${S.lists.length - 1}"] [data-f="name"]`); r && r.focus(); };
+  armed($("clearLists"), "Zeker? Klik nogmaals", () => { S.lists = []; S.emlRef = null; S.lots = []; update(); });
+  $("pasteToggle").onclick = () => { $("pasteBox").hidden = !$("pasteBox").hidden; };
+  $("pasteApply").onclick = () => {
+    const out = [];
+    for (const line of $("pasteArea").value.split(/\r?\n/)) {
+      if (!line.trim()) continue;
+      const parts = line.split(/\t|;/).map(s => s.trim()).filter((s, i, a) => s !== "" || i < a.length - 1);
+      const nr = parseInt(parts[0], 10); if (!Number.isFinite(nr)) continue;
+      const nums = parts.slice(1).map(s => s.replace(/\./g, "")).map(s => /^\d+$/.test(s) ? +s : null);
+      const name = parts.slice(1).find((s, i) => nums[i] === null) || "";
+      const ns = nums.filter(x => x !== null);
+      // uit de Kiesraad-sheet (C..H): naam, totaal, volle, rest, (leeg), stemmen -> neem het laatste getal als stemcijfer
+      const votes = ns.length ? (parts.length >= 6 ? ns[ns.length - 1] : ns[0]) : null;
+      const cands = parts.length < 6 && ns.length > 1 ? ns[1] : null;
+      out.push({ nr, name, votes, cands });
+    }
+    if (!out.length) return toast("Geen lijsten herkend");
+    S.lists = out; S.lots = []; $("pasteBox").hidden = true; update(); toast(out.length + " lijsten overgenomen");
+  };
+  $("lotBox").addEventListener("click", e => {
+    const b = e.target.closest("[data-lot]"); if (b) { S.lots.push(+b.dataset.lot); update(); return; }
+    if (e.target.id === "lotUndo") { S.lots.pop(); update(); }
+  });
+  $("psEml").onchange = () => { S.prog.src = "eml"; update(); };
+  $("psMan").onchange = () => { S.prog.src = "manual"; update(); };
+  $("cmpTable").addEventListener("change", e => {
+    const nr = e.target.dataset.man; if (!nr) return;
+    S.prog.man[nr] = S.prog.man[nr] || {}; S.prog.man[nr][e.target.dataset.f] = e.target.value === "" ? null : +e.target.value; update();
+  });
+  $("kenmBox").addEventListener("change", e => { const i = e.target.dataset.k; if (i === undefined) return; kenmFiles()[+i][e.target.dataset.kf] = e.target.value.trim(); update(); });
+  $("noteTxt").oninput = e => { S.note = e.target.value; saveLocal(); $("reportView").innerHTML = `<div class="report">${reportBody(compareRes())}</div>`; };
+  for (const [id, k] of [["authTxt", "auth"], ["placeTxt", "place"], ["chairTxt", "chair"]]) $(id).oninput = e => { S[k] = e.target.value; saveLocal(); $("reportView").innerHTML = `<div class="report">${reportBody(compareRes())}</div>`; };
+  $("noteTxt").onchange = () => update();
+  $("dlReport").onclick = () => download(`Verslag_controle_zetelverdeling_${safe(S.auth || S.election?.id || "CSB")}.html`, reportHtml(), "text/html");
+  $("copyTxt").onclick = async () => { try { await navigator.clipboard.writeText(reportText()); toast("Tekst gekopieerd"); } catch (e) { toast("Kopiëren lukt niet in deze omgeving"); } };
+  $("dlCsv").onclick = () => R ? download(`Zetelverdeling_${safe(S.auth || "berekening")}.csv`, csv(), "text/csv") : toast("Nog geen berekening");
+  $("sessSave").onclick = () => download(`zetelverdeling_${safe(S.auth || "sessie")}.json`, JSON.stringify({ format: "zetelverdeling/1", saved: new Date().toISOString(), S }, null, 1), "application/json");
+  $("sessLoad").onclick = () => $("sessFile").click();
+  $("sessFile").onchange = async e => {
+    const f = e.target.files[0]; e.target.value = ""; if (!f) return;
+    try { const j = JSON.parse(await f.text()); if (j.format !== "zetelverdeling/1") throw new Error("onbekend formaat"); S = Object.assign(fresh(), j.S); update(); toast("Sessie geladen"); }
+    catch (err) { toast("Dit is geen sessie van deze app: " + err.message); }
+  };
+  $("demoSel").onchange = e => { const k = e.target.value; e.target.value = ""; if (k) loadDemo(k); };
+  armed($("resetBtn"), "Zeker? Klik nogmaals", () => { S = fresh(); update(); });
+}
+loadLocal();
+bind();
+update();
+</script>
+</body>
+</html>
