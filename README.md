@@ -43,4 +43,4 @@ Settings → Pages → *Deploy from a branch* → `main` en map `/ (root)` → S
 
 ## Licentie
 
-[EUPL-1.2](https://interoperable-europe.ec.europa.eu/collection/eupl/eupl-text-eupl-12), dezelfde licentie als Abacus.
+[EUPL-1.2](LICENSE), dezelfde licentie als Abacus.
