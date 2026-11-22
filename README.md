@@ -1,6 +1,8 @@
 # EML-hulpmiddelen
 
-Hulpmiddelen om testbestanden te maken en te controleren volgens de **EML_NL-standaard** van de Kiesraad: van verkiezingsdefinitie tot proces-verbaal. Elke app is één HTML-bestand dat helemaal in de browser draait. Er gaat niets naar een server.
+Hulpmiddelen om testbestanden te maken en te controleren volgens de **EML_NL-standaard** van de Kiesraad: van verkiezingsdefinitie tot proces-verbaal. **Direct gebruiken: <https://bonzo261.github.io/EML-hulpmiddelen/>**
+
+Elke app is één HTML-bestand dat helemaal in de browser draait. Er gaat niets naar een server.
 
 > **Niet verbonden aan de Kiesraad.** Dit is een onafhankelijk hobbyproject. Het is niet gemaakt, gecontroleerd of goedgekeurd door de Kiesraad. Gebruik het alleen voor test en oefening, met fictieve gegevens. Controleer bestanden altijd tegen de officiële XSD's en modellen.
 
@@ -24,7 +26,7 @@ De volgorde waarin je de apps meestal gebruikt: **110a → 110b → 230b → 510
 
 ## Gebruiken
 
-- **Online:** via GitHub Pages (zie hieronder).
+- **Online:** <https://bonzo261.github.io/EML-hulpmiddelen/>
 - **Lokaal:** download de repository en open `index.html` in de browser. Voor de PV-generator moet `pv-fonts.js` in dezelfde map staan.
 
 Externe afhankelijkheden, geladen vanaf een CDN (daarvoor is internet nodig):
@@ -33,10 +35,6 @@ Externe afhankelijkheden, geladen vanaf een CDN (daarvoor is internet nodig):
 - [pdfmake](http://pdfmake.org/) en [JSZip](https://stuk.github.io/jszip/) voor de PV-generator (van jsDelivr, met unpkg en cdnjs als reserve)
 
 Sommige apps bewaren hun werk in `localStorage` van je browser. De Uitslagen-generator bewaart daar ook de testsleutels voor ondertekening. Die sleutels verlaten je browser alleen als je ze zelf exporteert. **Zet geëxporteerde sleutelbestanden (.json) nooit in deze repository.**
-
-## GitHub Pages aanzetten
-
-Settings → Pages → *Deploy from a branch* → `main` en map `/ (root)` → Save. Na een minuut staat de site op `https://bonzo261.github.io/EML-hulpmiddelen/`.
 
 ## Bronnen en dank
 

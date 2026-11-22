@@ -2,6 +2,9 @@
 
 Wat er per update is veranderd, nieuwste bovenaan. De precieze verschillen per bestand staan in de [commitgeschiedenis](https://github.com/Bonzo261/EML-hulpmiddelen/commits/main).
 
+## 22-11-2026 (nacht): link naar de website
+- De site staat online op <https://bonzo261.github.io/EML-hulpmiddelen/>. De README verwijst daar nu naar, in plaats van uit te leggen hoe GitHub Pages aangezet moet worden.
+
 ## 22-11-2026 (laat): controle zetelverdeling en controleprotocol GR26
 
 ### Nieuw: Controle zetelverdeling (`zetelverdeling.html`)
