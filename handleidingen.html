@@ -564,12 +564,14 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
       <li><span class="ui">Alle stembureaus als zip</span>: bij een model per stembureau krijg je één PDF per stembureau in een zip.</li>
       <li><span class="ui">Opnieuw opmaken</span> maakt de PDF opnieuw, bijvoorbeeld na het wijzigen van gegevens.</li>
     </ul>
-    <p>De PDF wordt in je browser gemaakt; er gaat niets naar een server.</p>
+    <p>De PDF wordt in je browser gemaakt; er gaat niets naar een server. Daarvoor laadt de app eerst de PDF-bibliotheek van internet (jsDelivr, met unpkg en cdnjs als reserve). Lukt het laden niet, of duurt het opmaken langer dan 90 seconden, dan stopt de app en zie je een foutmelding.</p>
 
     <h3 id="pv-faq">7. Vragen en problemen</h3>
     <details><summary>De knop Download PDF blijft grijs.</summary><p>Kies eerst een model en laad de bestanden die bij vraag 2 als ontbrekend staan.</p></details>
     <details><summary>Ik vind het model dat ik zoek niet.</summary><p>Zet het filter op <em>Alle</em> en vink <em>Alleen modellen die ik kan vullen</em> uit. Kijk ook onder <em>Andere soorten verkiezing</em>.</p></details>
     <details><summary>Waar haal ik een 510b of 520 vandaan?</summary><p>Een 510b, 510c of 510d maak je met de Uitslagen-generator, of je haalt hem uit Abacus. Een 520 en 510r komen uit Abacus.</p></details>
+    <details><summary>Ik krijg een melding dat de PDF-bibliotheek niet kon worden geladen.</summary><p>De app kon de bibliotheek niet ophalen bij jsDelivr, unpkg of cdnjs. Controleer je internetverbinding, of vraag na of een netwerkfilter (bijvoorbeeld op een gemeentelijk netwerk) deze adressen blokkeert. Probeer het daarna opnieuw.</p></details>
+    <details><summary>Ik krijg de melding dat het opmaken te lang duurde.</summary><p>Na 90 seconden stopt de app. Probeer het opnieuw of kies een ander model. Blijft het gebeuren, controleer dan of de geladen EML-bestanden bij dezelfde verkiezing horen.</p></details>
     <details><summary>De app meldt dat er geloot moet worden.</summary><p>De app kan niet loten. Ze kiest de eerste lijst of kandidaat en meldt dat. Pas de zetelverdeling in het PV met de hand aan na de loting.</p></details>
 
     <h3 id="pv-beperk">8. Bekende beperkingen</h3>
@@ -579,6 +581,7 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
       <li>De app kan niet loten. Bij gelijke restzetels of gelijke voorkeurstemmen kiest ze de eerste en meldt dat.</li>
       <li>Bij de gekozen kandidaten houdt de app geen rekening met bijvoorbeeld overleden kandidaten. Verschillen met de 520 worden gemeld.</li>
       <li>P 22-2 is alleen voor de gemeenteraad en het waterschap.</li>
+      <li>Voor het maken van de PDF is internet nodig: de PDF- en zip-bibliotheek worden van jsDelivr, unpkg of cdnjs geladen.</li>
     </ul>
   </article>
 </div>

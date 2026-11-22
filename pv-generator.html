@@ -194,9 +194,27 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
 </footer>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.20/pdfmake.min.js"></script>
-<script>if(!window.pdfMake)document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/pdfmake.min.js"><\/script>')</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+window.__libs = (function () {
+  function load(urls) {
+    return new Promise(function (res, rej) {
+      var i = 0;
+      (function next() {
+        if (i >= urls.length) return rej(new Error("niet geladen"));
+        var s = document.createElement("script"); s.src = urls[i++];
+        s.onload = function () { res(s.src); };
+        s.onerror = function () { s.remove(); next(); };
+        document.head.appendChild(s);
+      })();
+    });
+  }
+  var pdf = load(["https://cdn.jsdelivr.net/npm/pdfmake@0.2.20/build/pdfmake.min.js", "https://unpkg.com/pdfmake@0.2.20/build/pdfmake.min.js", "https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/pdfmake.min.js"]);
+  var zip = load(["https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js", "https://unpkg.com/jszip@3.10.1/dist/jszip.min.js", "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"]);
+  pdf.catch(function () {}); zip.catch(function () {});
+  return { pdf: pdf, zip: zip };
+})();
+</script>
+
 <script src="pv-fonts.js"></script>
 <script>
 /* ==================================================================
@@ -2313,9 +2331,21 @@ const $ = id => document.getElementById(id);
 const h = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("show"), 3200); }
 
-if (!window.pdfMake) window.pdfMake = { createPdf() { throw new Error("de PDF-bibliotheek kon niet worden geladen (geen internet?)"); } };
-pdfMake.vfs = window.PV_VFS;
-pdfMake.fonts = {
+/* bibliotheken: lokaal (test) of via een CDN-lader met reserve-adressen */
+let pdfReady = null;
+function ensurePdf() {
+  if (!pdfReady) pdfReady = (window.__libs ? window.__libs.pdf.catch(() => {}) : Promise.resolve()).then(() => {
+    if (!window.pdfMake) { pdfReady = null; throw new Error("de PDF-bibliotheek kon niet worden geladen van jsDelivr, unpkg of cdnjs. Controleer je internetverbinding of netwerkfilter en probeer het opnieuw."); }
+    pdfMake.vfs = window.PV_VFS;
+    pdfMake.fonts = PDF_FONTS;
+  });
+  return pdfReady;
+}
+async function ensureZip() {
+  if (window.__libs) { try { await window.__libs.zip; } catch (e) {} }
+  if (!window.JSZip) throw new Error("de zip-bibliotheek kon niet worden geladen");
+}
+const PDF_FONTS = {
   DMSans: { normal: "DMSans-Regular.ttf", bold: "DMSans-Bold.ttf", italics: "DMSans-Italic.ttf", bolditalics: "DMSans-BoldItalic.ttf" },
   Geist: { normal: "GeistMono-Regular.otf", bold: "GeistMono-Regular.otf", italics: "GeistMono-Regular.otf", bolditalics: "GeistMono-Regular.otf" }
 };
@@ -2544,7 +2574,21 @@ function fileName(m, ctx) {
   return `Model_${m.code.replace(/\s+/g, "_")}${part}${place ? "_" + place : ""}_${(ctx.el.id || "verkiezing").replace(/[^\w-]+/g, "")}${S.opts.fill ? "_TEST" : ""}.pdf`;
 }
 /* Eén PDF maken (twee rondes: eerst paginanummers van de delen bepalen voor de kopregel) */
-function makePdf(m, opts) {
+async function makePdf(m, opts) {
+  await ensurePdf();
+  return withTimeout(makePdfInner(m, opts), 90000);
+}
+function withTimeout(p, ms) {
+  return new Promise((resolve, reject) => {
+    const t = setTimeout(() => reject(new Error("het opmaken duurde te lang (meer dan " + ms / 1000 + " seconden). Probeer het opnieuw of kies een ander model.")), ms);
+    const off = ev => { clearTimeout(t); window.removeEventListener("unhandledrejection", off); window.removeEventListener("error", off2); reject(new Error("fout tijdens het opmaken: " + (ev.reason?.message || ev.reason || "onbekend"))); };
+    const off2 = ev => { clearTimeout(t); window.removeEventListener("unhandledrejection", off); window.removeEventListener("error", off2); reject(new Error("fout tijdens het opmaken: " + (ev.message || "onbekend"))); };
+    window.addEventListener("unhandledrejection", off); window.addEventListener("error", off2);
+    p.then(v => { clearTimeout(t); window.removeEventListener("unhandledrejection", off); window.removeEventListener("error", off2); resolve(v); },
+           e => { clearTimeout(t); window.removeEventListener("unhandledrejection", off); window.removeEventListener("error", off2); reject(e); });
+  });
+}
+function makePdfInner(m, opts) {
   return new Promise((resolve, reject) => {
     try {
       const ctx = buildInput(S, opts);
@@ -2589,7 +2633,7 @@ async function zipAll() {
   const m = MODELS.find(x => x.code === S.sel);
   const places = S.files["110b"]?.data.places || [];
   if (!m?.perSB || !places.length) return;
-  if (!window.JSZip) { toast("De zip-bibliotheek kon niet worden geladen."); return; }
+  try { await ensureZip(); } catch (e) { toast(e.message); return; }
   const btn = $("zipBtn"); btn.disabled = true;
   const st = $("status");
   const zip = new JSZip();

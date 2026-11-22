@@ -24,10 +24,10 @@ De volgorde waarin je de apps meestal gebruikt: **110a → 110b → 230b → 510
 - **Online:** via GitHub Pages (zie hieronder).
 - **Lokaal:** download de repository en open `index.html` in de browser. Voor de PV-generator moet `pv-fonts.js` in dezelfde map staan.
 
-Externe afhankelijkheden, geladen vanaf een CDN:
+Externe afhankelijkheden, geladen vanaf een CDN (daarvoor is internet nodig):
 - Google Fonts (IBM Plex)
 - [SheetJS](https://sheetjs.com/) (xlsx) voor Stembureaus-maker en Controleprotocol
-- [pdfmake](http://pdfmake.org/) en [JSZip](https://stuk.github.io/jszip/) voor de PV-generator
+- [pdfmake](http://pdfmake.org/) en [JSZip](https://stuk.github.io/jszip/) voor de PV-generator (van jsDelivr, met unpkg en cdnjs als reserve)
 
 Sommige apps bewaren hun werk in `localStorage` van je browser. De Uitslagen-generator bewaart daar ook de testsleutels voor ondertekening. Die sleutels verlaten je browser alleen als je ze zelf exporteert. **Zet geëxporteerde sleutelbestanden (.json) nooit in deze repository.**
 

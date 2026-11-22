@@ -52,9 +52,13 @@ De app zelf gebruikt IBM Plex; de PDF volgt de opmaak van Abacus (DM Sans en Gei
 - `Download PDF`, `Alle stembureaus als zip`, `Opnieuw opmaken`.
 - Inhoudsopgave van het PV met paginanummers.
 
-## Bronnen
+## Bronnen en techniek
 - Opbouw, teksten en opmaak uit de Typst-sjablonen van Abacus (`backend/templates`, versie 2027; EUPL-1.2).
-- Leest EML_NL 1.2.2 en 1.3.x. PDF wordt in de browser gemaakt (pdfmake, JSZip).
+- Leest EML_NL 1.2.2 en 1.3.x. PDF wordt in de browser gemaakt (pdfmake 0.2.20, JSZip 3.10.1).
+- De bibliotheken worden geladen van jsDelivr, met unpkg en cdnjs als reserve. Lukt dat niet of loopt het opmaken vast, dan toont de app na hooguit 90 seconden een foutmelding in plaats van te blijven draaien.
+
+## Opgeloste problemen
+- **22-11-2026: PDF bleef draaien in productie.** Met de bestanden van ’s-Hertogenbosch (110a, 110b, 230b, 510b) werkten alle modellen lokaal wel. Oorzaak vermoedelijk het laden van pdfmake van cdnjs (versie daar niet beschikbaar) en fouten in de bibliotheek die niet werden gemeld. Opgelost met reserve-CDN's, een tijdslimiet en een foutmelding.
 
 ## Open punten
 - **Hulpmiddel:** een PV uit de app altijd controleren tegen het vastgestelde model van de Kiesraad.
@@ -64,3 +68,4 @@ De app zelf gebruikt IBM Plex; de PDF volgt de opmaak van Abacus (DM Sans en Gei
 - **Onverdeelde zetels** worden alleen gemeld.
 - **P 22-2** is alleen voor gemeenteraad en waterschap; voor PS, TK en EP is er P 22-1.
 - **Fictieve correctie:** zonder 510r of vorige waarden maakt de testmodus een verzonnen correctie. Alleen voor testen.
+- **Productie nog niet bevestigd:** de oplossing van 22-11-2026 is getest met nagebootste CDN's, niet in de echte productieomgeving.
