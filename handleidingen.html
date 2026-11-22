@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Handleidingen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#17202b; --muted:#5b6673; --paper:#f5f6f4; --panel:#ffffff; --line:#d9ddd8;
+  --accent:#c4122f; --accent-soft:#fbe7ea;
+  --ok:#1f7a4a; --warn:#a15c00; --ok-soft:#e3f3ea; --warn-soft:#fdf0dc;
+  --font-display:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;
+  --font-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --ink:#e6e9ec; --muted:#9aa4ae; --paper:#12161b; --panel:#1a2027; --line:#2e3640;
+    --accent:#ff5468; --accent-soft:#3a1d23;
+    --ok:#5fd398; --warn:#f0b357; --ok-soft:#163026; --warn-soft:#33260f;
+    color-scheme:dark;
+  }
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{background:var(--paper);color:var(--ink);font:15.5px/1.6 var(--font-body)}
+a{color:var(--accent)}
+code{font:500 13px var(--font-mono);background:var(--paper);border:1px solid var(--line);border-radius:3px;padding:0 4px}
+header.top{padding:22px 24px 14px;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px 24px;align-items:end;justify-content:space-between;background:var(--panel)}
+header.top h1{font:600 26px/1.1 var(--font-display);margin:0}
+header.top h1 .tag{font:500 12px/1 var(--font-mono);color:var(--accent);border:1px solid var(--accent);border-radius:3px;padding:3px 6px;margin-left:8px;vertical-align:4px}
+header.top p{margin:4px 0 0;color:var(--muted);max-width:70ch}
+nav.tabs{display:flex;padding:0 24px;border-bottom:1px solid var(--line);overflow-x:auto;background:var(--panel);position:sticky;top:0;z-index:5}
+nav.tabs a{text-decoration:none;border-bottom:3px solid transparent;padding:13px 16px 11px;white-space:nowrap;color:var(--muted);font-weight:600}
+nav.tabs a:hover{color:var(--ink);border-color:var(--line)}
+nav.tabs a[aria-current="page"]{color:var(--ink);border-bottom-color:var(--accent)}
+.wrap{max-width:1180px;padding:24px;margin:0 auto}
+/* overzicht */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:18px 20px;display:grid;gap:10px;align-content:start}
+.card h2{margin:0;font:600 20px/1.2 var(--font-display)}
+.card .lvl{font:500 12px/1 var(--font-mono);color:var(--accent)}
+.card p{margin:0;color:var(--muted)}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.btn{display:inline-block;font:500 14px/1 var(--font-body);border-radius:4px;padding:10px 13px;border:1px solid var(--line);background:var(--panel);color:var(--ink);text-decoration:none}
+.btn:hover{border-color:var(--ink)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.flow{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:18px 20px;margin-top:16px}
+.flow h2{margin:0 0 8px;font:600 18px/1.2 var(--font-display)}
+.chain{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font:500 13px var(--font-mono)}
+.chain span{border:1px solid var(--line);border-radius:4px;padding:6px 9px;background:var(--paper)}
+.chain span.app{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.chain i{font-style:normal;color:var(--muted)}
+/* handleiding */
+.doc{display:grid;grid-template-columns:230px minmax(0,1fr);gap:32px;align-items:start}
+@media (max-width:860px){.doc{grid-template-columns:1fr}.toc{position:static!important}}
+.toc{position:sticky;top:64px;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:14px 16px;font-size:14px}
+.toc b{display:block;font:600 12px/1 var(--font-mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px}
+.toc ol{margin:0;padding-left:20px;display:grid;gap:4px}
+.toc a{color:var(--ink);text-decoration:none}
+.toc a:hover{color:var(--accent);text-decoration:underline}
+.toc .open{margin-top:12px}
+article{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:24px 30px 30px;min-width:0}
+article h2{font:600 26px/1.15 var(--font-display);margin:0 0 4px}
+article h3{font:600 19px/1.25 var(--font-display);margin:32px 0 8px;padding-top:16px;border-top:1px solid var(--line);scroll-margin-top:70px}
+article h4{font:600 16px/1.3 var(--font-display);margin:20px 0 6px}
+article p,article li{max-width:76ch}
+article ul,article ol{padding-left:22px}
+article li{margin:3px 0}
+.lead{color:var(--muted);font-size:16.5px;margin-top:4px}
+.step{display:grid;grid-template-columns:34px 1fr;gap:12px;margin:14px 0}
+.step .n{font:500 14px/1 var(--font-mono);color:#fff;background:var(--accent);border-radius:4px;height:28px;display:grid;place-items:center}
+.step > div > :first-child{margin-top:2px}
+.step p{margin:4px 0}
+.note,.tip{border-radius:5px;padding:10px 14px;margin:14px 0;font-size:14.5px;max-width:76ch}
+.note{background:var(--warn-soft);color:var(--ink);border-left:4px solid var(--warn)}
+.tip{background:var(--ok-soft);color:var(--ink);border-left:4px solid var(--ok)}
+.note b,.tip b{display:block;font:600 13px/1.4 var(--font-mono);text-transform:uppercase;letter-spacing:.04em}
+.note b{color:var(--warn)} .tip b{color:var(--ok)}
+table{border-collapse:collapse;width:100%;font-size:14.5px;margin:10px 0}
+th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font-weight:600;color:var(--muted);font-size:13px;border-bottom:1.5px solid var(--ink)}
+.tablewrap{overflow-x:auto}
+.ui{font-weight:600;background:var(--accent-soft);color:var(--accent);border-radius:3px;padding:0 5px;white-space:nowrap}
+.kbd{font:500 12px var(--font-mono);border:1px solid var(--line);border-bottom-width:2px;border-radius:3px;padding:1px 5px;background:var(--paper)}
+details{border:1px solid var(--line);border-radius:5px;padding:10px 14px;margin:8px 0;background:var(--paper)}
+details summary{cursor:pointer;font-weight:600}
+details[open] summary{margin-bottom:6px}
+details p{margin:4px 0}
+footer{padding:0 24px 30px;color:var(--muted);font-size:13px;max-width:1180px;margin:0 auto}
+header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace);color:var(--accent,#c8102e);text-decoration:none;margin-bottom:10px}header.top .back:hover{text-decoration:underline}header.top .nk{font:400 12px/1 var(--font-mono,monospace);color:var(--muted,#666)}
+</style>
+</head>
+<body>
+<header class="top">
+  <div>
+    <a class="back" href="index.html">← Alle hulpmiddelen</a><span class="nk"> · Onafhankelijk hulpmiddel, niet van de Kiesraad</span>
+    <h1>Handleidingen <span class="tag">EML · Kiesraad</span></h1>
+    <p>Uitleg over de werking van de apps rond de EML-standaard van de Kiesraad. Kies een app om de handleiding te lezen.</p>
+  </div>
+</header>
+
+<nav class="tabs" aria-label="Handleidingen">
+  <a href="#overzicht" data-view="overzicht">Overzicht</a>
+  <a href="#verkiezingsdefinitie-maker" data-view="verkiezingsdefinitie-maker">Verkiezingsdefinitie</a>
+  <a href="#stembureaus-maker" data-view="stembureaus-maker">Stembureaus</a>
+  <a href="#kandidatenlijsten-maker" data-view="kandidatenlijsten-maker">Kandidatenlijsten</a>
+  <a href="#pv-generator" data-view="pv-generator">PV-generator</a>
+  <a href="#uitslagen-generator" data-view="uitslagen-generator">Uitslagen-generator</a>
+  <a href="#controleprotocol" data-view="controleprotocol">Controleprotocol</a>
+</nav>
+
+<!-- ============================ OVERZICHT ============================ -->
+<section data-pane="overzicht" class="wrap">
+  <div class="cards">
+    <div class="card">
+      <span class="lvl">EML 110a</span>
+      <h2>Verkiezingsdefinitie-maker</h2>
+      <p>Maak de verkiezingsdefinitie: soort verkiezing, gebied, datums, zetels, geregistreerde aanduidingen en de indeling in kieskringen. Dit bestand is de basis voor alle andere apps.</p>
+      <div class="btns">
+        <a class="btn primary" href="#verkiezingsdefinitie-maker">Handleiding lezen</a>
+        <a class="btn" href="verkiezingsdefinitie.html">App openen</a>
+      </div>
+    </div>
+    <div class="card">
+      <span class="lvl">EML 110b</span>
+      <h2>Stembureaus-maker</h2>
+      <p>Maak de lijst met stembureaus van een gemeente, in de oude (1.2.2) of de nieuwe standaard (1.3.1). Invoeren op het scherm, uit Excel of vanuit een bestaand bestand.</p>
+      <div class="btns">
+        <a class="btn primary" href="#stembureaus-maker">Handleiding lezen</a>
+        <a class="btn" href="stembureaus.html">App openen</a>
+      </div>
+    </div>
+    <div class="card">
+      <span class="lvl">EML 230b</span>
+      <h2>Kandidatenlijsten-maker</h2>
+      <p>Maak kandidatenlijsten met fictieve personen, per kieskring, voor test en oefening. Met stellen, lijstengroepen en hashcodes.</p>
+      <div class="btns">
+        <a class="btn primary" href="#kandidatenlijsten-maker">Handleiding lezen</a>
+        <a class="btn" href="kandidatenlijsten.html">App openen</a>
+      </div>
+    </div>
+    <div class="card">
+      <span class="lvl">Abacus-modellen · PDF</span>
+      <h2>PV-generator</h2>
+      <p>Maak processen-verbaal als PDF in de opmaak van Abacus, gevuld met de EML-bestanden uit de andere apps.</p>
+      <div class="btns">
+        <a class="btn primary" href="#pv-generator">Handleiding lezen</a>
+        <a class="btn" href="pv-generator.html">App openen</a>
+      </div>
+    </div>
+    <div class="card">
+      <span class="lvl">GSB · HSB · CSB</span>
+      <h2>Controleprotocol</h2>
+      <p>De digitale vervanger van de controle-spreadsheet van de Kiesraad. Controleer of de uitslagsoftware goed heeft opgeteld (artikel Na 27 Kieswet): loot lijsten, voer de lijsttotalen in vanaf papier en vergelijk die met de uitslag-EML.</p>
+      <div class="btns">
+        <a class="btn primary" href="#controleprotocol">Handleiding lezen</a>
+        <a class="btn" href="controleprotocol.html">App openen</a>
+      </div>
+    </div>
+    <div class="card">
+      <span class="lvl">510b · 510c · 510d</span>
+      <h2>Uitslagen-generator</h2>
+      <p>Maak consistente test-uitslagen om Abacus te testen, ook voor het hoofdstembureau en het centraal stembureau. Optioneel ondertekend, met een Abacus-importzip per bestand.</p>
+      <div class="btns">
+        <a class="btn primary" href="#uitslagen-generator">Handleiding lezen</a>
+        <a class="btn" href="uitslagen-generator.html">App openen</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow">
+    <h2>Hoe de apps samenhangen</h2>
+    <p style="margin:0 0 10px;color:var(--muted)">De makers leveren de invoerbestanden. De andere apps lezen die bestanden in. Begin daarom altijd met de verkiezingsdefinitie.</p>
+    <div class="chain" style="margin-bottom:8px">
+      <span class="app">Verkiezingsdefinitie-maker</span><i>→</i><span>110a</span><i>→</i>
+      <span class="app">Stembureaus-maker</span><i>→</i><span>110b</span>
+      <i>en</i>
+      <span class="app">Kandidatenlijsten-maker</span><i>→</i><span>230b</span>
+    </div>
+    <div class="chain">
+      <span>110a</span><span>110b</span><span>230b</span><i>→</i>
+      <span class="app">Uitslagen-generator</span><i>→</i>
+      <span>510b · 510c · 510d</span><i>→</i>
+      <span class="app">Controleprotocol</span> <i>,</i> <span class="app">PV-generator</span> <i>en</i> <span>Abacus</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ VERKIEZINGSDEFINITIE ============================ -->
+<section data-pane="verkiezingsdefinitie-maker" class="wrap" hidden>
+<div class="doc">
+  <aside class="toc">
+    <b>Inhoud</b>
+    <ol>
+      <li><a href="#vd-doel">Waarvoor is de app?</a></li>
+      <li><a href="#vd-scherm">Het scherm</a></li>
+      <li><a href="#vd-v1">1 · Soort verkiezing</a></li>
+      <li><a href="#vd-v2">2 · Gebied</a></li>
+      <li><a href="#vd-v3">3 · Datums</a></li>
+      <li><a href="#vd-v4">4 · Zetels</a></li>
+      <li><a href="#vd-v5">5 · Aanduidingen</a></li>
+      <li><a href="#vd-v6">6 · Indeling</a></li>
+      <li><a href="#vd-v7">7 · Bestand</a></li>
+      <li><a href="#vd-dl">Downloaden</a></li>
+      <li><a href="#vd-faq">Vragen en problemen</a></li>
+      <li><a href="#vd-beperk">Bekende beperkingen</a></li>
+    </ol>
+    <div class="open"><a class="btn primary" href="verkiezingsdefinitie.html">App openen</a></div>
+  </aside>
+  <article>
+    <h2>Verkiezingsdefinitie-maker</h2>
+    <p class="lead">Handleiding voor het maken van een verkiezingsdefinitie (EML 110a).</p>
+
+    <h3 id="vd-doel">1. Waarvoor is de app?</h3>
+    <p>De verkiezingsdefinitie beschrijft de verkiezing: welke verkiezing, in welk gebied, op welke dag, hoeveel zetels, welke aanduidingen geregistreerd zijn en hoe het gebied is ingedeeld in kieskringen en gemeenten. De uitslagsoftware leest dit bestand als eerste in. Alle andere apps in deze reeks gebruiken het ook.</p>
+
+    <h3 id="vd-scherm">2. Het scherm</h3>
+    <ul>
+      <li><b>Links</b> staan zeven vragen. Velden met het label <em>automatisch</em> vult de app zelf in. Pas je zo'n veld aan, dan blijft jouw waarde staan.</li>
+      <li><b>Rechts</b> zie je direct het resultaat: categorie, subcategorie, zetels, aantal gebieden, de status, meldingen en de XML.</li>
+      <li><b>Bovenaan</b> staan <span class="ui">Bestaand 110a-bestand openen</span> (om een bestand verder te bewerken) en <span class="ui">Opnieuw beginnen</span>.</li>
+    </ul>
+
+    <h3 id="vd-v1">3. Vraag 1 · Welke verkiezing?</h3>
+    <p>Kies de soort verkiezing: gemeenteraad, Provinciale Staten, waterschap, Tweede Kamer, Europees Parlement, Eerste Kamer, kiescollege, stadsdeelcommissie, wijkraad/gebiedscommissie of bestuursraad. De rest van de vragen past zich hierop aan.</p>
+    <div class="note"><b>Let op</b>Een kiescollege kan pas vanaf EML_NL 1.3. Een bestuursraad heeft geen eigen categorie in EML_NL; het bestand gebruikt dan categorie BC, net als een stadsdeelcommissie.</div>
+
+    <h3 id="vd-v2">4. Vraag 2 · Voor welk gebied?</h3>
+    <p>Kies de gemeente, provincie of het waterschap uit de keuzelijst. Staat het gebied er niet in, vul dan zelf de naam en de code in.</p>
+    <ul>
+      <li><b>Gemeente:</b> de 4-cijferige CBS-code, met voorloopnullen (Assen = <code>0106</code>).</li>
+      <li><b>Provincie:</b> het nummer van 1 (Groningen) t/m 12 (Limburg).</li>
+      <li><b>Stadsdeelcommissie, wijkraad of bestuursraad:</b> kies ook de gemeente en vul de naam van de commissie in. Elke commissie krijgt een eigen bestand.</li>
+    </ul>
+
+    <h3 id="vd-v3">5. Vraag 3 · Wanneer is de stemming?</h3>
+    <p>Vul de dag van stemming in. De dag van kandidaatstelling wordt automatisch de 44e dag daarvoor. Pas die aan als er voor deze verkiezing iets anders geldt.</p>
+
+    <h3 id="vd-v4">6. Vraag 4 · Hoeveel zetels?</h3>
+    <p>Het aantal zetels komt uit de keuzelijst (voor gemeenten uit het overzicht GR2026 van de Kiesraad). De voorkeurdrempel en de subcategorie worden automatisch bepaald:</p>
+    <ul>
+      <li>Voorkeurdrempel: 25% van de kiesdeler; 50% bij minder dan 19 zetels en bij de Eerste Kamer; 10% bij het Europees Parlement.</li>
+      <li>Provinciale Staten met één kieskring wordt PS1, met meer kieskringen PS2.</li>
+    </ul>
+
+    <h3 id="vd-v5">7. Vraag 5 · Geregistreerde aanduidingen</h3>
+    <p>Zet de aanduidingen uit het register van het centraal stembureau in het tekstvak, letterlijk zoals ze daar staan, één per regel.</p>
+    <ul>
+      <li><span class="ui">Landelijk register toevoegen (37)</span> voegt de aanduidingen uit het landelijk register van de Kiesraad toe. Die gelden ook voor deze verkiezing.</li>
+      <li><span class="ui">Inlezen uit bestand van het CSB</span> leest aanduidingen uit een 110a, een 230b, of een txt- of csv-bestand (één per regel; bij csv de eerste kolom).</li>
+      <li>Vink <span class="ui">Aanvullen in plaats van vervangen</span> aan om bestaande regels te bewaren.</li>
+    </ul>
+
+    <h3 id="vd-v6">8. Vraag 6 · Hoe ziet de indeling eruit?</h3>
+    <p>De tabel toont de verkiezingsboom: de gebieden, hun nummer en naam, onder welk gebied ze vallen, en waar het centraal stembureau (CSB) en de hoofdstembureaus (HSB) zitten. Voor bekende provincies en de Tweede Kamer vult de app de kieskringen en hoofdstembureaus zelf in.</p>
+    <ul>
+      <li><span class="ui">Gebied toevoegen</span> en <span class="ui">Standaardindeling herstellen</span>.</li>
+      <li><span class="ui">HSB opnemen bij het CSB</span>: de Kieswet kent alleen een hoofdstembureau bij TK, EP en PS met meerdere kieskringen, maar de bestanden van de Kiesraad nemen er toch een op. Vink dit aan als je die bestanden wilt nabootsen.</li>
+      <li><span class="ui">Fictieve testindeling</span>: de fictieve gebieden uit de testbestanden van Abacus (Heemdamseburg, Juinen, Middelgein, 's-Gravenveen, Oost-Holland, Zuid-Brabant, Rivier en Polder).</li>
+      <li><span class="ui">Gemeenten opnemen in de indeling</span>: nodig als je later per hoofdstembureau wilt werken (Uitslagen-generator, Controleprotocol).</li>
+      <li>Onder <span class="ui">Gemeenten in één keer toevoegen</span> plak je regels als <code>0106;Assen;3</code> (code;naam;kieskringnummer).</li>
+    </ul>
+
+    <h3 id="vd-v7">9. Vraag 7 · Naam en kenmerken van het bestand</h3>
+    <ul>
+      <li><b>EML_NL-versie:</b> 1.3.1 (huidige versie), 1.3, of 1.2.2 (gebruikt bij de herindelingsverkiezingen van 18 november 2026).</li>
+      <li><b>Naam verkiezing</b> en <b>Verkiezings-Id</b> worden automatisch gevuld.</li>
+      <li>Onder <span class="ui">Geavanceerd</span>: TransactionId, IssueDate, ManagingAuthority Id (leeg = weglaten), MaxVotes en ContestIdentifier.</li>
+    </ul>
+
+    <h3 id="vd-dl">10. Downloaden</h3>
+    <p>Staat de status op groen, klik dan op <span class="ui">Download .eml.xml + hashcode</span>. Je krijgt het bestand en de SHA-256-hashcode. Met <span class="ui">Kopieer XML</span> zet je de XML op het klembord.</p>
+    <div class="note"><b>Proef inlezen</b>De app controleert de opbouw, maar valideert niet tegen de XSD. Lees het bestand altijd eerst proef in de uitslagsoftware in.</div>
+
+    <h3 id="vd-faq">11. Vragen en problemen</h3>
+    <details><summary>Mijn gemeente heeft een ander aantal zetels.</summary><p>Vul het juiste aantal zelf in bij vraag 4. De voorkeurdrempel past zich aan.</p></details>
+    <details><summary>De subcategorie klopt niet.</summary><p>De subcategorie hangt af van het aantal kieskringen (PS) of het aantal zetels. Kies hem desnoods zelf bij vraag 4.</p></details>
+    <details><summary>Een ElectionDomain-Id wordt afgekeurd.</summary><p>Volgens EML_NL mag dat alleen 4 cijfers zijn, of een getal van 0 t/m 29.</p></details>
+    <details><summary>Na herladen is mijn werk weg.</summary><p>Deze app bewaart niets in de browser. Download het bestand als je klaar bent en open het later weer met <span class="ui">Bestaand 110a-bestand openen</span>.</p></details>
+
+    <h3 id="vd-beperk">12. Bekende beperkingen</h3>
+    <ul>
+      <li>De app valideert niet tegen de XSD. Lees het bestand altijd eerst proef in.</li>
+      <li>Je werk wordt niet in de browser bewaard.</li>
+      <li>De zetelaantallen komen uit GR2026 (raadszetels), 2023 (statenzetels en kieskringen) en 2024 (31 EP-zetels). Controleer ze bij latere verkiezingen.</li>
+      <li>Het landelijk register (37 aanduidingen) is de stand van 27 augustus 2026.</li>
+      <li>De keuzelijst voor waterschappen bevat alleen het fictieve waterschap Rivier en Polder. Een echt waterschap vul je met de hand in.</li>
+      <li>Bij een kiescollege worden het aantal leden en de indeling niet automatisch ingevuld. Bij de Eerste Kamer horen de stemwaarden niet in dit bestand.</li>
+      <li>EML_NL kent geen gebiedscategorie voor stadsdelen en wijken. De indeling gebruikt de gemeente; proef inlezen is extra belangrijk.</li>
+      <li>Of Abacus een HSB bij het CSB verwacht (zoals de Kiesraad-bestanden) of niet (zoals de Kieswet), moet nog worden nagegaan.</li>
+    </ul>
+  </article>
+</div>
+</section>
+
+<!-- ============================ STEMBUREAUS ============================ -->
+<section data-pane="stembureaus-maker" class="wrap" hidden>
+<div class="doc">
+  <aside class="toc">
+    <b>Inhoud</b>
+    <ol>
+      <li><a href="#sb-doel">Waarvoor is de app?</a></li>
+      <li><a href="#sb-v1">1 · Standaard</a></li>
+      <li><a href="#sb-v2">2 · Verkiezing en gemeente</a></li>
+      <li><a href="#sb-v3">3 · Stembureaus invoeren</a></li>
+      <li><a href="#sb-excel">Uit Excel</a></li>
+      <li><a href="#sb-file">Bestaand bestand</a></li>
+      <li><a href="#sb-v4">4 · Bestand</a></li>
+      <li><a href="#sb-dl">Controleren en downloaden</a></li>
+      <li><a href="#sb-faq">Vragen en problemen</a></li>
+      <li><a href="#sb-beperk">Bekende beperkingen</a></li>
+    </ol>
+    <div class="open"><a class="btn primary" href="stembureaus.html">App openen</a></div>
+  </aside>
+  <article>
+    <h2>Stembureaus-maker</h2>
+    <p class="lead">Handleiding voor het maken van de stembureaulijst van een gemeente (EML 110b).</p>
+
+    <h3 id="sb-doel">1. Waarvoor is de app?</h3>
+    <p>Een 110b-bestand bevat de stembureaus van één gemeente. Met deze app maak je dat bestand: door de stembureaus op het scherm in te vullen, ze uit Excel te lezen, of een bestaand bestand om te zetten naar de nieuwe standaard. De app bewaart je werk in deze browser.</p>
+
+    <h3 id="sb-v1">2. Vraag 1 · Welke standaard?</h3>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Standaard</th><th>Wat staat er per stembureau in</th></tr></thead>
+      <tbody>
+        <tr><td><b>EML_NL 1.2.2</b> (oud)</td><td>Nummer, naam en eventueel postcode. Gebruikt bij de herindelingsverkiezingen van 18 november 2026.</td></tr>
+        <tr><td><b>EML_NL 1.3.1</b> (nieuw)</td><td>Ook straat, huisnummer, huisletter, toevoeging, postcode, plaats en het type: vast, mobiel of bijzonder. Zoals Abacus ze gebruikt.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3 id="sb-v2">3. Vraag 2 · Voor welke verkiezing en gemeente?</h3>
+    <p>Sleep het 110a-bestand naar het vak (of <span class="ui">Kies 110a-bestand</span>). De verkiezing wordt dan overgenomen, zodat Id, naam en datum precies gelijk zijn aan de definitie. Dat is de aanbevolen manier.</p>
+    <p>Zonder 110a vul je zelf in: soort verkiezing, subcategorie, dag van stemming, naam en Id. Kies daarna de gemeente uit de lijst, of vul de naam en de 4-cijferige CBS-code zelf in. Met <span class="ui">Weer zelf invullen</span> koppel je de 110a weer los.</p>
+
+    <h3 id="sb-v3">4. Vraag 3 · Welke stembureaus zijn er?</h3>
+    <p>Er zijn drie manieren, elk op een eigen tabblad: <span class="ui">Invoerscherm</span>, <span class="ui">Uit Excel</span> en <span class="ui">Bestaand bestand</span>.</p>
+    <h4>Invoerscherm</h4>
+    <p>Vul per regel een stembureau in. De kolommen passen bij de gekozen standaard. Handige knoppen:</p>
+    <ul>
+      <li><span class="ui">Stembureau toevoegen</span>, <span class="ui">Sorteren op nummer</span>, <span class="ui">Opnieuw nummeren 1, 2, 3 …</span></li>
+      <li><span class="ui">Alles wissen</span> en <span class="ui">Voorbeeld (fictief)</span> om de app te proberen.</li>
+    </ul>
+
+    <h3 id="sb-excel">5. Stembureaus uit Excel</h3>
+    <div class="step"><span class="n">1</span><div><p>Download eventueel eerst het <span class="ui">invulsjabloon (.xlsx)</span>. Het bevat alleen de kolommen die Abacus gebruikt, voor de standaard die je bij vraag 1 hebt gekozen.</p></div></div>
+    <div class="step"><span class="n">2</span><div><p>Sleep een Excel-, ods- of csv-bestand naar het vak, of klik op <span class="ui">Kies Excel-bestand</span>. Je kunt ook cellen kopiëren in Excel (inclusief de kopregel) en ze plakken onder <span class="ui">Of plak de cellen uit Excel</span>.</p></div></div>
+    <div class="step"><span class="n">3</span><div><p>Kies het werkblad en de rij met de kopregel. De app koppelt de kolommen zelf op naam (bijvoorbeeld <em>Nummer stembureau</em>, <em>Straatnaam</em>, <em>Postcode</em>). Gekoppelde kolommen worden groen; controleer de koppeling en pas hem aan waar nodig. Een voorbeeld van de eerste rijen staat eronder.</p></div></div>
+    <div class="step"><span class="n">4</span><div><p>Komen nummers dubbel voor, dan toont de app een oranje vak waarin je per geval kiest wat er moet gebeuren.</p></div></div>
+    <div class="step"><span class="n">5</span><div><p>Kies wat je met de gegevens doet:</p>
+      <ul>
+        <li><span class="ui">Vervang de lijst door deze stembureaus</span></li>
+        <li><span class="ui">Vul de bestaande stembureaus aan (op nummer)</span>: alleen lege of nieuwe gegevens worden ingevuld bij stembureaus met hetzelfde nummer.</li>
+        <li><span class="ui">Voeg toe aan de lijst</span></li>
+      </ul></div></div>
+
+    <h3 id="sb-file">6. Een bestaand bestand gebruiken</h3>
+    <p>Sleep een bestaand 110b-bestand (oud of nieuw) naar het vak op het tabblad <span class="ui">Bestaand bestand</span>. De verkiezing, de gemeente en alle stembureaus worden overgenomen; de huidige lijst wordt vervangen. Daarna kun je:</p>
+    <ul>
+      <li><span class="ui">Omzetten naar nieuwe standaard</span>: van 1.2.2 naar 1.3.1;</li>
+      <li><span class="ui">Wijzigen op het invoerscherm</span>;</li>
+      <li><span class="ui">Aanvullen met Excel</span>: bijvoorbeeld de adressen toevoegen. Aanvullen gaat op stembureaunummer.</li>
+    </ul>
+    <div class="tip"><b>Tip: oude lijst naar nieuwe standaard</b>Lees de oude 110b in, kies <em>Omzetten naar nieuwe standaard</em> en vul daarna de adressen en het type aan vanuit Excel.</div>
+
+    <h3 id="sb-v4">7. Vraag 4 · Bestand</h3>
+    <p>Vul eventueel de contactgegevens en de verkiezingswebsite van de gemeente in. Onder <span class="ui">Geavanceerd</span> staan ManagingAuthority Id en naam, TransactionId en IssueDate. Laat ManagingAuthority Id leeg om de gemeentecode te gebruiken.</p>
+
+    <h3 id="sb-dl">8. Controleren en downloaden</h3>
+    <p>Rechts zie je het aantal stembureaus, hoeveel er mobiel of bijzonder zijn, hoeveel er een adres hebben, en het aantal kiesgerechtigden. Daaronder staan de meldingen. Met de tabbladen <span class="ui">Overzicht</span> en <span class="ui">XML</span> wissel je tussen een kaartje per stembureau en het bestand zelf.</p>
+    <p>Klik op <span class="ui">Download .eml.xml + hashcode</span> om het bestand op te slaan, of <span class="ui">Kopieer XML</span>.</p>
+    <div class="note"><b>Proef inlezen</b>De app valideert niet tegen de XSD. Lees het bestand altijd eerst proef in.</div>
+
+    <h3 id="sb-faq">9. Vragen en problemen</h3>
+    <details><summary>Een kolom uit mijn Excel wordt niet herkend.</summary><p>Kies de kolom zelf in de koppeling. Klopt de kopregel niet, stel dan het juiste rijnummer in bij <em>Kopregel is rij</em>.</p></details>
+    <details><summary>Moet ik het aantal kiesgerechtigden invullen?</summary><p>Nee, dat mag leeg blijven.</p></details>
+    <details><summary>Ik zie mijn werk niet meer.</summary><p>De app bewaart je werk alleen in dezelfde browser op dezelfde computer. Download het bestand daarom altijd als je klaar bent; je kunt het later weer inlezen via <em>Bestaand bestand</em>.</p></details>
+    <details><summary>Excel-bestanden openen lukt niet.</summary><p>De Excel-lezer wordt van internet geladen. Lukt dat niet, sla het bestand dan op als csv of kopieer en plak de cellen.</p></details>
+
+    <h3 id="sb-beperk">10. Bekende beperkingen</h3>
+    <ul>
+      <li>De app valideert niet tegen de XSD. Lees het bestand altijd eerst proef in.</li>
+      <li>Controleer of de software die het bestand inleest EML_NL 1.3.1 al ondersteunt.</li>
+      <li>Extra gegevens uit een ingelezen 110b (zoals BAG-id, wijk en buurt, gebruiksdoel, tellocatie, gedeelde locatie) blijven in het bestand staan, maar staan niet in het invulsjabloon.</li>
+      <li>Kies je de oude standaard, dan komen ingevulde adressen (behalve de postcode) niet in het bestand.</li>
+      <li>Het aantal kiesgerechtigden mag leeg blijven; ga na of de ontvangende software dat accepteert.</li>
+    </ul>
+  </article>
+</div>
+</section>
+
+<!-- ============================ KANDIDATENLIJSTEN ============================ -->
+<section data-pane="kandidatenlijsten-maker" class="wrap" hidden>
+<div class="doc">
+  <aside class="toc">
+    <b>Inhoud</b>
+    <ol>
+      <li><a href="#kl-doel">Waarvoor is de app?</a></li>
+      <li><a href="#kl-v1">1 · Definitie inladen</a></li>
+      <li><a href="#kl-v2">2 · Partijen</a></li>
+      <li><a href="#kl-kk">Per kieskring</a></li>
+      <li><a href="#kl-v3">3 · Personen</a></li>
+      <li><a href="#kl-v4">4 · Bestanden</a></li>
+      <li><a href="#kl-dl">Bekijken en downloaden</a></li>
+      <li><a href="#kl-faq">Vragen en problemen</a></li>
+      <li><a href="#kl-beperk">Bekende beperkingen</a></li>
+    </ol>
+    <div class="open"><a class="btn primary" href="kandidatenlijsten.html">App openen</a></div>
+  </aside>
+  <article>
+    <h2>Kandidatenlijsten-maker</h2>
+    <p class="lead">Handleiding voor het maken van kandidatenlijsten (EML 230b) met fictieve personen.</p>
+
+    <h3 id="kl-doel">1. Waarvoor is de app?</h3>
+    <p>Voor testen en oefenen heb je kandidatenlijsten nodig die passen bij je verkiezingsdefinitie. Deze app maakt ze, per kieskring, met fictieve personen en met de hashcodes erbij.</p>
+    <div class="note"><b>Alleen voor testen</b>Alle personen zijn fictief, samengesteld uit veelvoorkomende voor- en achternamen. Gebruik de bestanden alleen voor test en oefening.</div>
+
+    <h3 id="kl-v1">2. Vraag 1 · Laad de verkiezingsdefinitie in</h3>
+    <p>Sleep een 110a-bestand naar het vak of klik op <span class="ui">Kies 110a-bestand</span>. Gebruik het bestand uit de Verkiezingsdefinitie-maker of uit de uitslagsoftware. De andere vragen zijn vergrendeld tot er een definitie is ingeladen.</p>
+    <p>Wil je de app eerst proberen, kies dan <span class="ui">Voorbeeld: gemeenteraad</span> of <span class="ui">Voorbeeld: Tweede Kamer</span>.</p>
+
+    <h3 id="kl-v2">3. Vraag 2 · Hoeveel partijen doen mee?</h3>
+    <p>Vul het aantal partijen in. De eerste partijen krijgen de geregistreerde aanduidingen uit de definitie; de rest krijgt een fictieve naam. In de tabel kun je per lijst aanpassen:</p>
+    <ul>
+      <li><b>Aanduiding.</b> Laat je die leeg, dan wordt het een blanco lijst.</li>
+      <li><b>Kandidaten:</b> het aantal kandidaten op de lijst. De Kieswet staat er maximaal 50 toe, en 80 voor partijen met meer dan 15 zetels.</li>
+      <li><b>Per kieskring</b> en <b>Kieskringen</b> (alleen bij meerdere kieskringen, zie hieronder).</li>
+    </ul>
+
+    <h3 id="kl-kk">4. Per kieskring</h3>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Keuze</th><th>Wat het betekent</th></tr></thead>
+      <tbody>
+        <tr><td>gelijk</td><td>Overal dezelfde lijst: een stel gelijkluidende lijsten.</td></tr>
+        <tr><td>regionale stellen</td><td>Dezelfde top en lijstduwer, met regionale kandidaten per groep kieskringen.</td></tr>
+        <tr><td>elke kieskring anders</td><td>Een lijstengroep: per kieskring een andere lijst.</td></tr>
+        <tr><td>alleen enkele kieskringen</td><td>De partij doet niet overal mee. Geef in de kolom <em>Kieskringen</em> aan waar wel, bijvoorbeeld <code>1-5, 9</code>.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3 id="kl-v3">5. Vraag 3 · Hoe moeten de personen eruitzien?</h3>
+    <ul>
+      <li><b>Aandeel vrouwen (%)</b>.</li>
+      <li><b>Startgetal:</b> met hetzelfde startgetal krijg je dezelfde personen terug. Handig om een test te herhalen.</li>
+      <li><span class="ui">Nieuwe personen</span> kiest een nieuw startgetal.</li>
+      <li><span class="ui">Enkele kandidaten wonen in het buitenland</span>: voor het testen van buitenlandse adressen.</li>
+    </ul>
+
+    <h3 id="kl-v4">6. Vraag 4 · Bestanden</h3>
+    <p>Er wordt altijd een <b>totaalbestand</b> gemaakt met alle kieskringen samen. Dat is nodig voor de uitslagvaststelling door het centraal stembureau.</p>
+    <ul>
+      <li><span class="ui">Ook een apart bestand per kieskring maken</span>: voor de hoofdstembureaus. Deze bestanden heb je ook nodig in de Uitslagen-generator.</li>
+      <li><span class="ui">kr:ListData opnemen</span>: alleen voor EML_NL 1.3 en hoger.</li>
+      <li>Onder <span class="ui">Geavanceerd</span>: ManagingAuthority Id en naam, TransactionId en IssueDate.</li>
+    </ul>
+
+    <h3 id="kl-dl">7. Bekijken en downloaden</h3>
+    <p>Rechts zie je het aantal kieskringen, lijsten, unieke kandidaten en bestanden, met de meldingen eronder. Kies met het tabblad <span class="ui">Lijsten</span> of <span class="ui">XML</span> hoe je het resultaat bekijkt, en kies de kieskring in de keuzelijst. In de lijstweergave betekent een rood nummer: regionale kandidaat (verschilt per kieskring).</p>
+    <p>Klik op <span class="ui">Download .zip (lijsten + hashcodes)</span>. De hashcodes zijn SHA-256 over het hele bestand, in groepen van vier zoals op de processen-verbaal.</p>
+    <div class="note"><b>Proef inlezen</b>De app valideert niet tegen de XSD. Lees de bestanden altijd eerst proef in.</div>
+
+    <h3 id="kl-faq">8. Vragen en problemen</h3>
+    <details><summary>Ik kan vraag 2 t/m 4 niet invullen.</summary><p>Laad eerst een verkiezingsdefinitie (110a) in bij vraag 1.</p></details>
+    <details><summary>Ik zie de kolommen voor kieskringen niet.</summary><p>Die verschijnen alleen als de definitie meerdere kieskringen heeft.</p></details>
+    <details><summary>Ik wil dezelfde lijsten nog een keer maken.</summary><p>Gebruik dezelfde definitie, dezelfde instellingen en hetzelfde startgetal. De app onthoudt het startgetal niet: noteer het.</p></details>
+    <details><summary>Welk bestand lees ik in Abacus in?</summary><p>De bestanden per kieskring. Abacus leest per bestand precies één kieskring in; het totaalbestand is bedoeld voor de uitslagvaststelling door het centraal stembureau.</p></details>
+
+    <h3 id="kl-beperk">9. Bekende beperkingen</h3>
+    <ul>
+      <li>De app valideert niet tegen de XSD. Lees de bestanden altijd eerst proef in.</li>
+      <li>De lijstnummers zijn in alle kieskringen gelijk.</li>
+      <li>Een lijst met minder dan 4 kandidaten wordt altijd overal gelijk gemaakt, ook als je regionale stellen of een lijstengroep kiest.</li>
+      <li>Instellingen worden niet bewaard; bij elke start krijgt het startgetal een nieuwe waarde.</li>
+      <li>De woonplaatsen van kandidaten zijn indicatief. Kandidaten in het buitenland kunnen alleen bij TK en EP.</li>
+      <li>Maximaal 60 partijen. De XML-weergave toont maximaal 2.500 regels; de download is wel volledig.</li>
+    </ul>
+  </article>
+</div>
+</section>
+
+<!-- ============================ PV-GENERATOR ============================ -->
+<section data-pane="pv-generator" class="wrap" hidden>
+<div class="doc">
+  <aside class="toc">
+    <b>Inhoud</b>
+    <ol>
+      <li><a href="#pv-doel">Waarvoor is de app?</a></li>
+      <li><a href="#pv-nodig">Wat heb je nodig?</a></li>
+      <li><a href="#pv-v1">1 · Model kiezen</a></li>
+      <li><a href="#pv-v2">2 · EML-bestanden</a></li>
+      <li><a href="#pv-v3">3 · Gegevens</a></li>
+      <li><a href="#pv-dl">PDF downloaden</a></li>
+      <li><a href="#pv-faq">Vragen en problemen</a></li>
+      <li><a href="#pv-beperk">Bekende beperkingen</a></li>
+    </ol>
+    <div class="open"><a class="btn primary" href="pv-generator.html">App openen</a></div>
+  </aside>
+  <article>
+    <h2>PV-generator</h2>
+    <p class="lead">Handleiding voor het maken van processen-verbaal als PDF in de opmaak van Abacus.</p>
+
+    <h3 id="pv-doel">1. Waarvoor is de app?</h3>
+    <p>De PV-generator maakt processen-verbaal (PV's) als PDF, met dezelfde opbouw, teksten en opmaak als de modellen in Abacus. Het PV wordt gevuld met de gegevens uit je EML-bestanden. Zo kun je PV's bekijken, gebruiken bij oefeningen of vergelijken met wat Abacus maakt.</p>
+    <div class="note"><b>Hulpmiddel</b>Een PV uit deze app is een hulpmiddel. Controleer het altijd tegen het model dat de Kiesraad heeft vastgesteld.</div>
+
+    <h3 id="pv-nodig">2. Wat heb je nodig?</h3>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Bestand</th><th>Waar vandaan</th></tr></thead>
+      <tbody>
+        <tr><td><code>110a</code></td><td>Verkiezingsdefinitie-maker</td></tr>
+        <tr><td><code>110b</code></td><td>Stembureaus-maker</td></tr>
+        <tr><td><code>230b</code></td><td>Kandidatenlijsten-maker</td></tr>
+        <tr><td><code>510b</code>, <code>510c</code>, <code>510d</code></td><td>Abacus of de Uitslagen-generator</td></tr>
+        <tr><td><code>510r</code>, <code>520</code></td><td>Abacus (hertelling, zetelverdeling)</td></tr>
+      </tbody>
+    </table></div>
+    <p>Welke bestanden je precies nodig hebt, hangt af van het model. De app laat dat zien. Stembureau-, telling- en uitslagbestanden worden gelezen volgens EML_NL 1.2.2 en 1.3.x.</p>
+    <div class="tip"><b>Eerst oefenen?</b>Klik bovenaan op <span class="ui">Voorbeeld: gemeenteraad</span> of <span class="ui">Voorbeeld: Provinciale Staten</span>.</div>
+
+    <h3 id="pv-v1">3. Vraag 1 · Welk proces-verbaal?</h3>
+    <p>Kies een model uit de lijst. Met de tabbladen <span class="ui">Alle</span>, <span class="ui">Decentraal (DSO)</span> en <span class="ui">Centraal (CSO)</span> filter je op de manier van stemopneming. Vink <span class="ui">Alleen modellen die ik kan vullen</span> aan om alleen modellen te zien waarvoor je genoeg bestanden hebt.</p>
+    <ul>
+      <li><b>Groene stip:</b> alle benodigde EML-bestanden zijn geladen.</li>
+      <li><b>Oranje stip:</b> een deel is geladen.</li>
+      <li>Modellen die niet bij de geladen soort verkiezing horen (zoals O 7 en P 22-1 bij een gemeenteraadsverkiezing) staan onderaan onder <em>Andere soorten verkiezing</em>.</li>
+    </ul>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Niveau</th><th>Modellen</th></tr></thead>
+      <tbody>
+        <tr><td>Stembureau</td><td>N 10-1 en N 10-1 Inlegvel (DSO), N 10-2 (CSO), Na 31-2 Bijlage 1 (CSO), Na 14-1 versie 1 en 2 (corrigendum, DSO), Na 14-2 Bijlage 1 (CSO)</td></tr>
+        <tr><td>Gemeentelijk stembureau</td><td>Na 31-1 (DSO), Na 31-2 (CSO), de inlegvellen bij Na 31-1 en Na 31-2, Na 14-2 (corrigendum), P 2a (verslag nieuwe zitting), N 5 (overdrachtsdocument)*</td></tr>
+        <tr><td>Hoofdstembureau</td><td>O 7* (PS, TK, EP)</td></tr>
+        <tr><td>Centraal stembureau</td><td>P 22-2 en P 22-2 Bijlage 1 (gemeenteraad, waterschap), P 22-1* (TK, EP, PS)</td></tr>
+      </tbody>
+    </table></div>
+    <p class="hint" style="color:var(--muted);font-size:14px">* Abacus maakt dit model niet. De app volgt de indeling van het (concept)model van de Kiesraad, in de opmaak van Abacus. Bedoeld om te testen.</p>
+
+    <h3 id="pv-v2">4. Vraag 2 · Welke EML-bestanden zijn nodig?</h3>
+    <p>Hier staat per gekozen model een lijst van wat er nodig is, met per bestand of het al geladen is. Sleep de bestanden naar het vak of klik op <span class="ui">Kies bestanden</span>. Je mag alle bestanden tegelijk kiezen; de app herkent zelf welk bestand wat is. Ingelezen bestanden verschijnen als labels.</p>
+
+    <h3 id="pv-v3">5. Vraag 3 · Gegevens voor het proces-verbaal</h3>
+    <p>Vul de gegevens in die niet in de EML-bestanden staan. Welke velden er zijn, hangt af van het model.</p>
+    <p>Bij het model P 22-2 berekent de app de zetelverdeling volgens de Kieswet (artikelen P 5 tot en met P 10). Heb je een 520 geladen, dan vergelijkt de app de uitkomst met de zetels en gekozen kandidaten in dat bestand.</p>
+    <h4>Testmodus</h4>
+    <p>Bij een aantal modellen kun je <span class="ui">Testmodus</span> aanzetten. Het PV wordt dan ingevuld met telresultaten, zodat je bijvoorbeeld de invoer in Abacus kunt testen:</p>
+    <ul>
+      <li>PV van een stembureau: de cijfers van dat stembureau uit de 510b.</li>
+      <li>Corrigenda: ‘oorspronkelijk’ uit de 510b, ‘gecorrigeerd’ uit de vorige waarden in de 510b of een 510r van de hertelling. Is er geen van beide, dan maakt de app een fictieve correctie (2 stemmen naar een andere lijst).</li>
+      <li>Hoofdstembureau en centraal stembureau: zonder 510d gebruikt de app een 510c of de opgetelde 510b's.</li>
+    </ul>
+    <div class="note"><b>Watermerk</b>In testmodus krijgt de PDF het watermerk TESTGEGEVENS.</div>
+
+    <h3 id="pv-dl">6. PDF downloaden</h3>
+    <p>Rechts zie je het model, het aantal pagina's, lijsten en stembureaus, en de meldingen. Daaronder staat de inhoudsopgave van het PV met paginanummers.</p>
+    <ul>
+      <li><span class="ui">Download PDF</span> slaat het PV op.</li>
+      <li><span class="ui">Alle stembureaus als zip</span>: bij een model per stembureau krijg je één PDF per stembureau in een zip.</li>
+      <li><span class="ui">Opnieuw opmaken</span> maakt de PDF opnieuw, bijvoorbeeld na het wijzigen van gegevens.</li>
+    </ul>
+    <p>De PDF wordt in je browser gemaakt; er gaat niets naar een server.</p>
+
+    <h3 id="pv-faq">7. Vragen en problemen</h3>
+    <details><summary>De knop Download PDF blijft grijs.</summary><p>Kies eerst een model en laad de bestanden die bij vraag 2 als ontbrekend staan.</p></details>
+    <details><summary>Ik vind het model dat ik zoek niet.</summary><p>Zet het filter op <em>Alle</em> en vink <em>Alleen modellen die ik kan vullen</em> uit. Kijk ook onder <em>Andere soorten verkiezing</em>.</p></details>
+    <details><summary>Waar haal ik een 510b of 520 vandaan?</summary><p>Een 510b, 510c of 510d maak je met de Uitslagen-generator, of je haalt hem uit Abacus. Een 520 en 510r komen uit Abacus.</p></details>
+    <details><summary>De app meldt dat er geloot moet worden.</summary><p>De app kan niet loten. Ze kiest de eerste lijst of kandidaat en meldt dat. Pas de zetelverdeling in het PV met de hand aan na de loting.</p></details>
+
+    <h3 id="pv-beperk">8. Bekende beperkingen</h3>
+    <ul>
+      <li>Een PV uit de app is een hulpmiddel. Controleer het tegen het vastgestelde model van de Kiesraad.</li>
+      <li>N 5, O 7 en P 22-1 maakt Abacus nog niet. Ze volgen (concept)modellen van de Kiesraad en kunnen nog veranderen.</li>
+      <li>De app kan niet loten. Bij gelijke restzetels of gelijke voorkeurstemmen kiest ze de eerste en meldt dat.</li>
+      <li>Bij de gekozen kandidaten houdt de app geen rekening met bijvoorbeeld overleden kandidaten. Verschillen met de 520 worden gemeld.</li>
+      <li>P 22-2 is alleen voor de gemeenteraad en het waterschap.</li>
+    </ul>
+  </article>
+</div>
+</section>
+
+<!-- ============================ CONTROLEPROTOCOL ============================ -->
+<section data-pane="controleprotocol" class="wrap" hidden>
+<div class="doc">
+  <aside class="toc">
+    <b>Inhoud</b>
+    <ol>
+      <li><a href="#cp-doel">Waarvoor is de app?</a></li>
+      <li><a href="#cp-nodig">Wat heb je nodig?</a></li>
+      <li><a href="#cp-scherm">Het scherm</a></li>
+      <li><a href="#cp-s1">Stap 1 · Gegevens</a></li>
+      <li><a href="#cp-s2">Stap 2 · Loting</a></li>
+      <li><a href="#cp-s3">Stap 3 · Invoer</a></li>
+      <li><a href="#cp-s4">Stap 4 · Vergelijken</a></li>
+      <li><a href="#cp-verslag">Verslag en export</a></li>
+      <li><a href="#cp-sessie">Sessie bewaren</a></li>
+      <li><a href="#cp-ids">Hoe ID's worden gekoppeld</a></li>
+      <li><a href="#cp-faq">Vragen en problemen</a></li>
+      <li><a href="#cp-beperk">Bekende beperkingen</a></li>
+    </ol>
+    <div class="open"><a class="btn primary" href="controleprotocol.html">App openen</a></div>
+  </aside>
+
+  <article>
+    <h2>Controleprotocol</h2>
+    <p class="lead">Handleiding voor het gemeentelijk stembureau (GSB), het hoofdstembureau (HSB) en het centraal stembureau (CSB).</p>
+
+    <h3 id="cp-doel">1. Waarvoor is de app?</h3>
+    <p>Na de stemming telt de uitslagsoftware (Abacus) de uitslagen op. Volgens het controleprotocol van de Kiesraad (artikel Na 27 Kieswet) controleert het stembureau of die optelling klopt. Dat gebeurt door voor een aantal gelote lijsten de lijsttotalen <em>zelf</em> in te voeren vanaf de papieren processen-verbaal, en de som te vergelijken met het totaal in de uitslag van de software.</p>
+    <p>Deze app vervangt de controle-spreadsheet van de Kiesraad. Het belangrijkste uitgangspunt:</p>
+    <div class="tip"><b>Onafhankelijke invoer</b>De controle-invoer loopt naast de invoer in Abacus. Je kunt de uitslag-EML pas inlezen als álle controle-invoer compleet is. Zo kan niemand de uitkomst van de software zien tijdens het invoeren.</div>
+
+    <h3 id="cp-nodig">2. Wat heb je nodig?</h3>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Bestand</th><th>Wat staat erin</th><th>Wanneer</th></tr></thead>
+      <tbody>
+        <tr><td><code>110b</code></td><td>De stembureaus van de gemeente</td><td>Stap 1, bij GSB</td></tr>
+        <tr><td><code>110a</code></td><td>De verkiezingsdefinitie: gemeenten per kieskring (HSB) of de kieskringen (CSB)</td><td>Stap 1, bij HSB en CSB</td></tr>
+        <tr><td><code>230b</code></td><td>De kandidatenlijsten. Hieruit komen de loten.</td><td>Stap 1, altijd</td></tr>
+        <tr><td><code>510b</code> / <code>510c</code> / <code>510d</code></td><td>De uitslag uit de software, passend bij je niveau</td><td>Pas in stap 4</td></tr>
+        <tr><td>Papieren processen-verbaal</td><td>De bron voor de handmatige invoer</td><td>Stap 3</td></tr>
+      </tbody>
+    </table></div>
+    <p>Heb je geen 110b of 110a? Dan kun je de eenheden en lijsten ook zelf plakken, bijvoorbeeld uit de Excel van de Kiesraad (zie stap 1).</p>
+
+    <h3 id="cp-scherm">3. Het scherm</h3>
+    <ul>
+      <li><b>Bovenaan</b> staan de knoppen <span class="ui">Sessie opslaan</span>, <span class="ui">Sessie laden</span>, <span class="ui">Voorbeeld</span> en <span class="ui">Opnieuw beginnen</span>.</li>
+      <li><b>Daaronder</b> staan de vier stappen als tabbladen. Elk tabblad heeft een badge die laat zien of de stap klaar is (groen), aandacht vraagt (oranje) of een probleem heeft (rood).</li>
+      <li>Onderaan elke stap staat een rode knop om naar de volgende stap te gaan.</li>
+    </ul>
+    <div class="tip"><b>Eerst oefenen?</b>Klik op <span class="ui">Voorbeeld</span>. De app laadt dan een fictieve verkiezing, zodat je alle stappen kunt doorlopen zonder echte bestanden.</div>
+    <div class="note"><b>Let op</b><span class="ui">Opnieuw beginnen</span> wist alles. Je moet twee keer klikken: de eerste klik maakt de knop rood, de tweede klik (binnen 4 seconden) bevestigt.</div>
+
+    <h3 id="cp-s1">4. Stap 1 · Gegevens</h3>
+    <div class="step"><span class="n">1</span><div>
+      <p><b>Laad de EML-bestanden.</b> Sleep ze naar het vak <em>EML-bestanden inladen</em> of klik op <span class="ui">Kies bestanden</span>. Je mag meerdere bestanden tegelijk kiezen; de app herkent zelf welk soort het is. Ingelezen bestanden verschijnen als labels onder het vak.</p>
+    </div></div>
+    <div class="step"><span class="n">2</span><div>
+      <p><b>Kies welk orgaan de controle uitvoert:</b> <span class="ui">Gemeentelijk stembureau</span>, <span class="ui">Hoofdstembureau</span> of <span class="ui">Centraal stembureau</span>. Het niveau bepaalt wat een <em>eenheid</em> is in de rest van de app:</p>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Niveau</th><th>Eenheden</th><th>Bron op papier</th><th>Uitslag-EML</th></tr></thead>
+        <tbody>
+          <tr><td>GSB</td><td>Stembureaus</td><td>Processen-verbaal van de stembureaus</td><td><code>510b</code></td></tr>
+          <tr><td>HSB</td><td>Gemeenten in de kieskring</td><td>Processen-verbaal van de GSB's</td><td><code>510c</code></td></tr>
+          <tr><td>CSB</td><td>Kieskringen</td><td>Processen-verbaal van de HSB's</td><td><code>510d</code></td></tr>
+        </tbody>
+      </table></div>
+      <p>Bij het hoofdstembureau kies je daarna ook de <b>kieskring</b> van dit hoofdstembureau.</p>
+    </div></div>
+    <div class="step"><span class="n">3</span><div>
+      <p><b>Controleer de samenvatting.</b> Rechts zie je de verkiezing, het orgaan, het aantal eenheden en het aantal lijsten, met eventuele meldingen eronder. In de tabellen onderaan staan de eenheden en de lijsten.</p>
+    </div></div>
+    <h4>Zelf invullen of plakken</h4>
+    <p>Klik bij de eenheden op <span class="ui">Zelf invullen of plakken uit Excel</span> (of bij de lijsten op <span class="ui">Zelf invullen of plakken</span>). Zet één eenheid per regel: het nummer en de naam, gescheiden door een tab, puntkomma of spatie. Twee kolommen kopiëren uit de spreadsheet van de Kiesraad werkt direct.</p>
+    <ul>
+      <li>GSB: het nummer is het stembureaunummer.</li>
+      <li>HSB: het nummer is de gemeentecode.</li>
+      <li>CSB: het nummer is het kieskringnummer.</li>
+    </ul>
+    <p>Klik daarna op <span class="ui">Lijst overnemen</span>. Met <span class="ui">Terug naar de EML</span> (of <span class="ui">Terug naar de 230b</span>) gebruik je weer de gegevens uit het bestand.</p>
+    <div class="note"><b>Uitslag hier niet inlezen</b>Een 510-bestand wordt in stap 1 geweigerd. De uitslag komt pas in stap 4.</div>
+
+    <h3 id="cp-s2">5. Stap 2 · Loting</h3>
+    <div class="step"><span class="n">1</span><div>
+      <p><b>Kies wat er gecontroleerd wordt:</b> <span class="ui">Steekproef via loting</span> of <span class="ui">Alle lijsten</span>. Bij een steekproef vul je het aantal lijsten in; standaard is dat 3, zoals in het protocol.</p>
+    </div></div>
+    <div class="step"><span class="n">2</span><div>
+      <p><b>Kies de manier van loten:</b></p>
+      <ul>
+        <li><span class="ui">Loten uit de pot (klik aan)</span>: je trekt fysiek loten en klikt de getrokken lijsten aan in het overzicht <em>Alle loten</em>. De volgorde van aanklikken wordt bijgehouden.</li>
+        <li><span class="ui">Digitaal trekken</span>: klik op <span class="ui">Trek loten</span>. De app trekt met een cryptografisch veilige toevalsgenerator (<code>crypto.getRandomValues</code>).</li>
+      </ul>
+    </div></div>
+    <div class="step"><span class="n">3</span><div>
+      <p><b>Leg de loting vast</b> met <span class="ui">Loting vastleggen</span>. De datum en tijd worden genoteerd en komen in het verslag. Ben je nog niet tevreden, gebruik dan eerst <span class="ui">Loting opnieuw</span>.</p>
+    </div></div>
+    <p>De gelote lijsten staan rechts onder <em>Te controleren lijsten</em>.</p>
+
+    <h3 id="cp-s3">6. Stap 3 · Invoer</h3>
+    <p>Je ziet een raster: per rij een eenheid (stembureau, gemeente of kieskring) en per kolom een gecontroleerde lijst. Vul in elk vak het lijsttotaal in van het papieren proces-verbaal.</p>
+    <ul>
+      <li>Met <span class="kbd">Enter</span> ga je naar het volgende vak. Kies rechtsboven of Enter naar de <b>volgende lijst</b> gaat (per stembureau invoeren) of naar de <b>volgende rij</b> (per lijst invoeren).</li>
+      <li>Een rij die helemaal is ingevuld krijgt links een groene streep. De huidige rij is gemarkeerd.</li>
+      <li>De voortgangsbalk bovenaan laat zien hoeveel vakken al zijn ingevuld.</li>
+      <li>Onder <span class="ui">Meer</span> staat <span class="ui">Invoer wissen</span>. In het voorbeeld staat daar ook een knop die de juiste getallen invult, eventueel <span class="ui">met één afwijking</span>, zodat je de verschillen-weergave kunt uitproberen.</li>
+    </ul>
+    <div class="tip"><b>Tip</b>Voer in vanaf het papier, niet vanaf een scherm van Abacus. Dat is het hele punt van de controle.</div>
+
+    <h3 id="cp-s4">7. Stap 4 · Uitslag inlezen en vergelijken</h3>
+    <div class="step"><span class="n">1</span><div>
+      <p><b>Lees de uitslag-EML in</b> met <span class="ui">Kies de uitslag-EML</span> of door het bestand naar het vak te slepen. Dit kan alleen als:</p>
+      <ul><li>de loting is vastgelegd, en</li><li>alle vakken in stap 3 zijn ingevuld.</li></ul>
+      <p>Het bestand moet passen bij je niveau (510b, 510c of 510d). Bevat een 510d meerdere contests, kies dan de juiste bij <em>Contest in de uitslag</em>.</p>
+    </div></div>
+    <div class="step"><span class="n">2</span><div>
+      <p><b>Bekijk de controles op het bestand zelf.</b> De app controleert of:</p>
+      <ul>
+        <li>de eenheden en lijsten overeenkomen met jouw invoer;</li>
+        <li>het om dezelfde verkiezing gaat;</li>
+        <li>de eenheden optellen tot het totaal;</li>
+        <li>de kandidaatstemmen optellen tot het lijsttotaal.</li>
+      </ul>
+    </div></div>
+    <div class="step"><span class="n">3</span><div>
+      <p><b>Lees de uitkomst.</b> Per gecontroleerde lijst zie je de som van jouw invoer tegenover <code>TotalVotes</code> uit de uitslag. Het grote vak bovenaan geeft het eindoordeel.</p>
+    </div></div>
+    <h4>Er is een verschil</h4>
+    <p>Onder <em>Waar zit het verschil?</em> zie je per eenheid de afwijking tussen jouw invoer en <code>ReportingUnitVotes</code> in de uitslag. Zo vind je snel of het een invoerfout is (controleer het papier opnieuw) of een echt verschil.</p>
+    <p>Wil of moet je daarna alle lijsten controleren, klik dan op <span class="ui">Alle lijsten controleren</span>. De nieuwe lijsten komen erbij in stap 3. Tot ze helemaal zijn ingevoerd, blijven de cijfers uit de uitslag weer verborgen.</p>
+    <h4>Gegevens liggen vast</h4>
+    <p>Zodra er een uitslag is ingelezen, liggen stap 1 en de loting vast. Wil je toch iets aanpassen, klik dan op <span class="ui">Uitslag weghalen</span>. Daarna kun je stap 1 en 2 weer wijzigen; de uitslag lees je opnieuw in als de invoer weer compleet is.</p>
+
+    <h3 id="cp-verslag">8. Verslag en export</h3>
+    <p>Rechts in stap 4 vul je de verklaring of opmerkingen in, de plaats en de naam van de voorzitter. Daarna download je:</p>
+    <ul>
+      <li><span class="ui">Verslag downloaden (.html)</span>: het verslag volgens de opbouw van het Verslag controleprotocol van de Kiesraad, met de drie aankruisopties. Open het in je browser om het af te drukken of als pdf te bewaren.</li>
+      <li><span class="ui">Spreadsheet (.xlsx)</span>: invoer en vergelijking als Excel-bestand.</li>
+      <li><span class="ui">CSV</span>: dezelfde gegevens als platte tekst.</li>
+    </ul>
+    <p>Cijfers uit de uitslag komen pas in het verslag en de export als de vergelijking is toegestaan (invoer compleet).</p>
+    <div class="note"><b>Officieel formulier</b>Het officiële formulier van de Kiesraad blijft leidend. Het verslag uit de app is een hulpmiddel. De naam van de voorzitter is niet bedoeld voor publicatie.</div>
+
+    <h3 id="cp-sessie">9. Sessie bewaren</h3>
+    <ul>
+      <li>De app bewaart je werk automatisch in deze browser. Herlaad je de pagina, dan raak je niets kwijt.</li>
+      <li>Met <span class="ui">Sessie opslaan</span> download je alles als <code>.json</code>. Gebruik dit om op een andere computer verder te gaan of om de invoer te archiveren.</li>
+      <li>Met <span class="ui">Sessie laden</span> zet je zo'n bestand weer terug.</li>
+      <li>Er gaan geen gegevens naar een server; alles gebeurt in je browser.</li>
+    </ul>
+    <div class="note"><b>Andere browser = lege app</b>Automatisch bewaren werkt alleen in dezelfde browser op dezelfde computer. Sla daarom aan het eind altijd een sessie op.</div>
+
+    <h3 id="cp-ids">10. Hoe ID's worden gekoppeld</h3>
+    <p>De eenheden in de uitslag hebben soms een ander ID-formaat dan in de 110a of 110b. De app koppelt ze zo:</p>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Niveau</th><th>Regel</th><th>Voorbeeld</th></tr></thead>
+      <tbody>
+        <tr><td>GSB</td><td>Het laatste getal in het ID</td><td><code>9999::SB3</code> = stembureau <code>3</code></td></tr>
+        <tr><td>HSB</td><td>Het deel na <code>::</code>, als 4 cijfers</td><td><code>HSB1::0344</code> = gemeente <code>344</code></td></tr>
+        <tr><td>CSB</td><td>Het laatste getal</td><td><code>HSB2</code> = kieskring <code>2</code></td></tr>
+      </tbody>
+    </table></div>
+
+    <h3 id="cp-faq">11. Vragen en problemen</h3>
+    <details><summary>Ik kan de uitslag-EML niet inlezen.</summary><p>Controleer of de loting is vastgelegd en of alle vakken in stap 3 zijn ingevuld. De badge op het tabblad Invoer moet groen zijn. Controleer ook of het bestand past bij je niveau: een GSB leest een 510b, een HSB een 510c, een CSB een 510d.</p></details>
+    <details><summary>De app zegt dat de eenheden niet overeenkomen.</summary><p>De uitslag bevat eenheden die niet in jouw lijst staan, of andersom. Kijk of je de goede 110b of 110a hebt geladen, en bij een HSB of de goede kieskring is gekozen. Heb je de eenheden zelf geplakt, controleer dan de nummers (bij HSB de gemeentecode).</p></details>
+    <details><summary>Ik wil iets in stap 1 of de loting wijzigen, maar het lukt niet.</summary><p>Na het inlezen van de uitslag ligt alles vast. Klik in stap 4 op <span class="ui">Uitslag weghalen</span>.</p></details>
+    <details><summary>Ik heb een sessie geladen met een uitslag erin, maar zie geen vergelijking.</summary><p>Dat is zo bedoeld: is de invoer in de sessie niet compleet, dan blijft de vergelijking verborgen tot alles is ingevoerd.</p></details>
+    <details><summary>Kan ik de Excel van de Kiesraad direct openen?</summary><p>Nog niet. Kopieer de twee kolommen (nummer en naam) en plak ze in stap 1.</p></details>
+
+    <h3 id="cp-beperk">12. Bekende beperkingen</h3>
+    <ul>
+      <li>De Excel van de Kiesraad kan nog niet direct worden ingelezen; alleen plakken.</li>
+      <li>Een 510d met meerdere contests is nog niet getest met een echt bestand van een Tweede Kamerverkiezing.</li>
+    </ul>
+  </article>
+</div>
+</section>
+
+<!-- ============================ UITSLAGEN-GENERATOR ============================ -->
+<section data-pane="uitslagen-generator" class="wrap" hidden>
+<div class="doc">
+  <aside class="toc">
+    <b>Inhoud</b>
+    <ol>
+      <li><a href="#ug-doel">Waarvoor is de app?</a></li>
+      <li><a href="#ug-nodig">Wat heb je nodig?</a></li>
+      <li><a href="#ug-scherm">Het scherm</a></li>
+      <li><a href="#ug-s1">1 · EML-bestanden</a></li>
+      <li><a href="#ug-s2">2 · Welke uitslagen</a></li>
+      <li><a href="#ug-s3">3 · Hoe de uitslag eruitziet</a></li>
+      <li><a href="#ug-s4">4 · Ondertekenen</a></li>
+      <li><a href="#ug-gen">Genereren en downloaden</a></li>
+      <li><a href="#ug-abacus">Importeren in Abacus</a></li>
+      <li><a href="#ug-sleutels">Sleutels beheren</a></li>
+      <li><a href="#ug-faq">Vragen en problemen</a></li>
+      <li><a href="#ug-beperk">Bekende beperkingen</a></li>
+    </ol>
+    <div class="open"><a class="btn primary" href="uitslagen-generator.html">App openen</a></div>
+  </aside>
+
+  <article>
+    <h2>Uitslagen-generator</h2>
+    <p class="lead">Handleiding voor het maken van test-uitslagen (510b, 510c en 510d) voor Abacus.</p>
+
+    <h3 id="ug-doel">1. Waarvoor is de app?</h3>
+    <p>Om Abacus te testen heb je uitslagen nodig die er echt uitzien en die kloppen. De generator verzint per stembureau een consistente uitslag en telt die op naar het niveau van de gemeente (GSB), de kieskring (HSB) en het centraal stembureau (CSB). Zo kun je ook de HSB- en CSB-functies testen die in Abacus nog in ontwikkeling zijn.</p>
+    <div class="note"><b>Alleen voor testen</b>De bestanden en sleutels uit deze app zijn uitsluitend bedoeld voor testomgevingen.</div>
+
+    <h3 id="ug-nodig">2. Wat heb je nodig?</h3>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Bestand</th><th>Wat staat erin</th><th>Verplicht?</th></tr></thead>
+      <tbody>
+        <tr><td><code>230b</code></td><td>Kandidatenlijsten. Bij meerdere kieskringen één per kieskring.</td><td>Ja, minstens één</td></tr>
+        <tr><td><code>110a</code></td><td>Verkiezingsdefinitie, met de indeling van gemeenten in kieskringen</td><td>Nodig voor 510c en 510d</td></tr>
+        <tr><td><code>110b</code></td><td>Stembureaus, één bestand per gemeente</td><td>Nee; zonder 110b maakt de app fictieve stembureaus</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3 id="ug-scherm">3. Het scherm</h3>
+    <ul>
+      <li><b>Links</b> staan vier vragen (1 t/m 4).</li>
+      <li><b>Rechts</b> staat het resultaat: een samenvatting (verkiezing, gemeenten, stembureaus, hoofdstembureaus), meldingen, de knoppen <span class="ui">Uitslagen genereren</span> en <span class="ui">Alles downloaden (.zip)</span>, en daaronder de lijst met gemaakte bestanden.</li>
+      <li><b>Bovenaan</b> staan <span class="ui">EML-bestanden openen</span>, <span class="ui">Voorbeeld: gemeenteraad</span> en <span class="ui">Opnieuw beginnen</span>.</li>
+    </ul>
+    <div class="tip"><b>Eerst oefenen?</b>Klik op <span class="ui">Voorbeeld: gemeenteraad</span> om een fictieve gemeenteraadsverkiezing te laden.</div>
+
+    <h3 id="ug-s1">4. Vraag 1 · Welke EML-bestanden?</h3>
+    <p>Sleep de bestanden naar het vak of klik op <span class="ui">Kies bestanden</span>. Meerdere 230b's (per kieskring) en 110b's (per gemeente) mag. De app herkent zelf welk bestand wat is.</p>
+    <p>Boven het vak staat een checklist met wat er nodig is. Een groen vinkje betekent: geladen. Rood: nog nodig. Grijs: optioneel. Geladen bestanden verschijnen als labels; met het kruisje haal je er een weg.</p>
+
+    <h3 id="ug-s2">5. Vraag 2 · Welke uitslagen?</h3>
+    <p>Vink aan welke uitslagen je wilt maken:</p>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Uitslag</th><th>Orgaan</th><th>Wat je krijgt</th></tr></thead>
+      <tbody>
+        <tr><td><code>510b</code></td><td>Gemeentelijk stembureau</td><td>Eén bestand per gemeente, met de uitslag per stembureau</td></tr>
+        <tr><td><code>510c</code></td><td>Hoofdstembureau</td><td>Eén bestand per kieskring, met de uitslag per gemeente</td></tr>
+        <tr><td><code>510d</code></td><td>Centraal stembureau</td><td>De totaaltelling, met de uitslag per hoofdstembureau</td></tr>
+      </tbody>
+    </table></div>
+    <p>Verder stel je in:</p>
+    <ul>
+      <li><b>Gemeenten</b>: alle gemeenten uit de 110a en 110b, of alleen gemeenten waarvoor je een 110b hebt geladen.</li>
+      <li><b>Fictieve stembureaus</b>: hoeveel stembureaus een gemeente zonder 110b krijgt (standaard 3).</li>
+      <li><b>Stemopneming</b>: centraal (CSO) of decentraal (DSO).</li>
+    </ul>
+
+    <h3 id="ug-s3">6. Vraag 3 · Hoe moet de uitslag eruitzien?</h3>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Instelling</th><th>Betekenis</th></tr></thead>
+      <tbody>
+        <tr><td>Seed</td><td>Startgetal voor het toeval. Dezelfde seed en dezelfde invoer geven altijd precies dezelfde uitslag. Handig om een test te herhalen.</td></tr>
+        <tr><td>Opkomst min. / max. %</td><td>Per stembureau wordt een opkomst tussen deze grenzen gekozen.</td></tr>
+        <tr><td>Spreiding partijen</td><td>Hoe groot de verschillen tussen partijen zijn: klein, normaal of groot.</td></tr>
+        <tr><td>Blanco % / Ongeldig %</td><td>Het aandeel blanco en ongeldige stemmen.</td></tr>
+        <tr><td>Telverschil %</td><td>Het percentage stembureaus met 1 tot 3 meer of minder getelde stembiljetten dan toegelaten kiezers. Abacus geeft daar waarschuwingen op.</td></tr>
+        <tr><td>Kiesgerechtigden per stembureau</td><td>De bandbreedte van het aantal kiesgerechtigden.</td></tr>
+      </tbody>
+    </table></div>
+    <div class="tip"><b>Schone import testen?</b>Laat <em>Telverschil %</em> op 0. Wil je juist de waarschuwingen van Abacus testen, zet het dan hoger.</div>
+    <h4>ID-formaten (geavanceerd)</h4>
+    <p>Onder <span class="ui">ID-formaten (geavanceerd)</span> kun je de ID's van stembureaus, gemeenten, hoofdstembureaus en afzenders aanpassen. Gebruik daarin de velden <code>{gemeente}</code> (4-cijferige gemeentecode), <code>{nr}</code> (stembureaunummer) en <code>{hsb}</code> (kieskringnummer). De standaardwaarden:</p>
+    <ul>
+      <li>Stembureau in 510b: <code>{gemeente}::SB{nr}</code></li>
+      <li>Gemeente in 510c: <code>HSB{hsb}::{gemeente}</code></li>
+      <li>HSB in 510d: <code>HSB{hsb}</code></li>
+      <li>Afzender 510c: <code>HSB{hsb}</code>, afzender 510d: <code>CSB</code></li>
+      <li>Contest bij meerdere kieskringen: <code>alle</code></li>
+    </ul>
+    <p>Pas deze alleen aan als je weet dat Abacus een ander formaat verwacht.</p>
+
+    <h3 id="ug-s4">7. Vraag 4 · Ondertekenen voor Abacus</h3>
+    <p>Vink <span class="ui">Alle uitslagen ondertekenen</span> aan als je de bestanden in Abacus wilt importeren. De app maakt dan per orgaan een sleutelpaar (RSA-4096) met een certificaat, op dezelfde manier als Abacus dat doet.</p>
+    <p>Elk orgaan heeft een <b>UID</b>. De standaardwaarden zijn:</p>
+    <ul>
+      <li>GSB: <code>PSB{gemeente}</code>. Dit is het formaat dat Abacus nu ondersteunt.</li>
+      <li>HSB: <code>HSB{hsb}</code></li>
+      <li>CSB: <code>CSB</code></li>
+    </ul>
+    <div class="note"><b>Let op</b>Voor HSB en CSB legt Abacus nog geen UID-formaat vast; de standaardwaarden zijn een aanname. Wijzig je een UID, dan hoort daar een nieuwe sleutel bij, en moet je het nieuwe <code>.crt</code> opnieuw in Abacus inlezen.</div>
+
+    <h3 id="ug-gen">8. Genereren en downloaden</h3>
+    <div class="step"><span class="n">1</span><div><p>Controleer rechts de samenvatting en de meldingen. Zolang er geen 230b is geladen, staat de knop uit.</p></div></div>
+    <div class="step"><span class="n">2</span><div><p>Klik op <span class="ui">Uitslagen genereren</span>. Het maken van de sleutels kan de eerste keer even duren.</p></div></div>
+    <div class="step"><span class="n">3</span><div><p>In de bestandenlijst zie je per bestand het niveau, de belangrijkste aantallen en de SHA-256-hash. Klik op een bestand om de inhoud te bekijken.</p></div></div>
+    <div class="step"><span class="n">4</span><div><p>Download per bestand, of alles tegelijk met <span class="ui">Alles downloaden (.zip)</span>. Met ondertekening krijg je per uitslag een Abacus-importzip.</p></div></div>
+
+    <h3 id="ug-abacus">9. Importeren in Abacus</h3>
+    <p>Een importzip bevat precies twee bestanden: <code>X.eml.xml</code> en <code>X.eml.xml.signature</code>.</p>
+    <div class="step"><span class="n">1</span><div>
+      <p><b>Lees eerst de publieke sleutel in.</b> Lees in Abacus, bij het <em>ontvangende</em> orgaan, het <code>.crt</code>-bestand van de afzender in:</p>
+      <ul>
+        <li>GSB-sleutels bij het HSB of CSB;</li>
+        <li>HSB-sleutels bij het CSB.</li>
+      </ul>
+      <p>Alle <code>.crt</code>-bestanden download je in één keer met <span class="ui">Alle publieke sleutels (.zip)</span>.</p>
+    </div></div>
+    <div class="step"><span class="n">2</span><div><p><b>Importeer de zip.</b> Abacus controleert de handtekening tegen het ingelezen certificaat.</p></div></div>
+    <div class="step"><span class="n">3</span><div><p><b>Bevestig de hash.</b> Abacus vraagt om een deel van de SHA-256-hash, in 16 groepen van 4 tekens. Je vindt de hash bij het bestand in de bestandenlijst van de generator.</p></div></div>
+    <div class="note"><b>Huidige stand Abacus</b>Abacus leest op dit moment alleen GSB-uitslagen (510b) met een handtekening in. De HSB- en CSB-bestanden gebruiken hetzelfde formaat, zodat je ze kunt testen zodra Abacus ze ondersteunt. In een draaiende Abacus is de ondertekening nog niet getest; met OpenSSL zijn alle handtekeningen wel goedgekeurd.</div>
+
+    <h3 id="ug-sleutels">10. Sleutels beheren</h3>
+    <p>De sleutels worden per verkiezing en UID in je browser bewaard. Zo hoef je elk <code>.crt</code> maar één keer in Abacus in te lezen. Onder vraag 4 zie je welke sleutels er zijn, met hun vingerafdruk.</p>
+    <ul>
+      <li><span class="ui">Sleutels opslaan (.json)</span>: bewaar de sleutels in een bestand, bijvoorbeeld om op een andere computer verder te gaan.</li>
+      <li><span class="ui">Sleutels laden</span>: zet zo'n bestand terug.</li>
+      <li><span class="ui">Alle publieke sleutels (.zip)</span>: alle <code>.crt</code>-bestanden voor Abacus.</li>
+      <li><span class="ui">Sleutels vergeten</span>: verwijder de sleutels uit deze browser. Daarna maakt de app nieuwe sleutels, die je opnieuw in Abacus moet inlezen.</li>
+    </ul>
+    <div class="note"><b>Privé-sleutels</b>Het .json-bestand bevat de privé-sleutels. Deel het alleen binnen je testomgeving.</div>
+
+    <h3 id="ug-faq">11. Vragen en problemen</h3>
+    <details><summary>De knop Uitslagen genereren blijft grijs.</summary><p>Laad minstens één kandidatenlijst (230b). Voor 510c en 510d heb je ook een 110a nodig; de checklist bij vraag 1 laat zien wat ontbreekt.</p></details>
+    <details><summary>Abacus keurt de handtekening af.</summary><p>Controleer of je het <code>.crt</code> van precies deze afzender hebt ingelezen bij het ontvangende orgaan. Heb je sleutels vergeten of een UID gewijzigd, dan is er een nieuwe sleutel gemaakt: lees het nieuwe <code>.crt</code> in. Gebruik bij een GSB de UID <code>PSB{gemeente}</code>.</p></details>
+    <details><summary>Abacus geeft waarschuwingen over meer of minder getelde stembiljetten.</summary><p>Zet <em>Telverschil %</em> bij vraag 3 op 0 en genereer opnieuw.</p></details>
+    <details><summary>Ik wil precies dezelfde uitslag nog een keer maken.</summary><p>Gebruik dezelfde invoerbestanden, dezelfde instellingen en dezelfde seed.</p></details>
+    <details><summary>Kan ik de gegenereerde uitslag gebruiken in het controleprotocol?</summary><p>Ja. Laad in het Controleprotocol dezelfde 110a, 110b en 230b, en lees in stap 4 de gegenereerde 510b, 510c of 510d in. Dat is een goede manier om het controleprotocol te oefenen.</p></details>
+
+    <h3 id="ug-beperk">12. Bekende beperkingen</h3>
+    <ul>
+      <li>Het certificaatformaat voor HSB en CSB moet worden nagelopen zodra Abacus het vastlegt.</li>
+      <li>De ID's van eenheden in 510c en 510d (<code>HSB{n}::{gemeente}</code>, <code>HSB{n}</code>) en de CSB-contest <code>alle</code> zijn nog niet tegen een echt bestand gecontroleerd.</li>
+      <li>Een 510d telt kandidaatstemmen op per combinatie van lijst-ID en kandidaat-ID.</li>
+    </ul>
+  </article>
+</div>
+</section>
+
+<footer>Deze handleidingen beschrijven de huidige versie van de apps. Alle apps werken volledig in de browser; er gaan geen gegevens naar een server.</footer>
+
+<script>
+"use strict";
+const views = ["overzicht", "verkiezingsdefinitie-maker", "stembureaus-maker", "kandidatenlijsten-maker", "pv-generator", "controleprotocol", "uitslagen-generator"];
+const prefix = { vd: "verkiezingsdefinitie-maker", sb: "stembureaus-maker", kl: "kandidatenlijsten-maker", pv: "pv-generator", cp: "controleprotocol", ug: "uitslagen-generator" };
+let current = null;
+function show(hash) {
+  let h = (hash || "").replace(/^#/, "");
+  let view = views.includes(h) ? h : null, anchor = null;
+  if (!view && h) {
+    const p = h.split("-")[0];
+    if (prefix[p] && document.getElementById(h)) { view = prefix[p]; anchor = h; }
+  }
+  if (!view) view = "overzicht";
+  document.querySelectorAll("[data-pane]").forEach(s => s.hidden = s.dataset.pane !== view);
+  document.querySelectorAll("nav.tabs a").forEach(a => { if (a.dataset.view === view) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
+  if (anchor) document.getElementById(anchor).scrollIntoView();
+  else if (view !== current) window.scrollTo(0, 0);
+  current = view;
+}
+window.addEventListener("hashchange", () => show(location.hash));
+show(location.hash);
+</script>
+</body>
+</html>

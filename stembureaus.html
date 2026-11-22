@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stembureaus-maker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#17202b; --muted:#5b6673; --paper:#f5f6f4; --panel:#ffffff; --line:#d9ddd8;
+  --accent:#c4122f; --accent-soft:#fbe7ea; --code-bg:#1b2430; --code-ink:#dfe6ee;
+  --ok:#1f7a4a; --warn:#a15c00; --bad:#b3122a; --ok-soft:#e3f3ea; --warn-soft:#fdf0dc; --bad-soft:#fbe4e8;
+  --font-display:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;
+  --font-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --ink:#e6e9ec; --muted:#9aa4ae; --paper:#12161b; --panel:#1a2027; --line:#2e3640;
+    --accent:#ff5468; --accent-soft:#3a1d23; --code-bg:#0c1015; --code-ink:#d6dde5;
+    --ok:#5fd398; --warn:#f0b357; --bad:#ff7a8a; --ok-soft:#163026; --warn-soft:#33260f; --bad-soft:#3a1a20;
+    color-scheme:dark;
+  }
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font:15px/1.5 var(--font-body)}
+header.top{padding:22px 24px 14px;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px 24px;align-items:end;justify-content:space-between}
+header.top h1{font:600 26px/1.1 var(--font-display);margin:0;text-wrap:balance}
+header.top h1 .tag{font:500 12px/1 var(--font-mono);color:var(--accent);border:1px solid var(--accent);border-radius:3px;padding:3px 6px;margin-left:8px;vertical-align:4px}
+header.top p{margin:4px 0 0;color:var(--muted);max-width:66ch}
+main{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:24px;padding:20px 24px 40px;align-items:start}
+@media (max-width:1060px){main{grid-template-columns:1fr}}
+.questions{display:grid;gap:14px;min-width:0}
+.q{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:16px 18px;display:grid;gap:12px;min-width:0}
+.q h2{margin:0;font:600 17px/1.25 var(--font-display);display:flex;gap:10px;align-items:baseline}
+.q h2 .n{font:500 13px/1 var(--font-mono);color:#fff;background:var(--accent);border-radius:3px;padding:3px 6px;min-width:22px;text-align:center}
+.hint{color:var(--muted);font-size:13.5px;margin:0}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:end}
+.field{display:grid;gap:4px;flex:1 1 180px;min-width:0}
+.field.narrow{flex:0 1 140px}
+label{font-size:13px;font-weight:600;color:var(--muted)}
+label.inline{display:flex;gap:6px;align-items:center;color:var(--ink);font-weight:500;font-size:14px}
+input[type=text],input[type=number],input[type=date],select,textarea{font:inherit;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:7px 9px;width:100%}
+textarea{font-family:var(--font-mono);font-size:12.5px;min-height:90px;resize:vertical}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.auto{font:500 12px/1 var(--font-mono);color:var(--ok);margin-left:6px}
+button{font:500 14px/1 var(--font-body);border-radius:4px;padding:9px 13px;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+button:hover{border-color:var(--ink)}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button.primary:hover{filter:brightness(1.08)}
+button.primary:disabled{opacity:.5;cursor:not-allowed;filter:none}
+button.small{padding:5px 8px;font-size:12.5px}
+.types{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+.types label{display:block;cursor:pointer;border:1px solid var(--line);border-radius:5px;padding:11px 12px;color:var(--ink);font-weight:500;background:var(--paper)}
+.types input{position:absolute;opacity:0;pointer-events:none}
+.types label b{display:block;font:600 13px/1 var(--font-mono);color:var(--accent);margin-bottom:6px}
+.types label span{font-size:14px;font-weight:600;display:block}
+.types label small{display:block;color:var(--muted);font-size:12.5px;font-weight:400;margin-top:3px}
+.types input:checked+label{border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 3px 0 0 var(--accent)}
+.types input:focus-visible+label{outline:2px solid var(--accent)}
+.drop{border:1.5px dashed var(--line);border-radius:6px;padding:16px;text-align:center;display:grid;gap:10px;justify-items:center;background:var(--paper)}
+.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+.btns{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.drop .btns{justify-content:center}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:500 12px/1 var(--font-mono);border-radius:999px;padding:5px 9px;background:var(--paper);border:1px solid var(--line)}
+.chip.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.tabs{display:flex;border:1px solid var(--line);border-radius:4px;overflow:hidden;width:max-content}
+.tabs button{border:0;border-radius:0;padding:7px 12px;background:var(--panel)}
+.tabs button[aria-selected=true]{background:var(--accent);color:#fff}
+.tbl-wrap{overflow:auto;border:1px solid var(--line);border-radius:4px;max-height:560px}
+table.pt{border-collapse:collapse;width:100%;font-size:13px}
+table.pt th{font-weight:600;color:var(--muted);text-align:left;padding:6px 6px;background:var(--paper);border-bottom:1px solid var(--line);white-space:nowrap;position:sticky;top:0;z-index:1}
+table.pt td{padding:3px 4px;border-bottom:1px solid var(--line);vertical-align:middle}
+table.pt input,table.pt select{padding:4px 6px;font-size:13px}
+table.pt td.x{width:1%;white-space:nowrap}
+table.pt td select{min-width:92px}
+#paneForm,#paneExcel,#paneFile,#mapBox,.q>*{min-width:0}
+table.pt tr.det td{background:var(--paper);padding:8px 10px}
+.det-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.det-grid .field{flex:none}
+.det-grid label.inline{font-size:13px;align-self:end;padding-bottom:6px}
+.map-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.map-grid .field select{font-size:13px;padding:5px 7px}
+.map-grid .field.hit select{border-color:var(--ok)}
+details{border-top:1px dashed var(--line);padding-top:10px}
+summary{cursor:pointer;font-weight:600;font-size:14px}
+.out{position:sticky;top:16px;display:grid;gap:12px;min-width:0}
+.summary{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:14px 16px;display:grid;gap:10px}
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:520px){.facts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.fact small{display:block;color:var(--muted);font-size:12px}
+.fact strong{font:600 18px/1.2 var(--font-display);font-variant-numeric:tabular-nums}
+.status{font-weight:600;font-size:14px;padding:8px 10px;border-radius:4px}
+.status.ok{background:var(--ok-soft);color:var(--ok)}
+.status.warn{background:var(--warn-soft);color:var(--warn)}
+.status.bad{background:var(--bad-soft);color:var(--bad)}
+ul.checks{margin:0;padding:0;list-style:none;display:grid;gap:4px;font-size:13.5px;max-height:220px;overflow:auto}
+ul.checks li{padding-left:16px;position:relative}
+ul.checks li::before{content:"";position:absolute;left:2px;top:.55em;width:7px;height:7px;border-radius:50%}
+ul.checks li.bad::before{background:var(--bad)} ul.checks li.warn::before{background:var(--warn)} ul.checks li.info::before{background:var(--muted)}
+.actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.fname{font:500 12.5px/1.3 var(--font-mono);color:var(--muted);word-break:break-all}
+.cards{display:grid;gap:8px;max-height:64vh;overflow:auto}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:9px 12px;display:grid;grid-template-columns:44px 1fr;gap:2px 10px;font-size:13.5px}
+.card .nr{font:600 15px/1.3 var(--font-mono);color:var(--accent);grid-row:span 3}
+.card .nm{font-weight:600}
+.card .ad{color:var(--muted)}
+.card .bd{display:flex;flex-wrap:wrap;gap:5px}
+.card .bd .chip{font-size:11px;padding:3px 7px}
+pre.xml{margin:0;background:var(--code-bg);color:var(--code-ink);font:12.5px/1.55 var(--font-mono);padding:14px 16px;border-radius:6px;overflow:auto;max-height:64vh;tab-size:4}
+pre.xml .t{color:#7cc4ff} pre.xml .a{color:#ffc46b} pre.xml .v{color:#9be59b} pre.xml .p{color:#8a96a3}
+.empty{background:var(--panel);border:1px dashed var(--line);border-radius:6px;padding:36px 20px;text-align:center;color:var(--muted)}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:9px 14px;border-radius:4px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw;z-index:10}
+.toast.show{opacity:1}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+footer{padding:0 24px 30px;color:var(--muted);font-size:12.5px;max-width:110ch}
+.sr{position:absolute;left:-9999px}
+.preview{font-size:12.5px}
+.dup{border:1px solid var(--warn);background:var(--warn-soft);border-radius:6px;padding:12px 14px;display:grid;gap:12px}
+.dup h3{margin:0;font:600 15px/1.3 var(--font-display);color:var(--warn)}
+.dupg{background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:10px 12px;display:grid;gap:8px}
+.dupg .qq{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;font-size:14px}
+.dupg .qq b{font-family:var(--font-mono);color:var(--accent)}
+.dupg table td,.dupg table th{font-size:12.5px}
+.okc{color:var(--ok);font-weight:600}.badc{color:var(--warn);font-weight:600}
+header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace);color:var(--accent,#c8102e);text-decoration:none;margin-bottom:10px}header.top .back:hover{text-decoration:underline}header.top .nk{font:400 12px/1 var(--font-mono,monospace);color:var(--muted,#666)}
+</style>
+</head>
+<body>
+<header class="top">
+  <div>
+    <a class="back" href="index.html">← Alle hulpmiddelen</a><span class="nk"> · Onafhankelijk hulpmiddel, niet van de Kiesraad</span>
+    <h1>Stembureaus-maker <span class="tag">EML_NL 110b</span></h1>
+    <p>Maak de lijst met stembureaus van een gemeente als EML 110b-bestand, in de oude of de nieuwe standaard. Vul de stembureaus in op het scherm of lees ze in uit een Excel-bestand.</p>
+  </div>
+  <div class="actions">
+    <input type="file" id="openFile" accept=".xml,.eml,text/xml" hidden>
+    <button type="button" id="openBtn">Bestaand 110a- of 110b-bestand openen</button>
+    <button type="button" id="resetBtn">Opnieuw beginnen</button>
+  </div>
+</header>
+
+<main>
+<section class="questions" aria-label="Vragen">
+
+  <div class="q">
+    <h2><span class="n">1</span>Welke standaard?</h2>
+    <div class="types" role="radiogroup" aria-label="Standaard">
+      <input type="radio" name="std" id="stdOld" value="old"><label for="stdOld"><b>EML_NL 1.2.2</b><span>Oude standaard</span><small>Per stembureau alleen nummer, naam en (optioneel) postcode.</small></label>
+      <input type="radio" name="std" id="stdNew" value="new"><label for="stdNew"><b>EML_NL 1.3.1</b><span>Nieuwe standaard</span><small>Ook straat en huisnummer, postcode, plaats en type (vast, mobiel, bijzonder), zoals Abacus ze gebruikt.</small></label>
+    </div>
+    <p class="hint" id="stdHint"></p>
+  </div>
+
+  <div class="q">
+    <h2><span class="n">2</span>Voor welke verkiezing en gemeente?</h2>
+    <div class="drop" id="defDrop">
+      <input type="file" id="defFile" accept=".xml,.eml,text/xml" hidden>
+      <div>Sleep de verkiezingsdefinitie (110a) hierheen om de verkiezing over te nemen, of vul hieronder zelf in.</div>
+      <div class="btns"><button type="button" id="defBtn">Kies 110a-bestand</button><button type="button" id="defClear" hidden>Weer zelf invullen</button></div>
+    </div>
+    <div class="chips" id="defFacts" hidden></div>
+    <div class="row">
+      <div class="field"><label for="gemPick">Gemeente</label><select id="gemPick"></select></div>
+      <div class="field" id="gemManWrap"><label for="gemName">Naam gemeente</label><input type="text" id="gemName"></div>
+      <div class="field narrow"><label for="gemCode">CBS-gemeentecode</label><input type="text" id="gemCode" inputmode="numeric" placeholder="0106"></div>
+    </div>
+    <div class="row" id="elManual">
+      <div class="field narrow"><label for="elCat">Soort verkiezing</label><select id="elCat">
+        <option value="GR">GR – gemeenteraad</option><option value="PS">PS – Provinciale Staten</option><option value="AB">AB – waterschap</option>
+        <option value="TK">TK – Tweede Kamer</option><option value="EP">EP – Europees Parlement</option><option value="BC">BC – bestuurscommissie</option><option value="GC">GC – gebiedscommissie</option></select></div>
+      <div class="field narrow"><label for="elSub">Subcategorie</label><select id="elSub"></select></div>
+      <div class="field narrow"><label for="elDate">Dag van stemming</label><input type="date" id="elDate"></div>
+    </div>
+    <div class="row" id="elManual2">
+      <div class="field"><label for="elName">Naam verkiezing <span class="auto" id="nameAuto">automatisch</span></label><input type="text" id="elName"></div>
+      <div class="field"><label for="elId">Verkiezings-Id <span class="auto" id="idAuto">automatisch</span></label><input type="text" id="elId"></div>
+    </div>
+    <p class="hint">Een 110b-bestand bevat de stembureaus van één gemeente. Neem bij voorkeur de verkiezingsgegevens over uit de 110a, zodat Id, naam en datum precies gelijk zijn.</p>
+  </div>
+
+  <div class="q">
+    <h2><span class="n">3</span>Welke stembureaus zijn er?</h2>
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" id="tabForm" aria-selected="true">Invoerscherm</button>
+      <button type="button" role="tab" id="tabExcel" aria-selected="false">Uit Excel</button>
+      <button type="button" role="tab" id="tabFile" aria-selected="false">Bestaand bestand</button>
+    </div>
+
+    <div id="paneFile" hidden style="display:grid;gap:10px">
+      <div class="drop" id="ebDrop">
+        <input type="file" id="ebFile" accept=".xml,.eml,text/xml" hidden>
+        <div>Sleep een bestaand stembureaubestand (EML 110b) hierheen, in de oude of de nieuwe standaard, of</div>
+        <div class="btns"><button type="button" class="primary" id="ebBtn">Kies 110b-bestand</button></div>
+      </div>
+      <div id="ebInfo" hidden style="display:grid;gap:10px">
+        <div class="chips" id="ebFacts"></div>
+        <p class="hint" id="ebHint"></p>
+        <div class="btns">
+          <button type="button" class="primary" id="ebConvert">Omzetten naar nieuwe standaard</button>
+          <button type="button" id="ebEdit">Wijzigen op het invoerscherm</button>
+          <button type="button" id="ebExcel">Aanvullen met Excel</button>
+        </div>
+      </div>
+      <p class="hint">De verkiezing, de gemeente en alle stembureaus worden uit het bestand overgenomen; de huidige lijst wordt vervangen. Daarna kun je stembureaus wijzigen, toevoegen of verwijderen op het invoerscherm, of de gegevens aanvullen vanuit Excel. Aanvullen gaat op stembureaunummer.</p>
+    </div>
+
+    <div id="paneForm">
+      <div class="tbl-wrap"><table class="pt" id="sbTable"><thead></thead><tbody></tbody></table></div>
+      <div class="btns" style="margin-top:10px">
+        <button type="button" class="small" id="addRow">Stembureau toevoegen</button>
+        <button type="button" class="small" id="sortRows">Sorteren op nummer</button>
+        <button type="button" class="small" id="renumber">Opnieuw nummeren 1, 2, 3 …</button>
+        <button type="button" class="small" id="clearRows">Alles wissen</button>
+        <button type="button" class="small" id="demoRows">Voorbeeld (fictief)</button>
+      </div>
+      <p class="hint" id="formHint" style="margin-top:8px"></p>
+    </div>
+
+    <div id="paneExcel" hidden>
+      <div class="drop" id="xlDrop">
+        <input type="file" id="xlFile" accept=".xlsx,.xls,.xlsm,.ods,.csv,.txt" hidden>
+        <div>Sleep een Excel- of csv-bestand hierheen, of</div>
+        <div class="btns">
+          <button type="button" class="primary" id="xlBtn">Kies Excel-bestand</button>
+          <button type="button" id="tplBtn">Download invulsjabloon (.xlsx)</button>
+        </div>
+        <div class="hint">Het sjabloon bevat alleen de kolommen die Abacus gebruikt, voor de standaard die bij vraag 1 is gekozen.</div>
+        <div style="display:none">
+        </div>
+      </div>
+      <details>
+        <summary>Of plak de cellen uit Excel</summary>
+        <p class="hint" style="margin:8px 0">Selecteer in Excel de rijen inclusief de kopregel, kopieer en plak ze hier.</p>
+        <label for="paste" class="sr">Geplakte cellen</label>
+        <textarea id="paste" spellcheck="false" placeholder="Nummer stembureau&#9;Naam stembureau&#9;Straatnaam&#9;Huisnummer&#9;Postcode&#9;Plaats"></textarea>
+        <div class="btns" style="margin-top:8px"><button type="button" class="small" id="pasteBtn">Geplakte cellen inlezen</button></div>
+      </details>
+      <div id="mapBox" hidden style="display:grid;gap:10px">
+        <div class="row">
+          <div class="field" id="sheetWrap"><label for="sheetPick">Werkblad</label><select id="sheetPick"></select></div>
+          <div class="field narrow"><label for="headRow">Kopregel is rij</label><input type="number" id="headRow" min="1"></div>
+        </div>
+        <p class="hint" id="mapHint"></p>
+        <div class="map-grid" id="mapGrid"></div>
+        <div class="tbl-wrap preview" style="max-height:220px"><table class="pt" id="mapPreview"></table></div>
+        <div class="dup" id="dupBox" hidden></div>
+        <div class="btns">
+          <button type="button" class="primary" id="mapReplace">Vervang de lijst door deze stembureaus</button>
+          <button type="button" id="mapMerge">Vul de bestaande stembureaus aan (op nummer)</button>
+          <button type="button" id="mapAppend">Voeg toe aan de lijst</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q">
+    <h2><span class="n">4</span>Bestand</h2>
+    <div class="row" id="munWrap">
+      <div class="field"><label for="munContact">Contactgegevens gemeente <small>(optioneel)</small></label><input type="text" id="munContact" placeholder="bijv. Burgerzaken, 14 0592, verkiezingen@gemeente.nl"></div>
+      <div class="field"><label for="munSite">Verkiezingswebsite gemeente <small>(optioneel)</small></label><input type="text" id="munSite" placeholder="https://www.gemeente.nl/verkiezingen"></div>
+    </div>
+    <details>
+      <summary>Geavanceerd</summary>
+      <div class="row" style="margin-top:10px">
+        <div class="field narrow"><label for="authId">ManagingAuthority Id</label><input type="text" id="authId"></div>
+        <div class="field"><label for="authName">ManagingAuthority naam</label><input type="text" id="authName"></div>
+        <div class="field narrow"><label for="txId">TransactionId</label><input type="text" id="txId"></div>
+        <div class="field narrow"><label for="issueDate">IssueDate</label><input type="date" id="issueDate"></div>
+      </div>
+      <p class="hint" style="margin-top:8px">ManagingAuthority en ReportingUnit volgen standaard de gemeente. Laat ManagingAuthority Id leeg om de gemeentecode te gebruiken.</p>
+    </details>
+  </div>
+</section>
+
+<section class="out" aria-label="Resultaat">
+  <div class="summary">
+    <div class="facts">
+      <div class="fact"><small>Stembureaus</small><strong id="fCount">–</strong></div>
+      <div class="fact"><small>Mobiel / bijzonder</small><strong id="fMob">–</strong></div>
+      <div class="fact"><small>Met adres</small><strong id="fAddr">–</strong></div>
+      <div class="fact"><small>Kiesgerechtigden</small><strong id="fVoters">–</strong></div>
+    </div>
+    <div class="status idle" id="status"></div>
+    <ul class="checks" id="checks"></ul>
+    <div class="actions">
+      <button type="button" class="primary" id="dlBtn">Download .eml.xml + hashcode</button>
+      <button type="button" id="copyBtn">Kopieer XML</button>
+    </div>
+    <div class="fname" id="fname"></div>
+    <div class="fname" id="hash" aria-live="polite"></div>
+  </div>
+  <div class="tabs" role="tablist">
+    <button type="button" role="tab" id="vCards" aria-selected="true">Overzicht</button>
+    <button type="button" role="tab" id="vXml" aria-selected="false">XML</button>
+  </div>
+  <div class="cards" id="cards"></div>
+  <pre class="xml" id="xml" hidden aria-label="Voorbeeld van het EML-bestand"></pre>
+</section>
+</main>
+
+<footer>
+  Uitvoer volgens EML_NL (github.com/kiesraad/EML_NL): document <code>110b</code>, EML-schema 5, met alleen de gegevens die Abacus, de uitslagsoftware van de Kiesraad, per stembureau kent. <b>Oude standaard</b> (EML_NL 1.2.2, gebruikt bij de herindelingsverkiezingen van 18 november 2026): <code>PollingStation Id</code>, de naam in <code>xal:LocalityName</code> en eventueel <code>xal:PostalCode</code>. <b>Nieuwe standaard</b> (EML_NL 1.3.1): daarnaast <code>kr:Schema</code>, het adres in <code>sb:Location</code> (StreetName, Number, Letter, NumberAddition, PostalCode, City; namespace <code>http://www.kiesraad.nl/sb-extensions</code>) en <code>kr:ReportingUnitType</code> (FixedLocation, Mobile of Special), zoals in het 1.3.1-testbestand van Abacus. De tekst binnen <code>PollingStation</code> is het aantal kiesgerechtigden en mag leeg blijven. De hashcode is SHA-256 over het hele bestand. De app valideert niet tegen de XSD: lees het bestand altijd eerst proef in.
+</footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const NS_EML="urn:oasis:names:tc:evs:schema:eml", NS_KR="http://www.kiesraad.nl/extensions", NS_SB="http://www.kiesraad.nl/sb-extensions", NS_XAL="urn:oasis:names:tc:ciq:xsdschema:xAL:2.0";
+const STORE="stembureaus-maker-v1";
+
+/* ---------- gemeenten (CBS-code|naam), bron: Kiesraad GR2026 ---------- */
+const GEM_RAW="1680|Aa en Hunze;0358|Aalsmeer;0197|Aalten;0059|Achtkarspelen;0482|Alblasserdam;0613|Albrandswaard;0361|Alkmaar;0141|Almelo;0034|Almere;0484|Alphen aan den Rijn;1723|Alphen-Chaam;1959|Altena;0060|Ameland;0307|Amersfoort;0362|Amstelveen;0363|Amsterdam;0200|Apeldoorn;0202|Arnhem;0106|Assen;0743|Asten;0744|Baarle-Nassau;0308|Baarn;0489|Barendrecht;0203|Barneveld;0888|Beek;1954|Beekdaelen;0889|Beesel;1945|Berg en Dal;1724|Bergeijk;0893|Bergen (L);0373|Bergen (NH);0748|Bergen op Zoom;1859|Berkelland;1721|Bernheze;0753|Best;0209|Beuningen;0375|Beverwijk;1728|Bladel;0376|Blaricum;0377|Bloemendaal;1901|Bodegraven-Reeuwijk;0755|Boekel;1681|Borger-Odoorn;0147|Borne;0654|Borsele;0757|Boxtel;0758|Breda;1876|Bronckhorst;0213|Brummen;0899|Brunssum;0312|Bunnik;0313|Bunschoten;0214|Buren;0502|Capelle aan den IJssel;0383|Castricum;0109|Coevorden;1706|Cranendonck;0216|Culemborg;0148|Dalfsen;1891|Dantumadiel;0310|De Bilt;1940|De Fryske Marren;0736|De Ronde Venen;1690|De Wolden;0503|Delft;0400|Den Helder;0762|Deurne;0150|Deventer;0384|Diemen;1980|Dijk en Waard;1774|Dinkelland;0221|Doesburg;0222|Doetinchem;0766|Dongen;0505|Dordrecht;0498|Drechterland;1719|Drimmelen;0303|Dronten;0225|Druten;0226|Duiven;1711|Echt-Susteren;0385|Edam-Volendam;0228|Ede;0317|Eemnes;1979|Eemsdelta;0770|Eersel;1903|Eijsden-Margraten;0772|Eindhoven;0230|Elburg;0114|Emmen;0388|Enkhuizen;0153|Enschede;0232|Epe;0233|Ermelo;0777|Etten-Leur;0779|Geertruidenberg;1771|Geldrop-Mierlo;1652|Gemert-Bakel;0907|Gennep;0784|Gilze en Rijen;1924|Goeree-Overflakkee;0664|Goes;0785|Goirle;1942|Gooise Meren;0512|Gorinchem;0513|Gouda;0518|'s-Gravenhage;0014|Groningen;1729|Gulpen-Wittem;0158|Haaksbergen;0392|Haarlem;0394|Haarlemmermeer;1655|Halderberge;0160|Hardenberg;0243|Harderwijk;0523|Hardinxveld-Giessendam;0072|Harlingen;0244|Hattem;0396|Heemskerk;0397|Heemstede;0246|Heerde;0074|Heerenveen;0917|Heerlen;1658|Heeze-Leende;0399|Heiloo;0163|Hellendoorn;0794|Helmond;0531|Hendrik-Ido-Ambacht;0164|Hengelo (O);0796|'s-Hertogenbosch;1966|Het Hogeland;0252|Heumen;0797|Heusden;0534|Hillegom;0798|Hilvarenbeek;0402|Hilversum;1963|Hoeksche Waard;1735|Hof van Twente;1911|Hollands Kroon;0118|Hoogeveen;0405|Hoorn;1507|Horst aan de Maas;0321|Houten;0406|Huizen;0677|Hulst;0353|IJsselstein;1884|Kaag en Braassem;0166|Kampen;0678|Kapelle;0537|Katwijk;0928|Kerkrade;1598|Koggenland;0542|Krimpen aan den IJssel;1931|Krimpenerwaard;1659|Laarbeek;1982|Land van Cuijk;0882|Landgraaf;0415|Landsmeer;1621|Lansingerland;0417|Laren;0080|Leeuwarden;0546|Leiden;0547|Leiderdorp;1916|Leidschendam-Voorburg;0995|Lelystad;1640|Leudal;0327|Leusden;1705|Lingewaard;0553|Lisse;0262|Lochem;0809|Loon op Zand;0331|Lopik;0168|Losser;0263|Maasdriel;1641|Maasgouw;1991|Maashorst;0556|Maassluis;0935|Maastricht;0420|Medemblik;0938|Meerssen;1948|Meierijstad;0119|Meppel;0687|Middelburg;1842|Midden-Delfland;1731|Midden-Drenthe;1952|Midden-Groningen;1709|Moerdijk;1978|Molenlanden;1955|Montferland;0335|Montfoort;0944|Mook en Middelaar;1740|Neder-Betuwe;0946|Nederweert;0356|Nieuwegein;0569|Nieuwkoop;0267|Nijkerk;0268|Nijmegen;1930|Nissewaard;1970|Noardeast-Fryslân;1695|Noord-Beveland;1699|Noordenveld;0171|Noordoostpolder;0575|Noordwijk;0820|Nuenen, Gerwen en Nederwetten;0302|Nunspeet;0579|Oegstgeest;0823|Oirschot;0824|Oisterwijk;1895|Oldambt;0269|Oldebroek;0173|Oldenzaal;1773|Olst-Wijhe;0175|Ommen;1586|Oost Gelre;0826|Oosterhout;0085|Ooststellingwerf;0431|Oostzaan;0432|Opmeer;0086|Opsterland;0828|Oss;1509|Oude IJsselstreek;0437|Ouder-Amstel;0589|Oudewater;1734|Overbetuwe;0590|Papendrecht;1894|Peel en Maas;0765|Pekela;1926|Pijnacker-Nootdorp;0439|Purmerend;0273|Putten;0177|Raalte;0703|Reimerswaal;0274|Renkum;0339|Renswoude;1667|Reusel-De Mierden;0275|Rheden;0340|Rhenen;0597|Ridderkerk;1742|Rijssen-Holten;0603|Rijswijk;1669|Roerdalen;0957|Roermond;1674|Roosendaal;0599|Rotterdam;0277|Rozendaal;0840|Rucphen;0441|Schagen;0279|Scherpenzeel;0606|Schiedam;0088|Schiermonnikoog;1676|Schouwen-Duiveland;0965|Simpelveld;0845|Sint-Michielsgestel;1883|Sittard-Geleen;0610|Sliedrecht;1714|Sluis;0090|Smallingerland;0342|Soest;0847|Someren;0848|Son en Breugel;0037|Stadskanaal;0180|Staphorst;0532|Stede Broec;0851|Steenbergen;1708|Steenwijkerland;0971|Stein;1904|Stichtse Vecht;1900|Súdwest-Fryslân;0715|Terneuzen;0093|Terschelling;0448|Texel;1525|Teylingen;0716|Tholen;0281|Tiel;0855|Tilburg;0183|Tubbergen;1700|Twenterand;1730|Tynaarlo;0737|Tytsjerksteradiel;0450|Uitgeest;0451|Uithoorn;0184|Urk;0344|Utrecht;1581|Utrechtse Heuvelrug;0981|Vaals;0994|Valkenburg aan de Geul;0858|Valkenswaard;0047|Veendam;0345|Veenendaal;0717|Veere;0861|Veldhoven;0453|Velsen;0983|Venlo;0984|Venray;1961|Vijfheerenlanden;0622|Vlaardingen;0096|Vlieland;0718|Vlissingen;0986|Voerendaal;1992|Voorne aan Zee;0626|Voorschoten;0285|Voorst;0865|Vught;1949|Waadhoeke;0866|Waalre;0867|Waalwijk;0627|Waddinxveen;0289|Wageningen;0629|Wassenaar;0852|Waterland;0988|Weert;1960|West Betuwe;0668|West Maas en Waal;1969|Westerkwartier;1701|Westerveld;0293|Westervoort;1950|Westerwolde;1783|Westland;0098|Weststellingwerf;0189|Wierden;0296|Wijchen;0352|Wijk bij Duurstede;0294|Winterswijk;0873|Woensdrecht;0632|Woerden;0880|Wormerland;0351|Woudenberg;0479|Zaanstad;0297|Zaltbommel;0473|Zandvoort;0050|Zeewolde;0355|Zeist;0299|Zevenaar;0637|Zoetermeer;0638|Zoeterwoude;1892|Zuidplas;0879|Zundert;0301|Zutphen;1896|Zwartewaterland;0642|Zwijndrecht;0193|Zwolle";
+const GEMEENTEN=GEM_RAW.split(";").map(s=>s.split("|")).sort((a,b)=>a[1].replace(/^'s-/,"").localeCompare(b[1].replace(/^'s-/,""),"nl"));
+const FICT_GEM=[["0123","Heemdamseburg"],["0124","Juinen"],["0125","Middelgein"],["0126","'s-Gravenveen"]];
+const GEM_BY_CODE=Object.fromEntries(GEMEENTEN.concat(FICT_GEM).map(g=>[g[0],g[1]]));
+
+const CATS={GR:{subs:["GR1","GR2"],def:"GR2",prefix:"Gemeenteraad",local:true},PS:{subs:["PS1","PS2"],def:"PS1",prefix:"Provinciale Staten"},AB:{subs:["AB1","AB2"],def:"AB2",prefix:"Waterschap"},
+  TK:{subs:["TK"],def:"TK",prefix:"Tweede Kamer der Staten-Generaal"},EP:{subs:["EP"],def:"EP",prefix:"Europees Parlement"},BC:{subs:["BC"],def:"BC",prefix:"Bestuurscommissie",local:true},GC:{subs:["GC"],def:"GC",prefix:"Gebiedscommissie",local:true}};
+
+const RUTYPES=[["FixedLocation","vast"],["Mobile","mobiel"],["Special","bijzonder"]];
+const USAGE=["Bijeenkomst","Onderwijs","Sport","Kantoor","Winkel","Gezondheidszorg","Logies","Wonen","Industrie","Cel","Overig"];
+
+/* velden; old = ook in de oude standaard */
+const FIELDS=[
+  {k:"nr",l:"Nummer stembureau",old:true,syn:["nummerstembureau","stembureaunummer","nummer","nr","sbnummer","stembureaunr","nrstembureau","sbnr"]},
+  {k:"naam",l:"Naam stembureau",old:true,syn:["naamstembureau","naam","stembureau","stembureaunaam","naamlocatie","locatie","gebouw","naamgebouw","stemlokaal"]},
+  {k:"adres",l:"Straat + huisnummer (samen)",imp:true,syn:["adres","straatenhuisnummer","straatnaamenhuisnummer","straathuisnummer","bezoekadres"]},
+  {k:"straat",l:"Straatnaam",syn:["straatnaam","straat","openbareruimte","openbareruimtenaam"]},
+  {k:"huisnr",l:"Huisnummer",syn:["huisnummer","huisnr","hnr","nummerhuis"]},
+  {k:"letter",l:"Huisletter",syn:["huisletter","letter"]},
+  {k:"toev",l:"Huisnummertoevoeging",syn:["huisnummertoevoeging","toevoeging","huisnrtoevoeging","toev"]},
+  {k:"postcode",l:"Postcode",old:true,syn:["postcode","pc","postcodestembureau"]},
+  {k:"plaats",l:"Plaats",syn:["plaats","woonplaats","plaatsnaam","stad","kern","woonplaatsnaam"]},
+  {k:"extra",l:"Extra adresaanduiding",syn:["extraadresaanduiding","extraadresinformatie","aanvullendeadresinformatie","extrainformatie","toelichtinglocatie","ingang","locatieomschrijving"]},
+  {k:"type",l:"Type stembureau",syn:["typestembureau","type","soortstembureau","soort","mobielstembureau","mobiel"]},
+  {k:"gedeeld",l:"Gedeelde locatie",syn:["gedeeldelocatie","gedeeld","dubbelstembureau","meerderestembureaus","sharedlocation"]},
+  {k:"telt",l:"Tellocatie",syn:["tellocatie","telt","stemmentellen","countinglocation","centraletelling"]},
+  {k:"gebruik",l:"Gebruiksdoel gebouw",syn:["gebruiksdoelgebouw","gebruiksdoel","gebouwgebruik","gebruikgebouw","buildingusage"]},
+  {k:"wijk",l:"Wijknaam",syn:["wijknaam","wijk"]},
+  {k:"wijkcode",l:"Wijkcode (CBS)",syn:["cbswijknummer","wijkcode","cbswijkcode","wijknummer"]},
+  {k:"buurt",l:"Buurtnaam",syn:["buurtnaam","buurt"]},
+  {k:"buurtcode",l:"Buurtcode (CBS)",syn:["cbsbuurtnummer","buurtcode","cbsbuurtcode","buurtnummer"]},
+  {k:"bag",l:"BAG nummeraanduiding-id",syn:["bagnummeraanduidingid","bagid","bag","nummeraanduidingid","bagnummeraanduiding","bagreferentienummer"]},
+  {k:"website",l:"Website locatie",syn:["websitelocatie","website","url","site","webadres"]},
+  {k:"open",l:"Openingstijd (alleen ter controle)",imp:true,syn:["openingstijd","openingstijden","begintijd","vanaf","tijdvan","open","starttijd","aanvang"]},
+  {k:"close",l:"Sluitingstijd (alleen ter controle)",imp:true,syn:["sluitingstijd","eindtijd","tot","tijdtot","sluiting","einde"]},
+  {k:"kiesger",l:"Aantal kiesgerechtigden",old:true,syn:["aantalkiesgerechtigden","kiesgerechtigden","aantalkiezers","kiezers","stemgerechtigden"]}
+];
+const ROWKEYS=FIELDS.filter(f=>!f.imp).map(f=>f.k);
+/* velden die Abacus kent; alleen deze toont de app */
+const AB=["nr","naam","adres","straat","huisnr","letter","toev","postcode","plaats","type","open","close","kiesger"];
+FIELDS.find(f=>f.k==="adres").l="Straatnaam en huisnummer (samen)";
+FIELDS.find(f=>f.k==="kiesger").l="Aantal kiesgerechtigden (optioneel)";
+
+/* ---------- hulpfuncties ---------- */
+function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function slug(s){ return String(s).normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/'/g,"").replace(/[^A-Za-z0-9]+/g,"_").replace(/^_+|_+$/g,""); }
+function iso(d){ const z=n=>String(n).padStart(2,"0"); return d.getFullYear()+"-"+z(d.getMonth()+1)+"-"+z(d.getDate()); }
+function nowStamp(){ const d=new Date(), z=n=>String(n).padStart(2,"0"); return iso(d)+"T"+z(d.getHours())+":"+z(d.getMinutes())+":"+z(d.getSeconds())+"."+String(d.getMilliseconds()).padStart(3,"0"); }
+function norm(s){ return String(s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]/g,""); }
+function toast(m){ const t=$("toast"); t.textContent=m; t.classList.add("show"); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("show"),2800); }
+function emptyRow(nr){ const r={}; ROWKEYS.forEach(k=>r[k]=""); r.nr=nr==null?"":String(nr); r.type="FixedLocation"; return r; }
+function pc(s){ const t=String(s||"").toUpperCase().replace(/\s+/g,""); return /^\d{4}[A-Z]{2}$/.test(t)? t.slice(0,4)+" "+t.slice(4) : String(s||"").trim(); }
+function yesno(v){ const t=norm(v); if(["ja","j","true","waar","1","x","yes","y","wel"].includes(t)) return "true"; if(["nee","n","false","onwaar","0","no","niet"].includes(t)) return "false"; return ""; }
+function ruType(v){ const t=norm(v); if(!t) return "FixedLocation"; if(/mobiel|mobile|rijdend/.test(t)) return "Mobile"; if(/bijzonder|special|speciaal|zorg/.test(t)) return "Special"; return "FixedLocation"; }
+function usage(v){ const t=norm(v); if(!t) return ""; const hit=USAGE.find(u=>norm(u)===t||t.startsWith(norm(u))); if(hit) return hit;
+  if(/school|onderwijs/.test(t)) return "Onderwijs"; if(/sport|gym/.test(t)) return "Sport"; if(/kerk|buurthuis|wijkcentrum|dorpshuis|bijeenkomst|gemeentehuis|stadhuis/.test(t)) return "Bijeenkomst"; if(/zorg|ziekenhuis|verpleeg/.test(t)) return "Gezondheidszorg"; return "Overig"; }
+function cleanToev(r){ r.toev=String(r.toev||"").trim().replace(/^[-\s]+/,""); if(/^[A-Za-z]$/.test(r.toev) && !String(r.letter||"").trim()){ r.letter=r.toev.toUpperCase(); r.toev=""; } }
+function splitHuisnr(r){ const m=String(r.huisnr||"").trim().match(/^(\d+)\s*([A-Za-z])?\s*[-\s]?\s*(.*)$/); if(m && (m[2]||m[3])){ r.huisnr=m[1]; if(m[2]&&!r.letter) r.letter=m[2].toUpperCase(); if(m[3]&&!r.toev) r.toev=m[3]; } }
+function splitAdres(r,a){ const m=String(a||"").trim().match(/^(.*?)\s+(\d+)\s*([A-Za-z])?(?:\s*[-\s]\s*(\S.*))?$/); if(m){ r.straat=m[1]; r.huisnr=m[2]; if(m[3]) r.letter=m[3].toUpperCase(); if(m[4]) r.toev=m[4]; } else r.straat=String(a||"").trim(); }
+
+/* ---------- state ---------- */
+let S, edited={};
+function freshState(){
+  S={std:"new",gem:"0106",gemName:"Assen",gemCode:"0106",el:{cat:"GR",sub:"GR2",date:"2030-03-20",name:"",id:"",domId:"",domName:"",fromFile:""},
+     rows:[],open:{},munContact:"",munSite:"",authId:"",authName:"",tx:"1",issueDate:iso(new Date()),tab:"form",view:"cards",loaded:null};
+  edited={};
+}
+function save(){ try{ localStorage.setItem(STORE,JSON.stringify({S,edited})); }catch(e){} }
+function load(){ try{ const j=JSON.parse(localStorage.getItem(STORE)||"null"); if(j&&j.S&&Array.isArray(j.S.rows)){ freshState(); Object.assign(S,j.S); S.el=Object.assign({},S.el,j.S.el); edited=j.edited||{}; S.open={}; return true; } }catch(e){} return false; }
+
+/* ---------- automatische velden ---------- */
+function year(){ return (S.el.date||"").slice(0,4)||"JJJJ"; }
+function applyAuto(){
+  if(S.el.fromFile) return;
+  const C=CATS[S.el.cat];
+  if(!C.subs.includes(S.el.sub)) S.el.sub=C.def;
+  const local=C.local;
+  if(!edited.name) S.el.name= local? C.prefix+" "+S.gemName+" "+year() : C.prefix+" "+year();
+  if(!edited.id) S.el.id= local? S.el.cat+year()+"_"+slug(S.gemName) : S.el.cat+year();
+  if(local){ S.el.domId=S.gemCode; S.el.domName=S.gemName; } else { S.el.domId=""; S.el.domName=""; }
+}
+
+/* ---------- XML ---------- */
+function isNew(){ return S.std==="new"; }
+function hasAddr(r){ return !!(r.straat||r.huisnr||r.plaats||r.bag||r.extra||r.wijk||r.wijkcode||r.buurt||r.buurtcode||r.website||r.gebruik||r.letter||r.toev||r.telt); }
+function buildXml(){
+  const I="    ", L=[], p=(d,s)=>L.push(I.repeat(d)+s), N=isNew();
+  const gc=S.gemCode.trim(), gn=S.gemName.trim();
+  L.push('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>');
+  L.push('<EML xmlns="urn:oasis:names:tc:evs:schema:eml" xmlns:kr="http://www.kiesraad.nl/extensions"'+(N?' xmlns:sb="http://www.kiesraad.nl/sb-extensions"':'')+' xmlns:xal="urn:oasis:names:tc:ciq:xsdschema:xAL:2.0" xmlns:xnl="urn:oasis:names:tc:ciq:xsdschema:xNL:2.0" Id="110b" SchemaVersion="5">');
+  p(1,"<TransactionId>"+esc(S.tx||"1")+"</TransactionId>");
+  p(1,"<ManagingAuthority>");
+  p(2,'<AuthorityIdentifier Id="'+esc(S.authId.trim()||gc)+'">'+esc(S.authName.trim()||gn)+"</AuthorityIdentifier>");
+  p(2,"<AuthorityAddress/>");
+  p(1,"</ManagingAuthority>");
+  if(S.issueDate) p(1,"<IssueDate>"+esc(S.issueDate)+"</IssueDate>");
+  if(N) p(1,'<kr:Schema Version="1.3.1"/>');
+  p(1,"<kr:CreationDateTime>"+nowStamp()+"</kr:CreationDateTime>");
+  p(1,"<ElectionEvent>");
+  p(2,"<EventIdentifier/>");
+  p(2,"<Election>");
+  p(3,'<ElectionIdentifier Id="'+esc(S.el.id)+'">');
+  p(4,"<ElectionName>"+esc(S.el.name)+"</ElectionName>");
+  p(4,"<ElectionCategory>"+esc(S.el.cat)+"</ElectionCategory>");
+  if(S.el.sub) p(4,"<kr:ElectionSubcategory>"+esc(S.el.sub)+"</kr:ElectionSubcategory>");
+  if(S.el.domName) p(4,"<kr:ElectionDomain"+(S.el.domId?' Id="'+esc(S.el.domId)+'"':"")+">"+esc(S.el.domName)+"</kr:ElectionDomain>");
+  p(4,"<kr:ElectionDate>"+esc(S.el.date)+"</kr:ElectionDate>");
+  p(3,"</ElectionIdentifier>");
+  p(3,"<Contest>");
+  p(4,'<ContestIdentifier Id="geen"/>');
+  p(4,"<ReportingUnit>");
+  p(5,'<ReportingUnitIdentifier Id="'+esc(gc)+'">'+esc(gn)+"</ReportingUnitIdentifier>");
+  p(4,"</ReportingUnit>");
+  p(4,"<VotingMethod>SPV</VotingMethod>");
+  p(4,"<MaxVotes></MaxVotes>");
+  if(N && S.munContact.trim()) p(4,"<sb:MunicipalityContactDetails>"+esc(S.munContact.trim())+"</sb:MunicipalityContactDetails>");
+  if(N && S.munSite.trim()) p(4,"<sb:MunicipalityElectionSite>"+esc(S.munSite.trim())+"</sb:MunicipalityElectionSite>");
+  S.rows.forEach(r=>{
+    p(4,'<PollingPlace Channel="polling">');
+    p(5,"<PhysicalLocation>");
+    p(6,"<Address>");
+    p(7,"<Locality>");
+    p(8,"<xal:LocalityName>"+esc(String(r.naam).trim())+"</xal:LocalityName>");
+    if(String(r.postcode).trim()){ p(8,"<xal:PostalCode>"); p(9,"<xal:PostalCodeNumber>"+esc(pc(r.postcode))+"</xal:PostalCodeNumber>"); p(8,"</xal:PostalCode>"); }
+    p(7,"</Locality>");
+    if(N && (hasAddr(r)||String(r.postcode).trim())){
+      const e=(n,v)=>{ v=String(v==null?"":v).trim(); if(v) p(8,"<sb:"+n+">"+esc(v)+"</sb:"+n+">"); };
+      p(7,"<sb:Location>");
+      e("BAGId",r.bag); e("StreetName",r.straat); e("Number",r.huisnr); e("Letter",r.letter); e("NumberAddition",r.toev);
+      e("PostalCode",pc(r.postcode)); e("City",r.plaats); e("AdditionalAddressInformation",r.extra); e("BuildingUsage",r.gebruik);
+      e("DistrictName",r.wijk); e("DistrictCode",r.wijkcode); e("NeighbourhoodName",r.buurt); e("NeighbourhoodCode",r.buurtcode);
+      e("Website",r.website); e("CountingLocation",r.telt);
+      p(7,"</sb:Location>");
+    }
+    p(6,"</Address>");
+    p(6,'<PollingStation Id="'+esc(String(r.nr).trim())+'">'+esc(String(r.kiesger).trim())+"</PollingStation>");
+    if(N){ p(6,"<kr:ReportingUnitType>"+esc(r.type||"FixedLocation")+"</kr:ReportingUnitType>"); if(r.gedeeld==="true") p(6,"<kr:SharedLocation>true</kr:SharedLocation>"); }
+    p(5,"</PhysicalLocation>");
+    p(4,"</PollingPlace>");
+  });
+  p(3,"</Contest>");
+  p(2,"</Election>");
+  p(1,"</ElectionEvent>");
+  L.push("</EML>");
+  return L.join("\n")+"\n";
+}
+function highlight(x){
+  return esc(x).replace(/(&lt;\?xml[\s\S]*?\?&gt;)/,'<span class="p">$1</span>')
+    .replace(/(&lt;\/?)([\w:]+)/g,'$1<span class="t">$2</span>')
+    .replace(/ ([\w:]+)=(&quot;.*?&quot;)/g,' <span class="a">$1</span>=<span class="v">$2</span>');
+}
+
+/* ---------- controles ---------- */
+function validate(){
+  const out=[], bad=m=>out.push(["bad",m]), warn=m=>out.push(["warn",m]), info=m=>out.push(["info",m]), N=isNew();
+  const lbl=r=>"Stembureau "+(String(r.nr).trim()||"zonder nummer")+(r.naam?" ("+r.naam+")":"");
+  if(!S.gemName.trim()) bad("Vul bij vraag 2 de naam van de gemeente in.");
+  if(!S.gemCode.trim()) bad("Vul bij vraag 2 de CBS-gemeentecode in.");
+  else if(!/^\d{4}$/.test(S.gemCode.trim())) warn("Een CBS-gemeentecode heeft 4 cijfers, met voorloopnullen (bijv. 0106).");
+  if(!S.el.id.trim()) bad("Het verkiezings-Id is leeg."); else if(/\s/.test(S.el.id)) bad("Het verkiezings-Id mag geen spaties bevatten.");
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(S.el.date)) bad("Kies bij vraag 2 de dag van stemming.");
+  if(!S.rows.length) bad("Voeg bij vraag 3 minstens één stembureau toe.");
+  const seen={}, dupl=new Set(); let noPc=0, badPc=0, noAddr=0, noVoters=0, lost=0;
+  S.rows.forEach(r=>{
+    const nr=String(r.nr).trim();
+    if(!nr) bad(lbl(r)+" heeft geen nummer.");
+    else if(!/^\d+$/.test(nr)) bad(lbl(r)+": het nummer mag alleen cijfers bevatten.");
+    else { if(seen[nr]) dupl.add(nr); seen[nr]=1; }
+    if(!String(r.naam).trim()) bad(lbl(r)+" heeft geen naam.");
+    const p=String(r.postcode).trim();
+    if(!p) noPc++; else if(!/^\d{4} ?[A-Za-z]{2}$/.test(p)) { badPc++; if(badPc<=3) warn(lbl(r)+": postcode '"+p+"' heeft niet de vorm 1234 AB."); }
+    if(String(r.kiesger).trim()==="") noVoters++; else if(!/^\d+$/.test(String(r.kiesger).trim())) warn(lbl(r)+": het aantal kiesgerechtigden is geen geheel getal.");
+    if(N){
+      if(r.type!=="Mobile" && !(String(r.straat).trim()&&String(r.huisnr).trim()&&String(r.plaats).trim())) noAddr++;
+      if(String(r.huisnr).trim() && !/^\d+$/.test(String(r.huisnr).trim())) warn(lbl(r)+": het huisnummer begint niet met een getal.");
+      if(String(r.letter).trim().length>1) warn(lbl(r)+": een huisletter is één letter.");
+      if(String(r.bag).trim() && !/^\d{16}$/.test(String(r.bag).trim())) warn(lbl(r)+": een BAG-id heeft 16 cijfers.");
+      if(String(r.website).trim() && !/^https?:\/\//i.test(String(r.website).trim())) warn(lbl(r)+": de website moet beginnen met http:// of https://.");
+    } else if(hasAddr(r)) lost++;
+  });
+  if(dupl.size) bad("Dubbel stembureaunummer: "+[...dupl].join(", ")+".");
+  if(badPc>3) warn("Nog "+(badPc-3)+" andere postcode(s) hebben niet de vorm 1234 AB.");
+  if(N){ const by={}; S.rows.forEach(r=>{ if(complete(r)){ const k=norm(r.straat)+"|"+norm(r.huisnr)+norm(r.letter)+norm(r.toev)+"|"+norm(r.plaats); (by[k]=by[k]||[]).push(String(r.nr).trim()); } });
+    const same=Object.values(by).filter(a=>a.length>1); if(same.length) info("Op hetzelfde adres: "+same.map(a=>a.join(" en ")).join("; ")+". Dat is in orde als dit stembureaus in hetzelfde stemlokaal zijn."); }
+  if(N && noAddr) warn(noAddr+" vast(e) stembureau(s) zonder volledig adres (straat, huisnummer en plaats).");
+  const extra=S.rows.filter(r=>r.extra||r.bag||r.wijk||r.wijkcode||r.buurt||r.buurtcode||r.website||r.gebruik||r.telt||r.gedeeld).length;
+  if(N && extra) info(extra+" stembureau(s) bevatten nog extra gegevens uit een ingelezen 110b-bestand (zoals wijk of BAG-id). Die blijven in het bestand staan.");
+  if(S.rows.length && noPc===S.rows.length && !N) info("Geen enkel stembureau heeft een postcode. In de oude standaard is de postcode optioneel.");
+  if(lost) info(lost+" stembureau(s) hebben adresgegevens die in de oude standaard niet in het bestand komen. Kies de nieuwe standaard om ze op te nemen.");
+  if(S.rows.length && noVoters===S.rows.length) info("Er zijn geen aantallen kiesgerechtigden ingevuld; het element PollingStation blijft dan leeg.");
+  else if(noVoters) info(noVoters+" stembureau(s) zonder aantal kiesgerechtigden.");
+  if(N && S.munSite.trim() && !/^https?:\/\//i.test(S.munSite.trim())) warn("De verkiezingswebsite van de gemeente moet beginnen met http:// of https://.");
+  if(!N) info("Oude standaard (EML_NL 1.2.2): geen kr:Schema-element en geen adres- of typegegevens.");
+  if(N) info("Nieuwe standaard (EML_NL 1.3.1). Controleer of de software die het bestand inleest deze versie al ondersteunt.");
+  if(GEM_BY_CODE[S.gemCode] && FICT_GEM.some(g=>g[0]===S.gemCode)) info("Fictieve testgemeente: alleen gebruiken om software te testen.");
+  return out;
+}
+
+/* ---------- weergave ---------- */
+function renderStd(){
+  $("stdOld").checked=S.std==="old"; $("stdNew").checked=S.std==="new";
+  $("stdHint").textContent=isNew()
+    ? "De adresgegevens komen in het nieuwe element sb:Location. De naam en postcode staan er voor oudere software ook nog op de oude plek in."
+    : "Gebruik de oude standaard voor software die EML_NL 1.3 nog niet kent, zoals bij de herindelingsverkiezingen van 18 november 2026. Adresvelden worden verborgen en niet opgenomen.";
+  $("munWrap").hidden=true;
+}
+function gemOptions(){
+  let h='<option value="">Andere gemeente (handmatig invullen)</option><optgroup label="Fictief: testgemeenten van de Kiesraad">'+FICT_GEM.map(g=>'<option value="'+g[0]+'">'+esc(g[1])+" (fictief, "+g[0]+")</option>").join("")+"</optgroup>";
+  h+='<optgroup label="Gemeenten">'+GEMEENTEN.map(g=>'<option value="'+g[0]+'">'+esc(g[1])+" ("+g[0]+")</option>").join("")+"</optgroup>";
+  return h;
+}
+function renderElection(){
+  $("gemPick").value=S.gem||"";
+  $("gemManWrap").hidden=!!S.gem;
+  ["gemName","gemCode"].forEach(k=>{ if(document.activeElement!==$(k)) $(k).value=S[k]; });
+  const ff=!!S.el.fromFile;
+  $("elManual").hidden=ff; $("elManual2").hidden=ff; $("defClear").hidden=!ff;
+  $("defFacts").hidden=!ff;
+  if(ff) $("defFacts").innerHTML=[S.el.name,S.el.id,"Categorie "+S.el.cat+(S.el.sub?" / "+S.el.sub:""),"Stemming "+S.el.date,"uit "+S.el.fromFile].map(f=>'<span class="chip on">'+esc(f)+"</span>").join("");
+  $("elCat").value=S.el.cat;
+  $("elSub").innerHTML=CATS[S.el.cat].subs.map(s=>"<option"+(s===S.el.sub?" selected":"")+">"+s+"</option>").join("");
+  if(document.activeElement!==$("elDate")) $("elDate").value=S.el.date;
+  if(document.activeElement!==$("elName")) $("elName").value=S.el.name;
+  if(document.activeElement!==$("elId")) $("elId").value=S.el.id;
+  [["nameAuto","name"],["idAuto","id"]].forEach(([b,k])=>{ $(b).textContent=edited[k]?"aangepast":"automatisch"; $(b).style.color=edited[k]?"var(--warn)":"var(--ok)"; });
+}
+function inp(i,k,v,attrs){ return '<input type="text" data-i="'+i+'" data-f="'+k+'" value="'+esc(v)+'" '+(attrs||"")+">"; }
+function sel(i,k,v,opts){ return '<select data-i="'+i+'" data-f="'+k+'">'+opts.map(([val,l])=>'<option value="'+esc(val)+'"'+(String(v)===val?" selected":"")+">"+esc(l)+"</option>").join("")+"</select>"; }
+function renderTable(){
+  const N=isNew();
+  const head=N?["Nr","Naam stembureau","Straat","Huisnr","Postcode","Plaats","Type","Kiesger.",""]:["Nr","Naam stembureau","Postcode","Kiesgerechtigden",""];
+  $("sbTable").querySelector("thead").innerHTML="<tr>"+head.map(h=>"<th>"+h+"</th>").join("")+"</tr>";
+  const rows=S.rows.map((r,i)=>{
+    const del='<td class="x"><button type="button" class="small" data-del="'+i+'" aria-label="Verwijder stembureau">×</button></td>';
+    if(!N) return "<tr><td>"+inp(i,"nr",r.nr,'style="width:56px" inputmode="numeric" aria-label="Nummer"')+"</td><td>"+inp(i,"naam",r.naam,'aria-label="Naam" style="min-width:200px"')+"</td><td>"+inp(i,"postcode",r.postcode,'style="width:92px" aria-label="Postcode"')+"</td><td>"+inp(i,"kiesger",r.kiesger,'style="width:96px" inputmode="numeric" aria-label="Kiesgerechtigden"')+"</td>"+del+"</tr>";
+    const hn=String(r.huisnr||"")+String(r.letter||"")+(r.toev?"-"+r.toev:"");
+    let h="<tr><td>"+inp(i,"nr",r.nr,'style="width:52px" inputmode="numeric" aria-label="Nummer"')+"</td><td>"+inp(i,"naam",r.naam,'aria-label="Naam" style="min-width:140px"')+"</td><td>"+inp(i,"straat",r.straat,'aria-label="Straat" style="min-width:100px"')+"</td><td>"+inp(i,"huisnrfull",hn,'style="width:64px" aria-label="Huisnummer" title="Bijv. 22, 22a of 22-1"')+"</td><td>"+inp(i,"postcode",r.postcode,'style="width:86px" aria-label="Postcode"')+"</td><td>"+inp(i,"plaats",r.plaats,'aria-label="Plaats" style="min-width:90px"')+"</td><td>"+sel(i,"type",r.type,RUTYPES)+"</td><td>"+inp(i,"kiesger",r.kiesger,'style="width:72px" inputmode="numeric" aria-label="Kiesgerechtigden (optioneel)"')+"</td>"+del+"</tr>";
+    if(false){
+      const f=(k,l,a)=>'<div class="field"><label>'+l+"</label>"+inp(i,k,r[k],a)+"</div>";
+      h+='<tr class="det"><td colspan="9"><div class="det-grid">'+f("letter","Huisletter",'maxlength="1"')+f("toev","Toevoeging")+f("extra","Extra adresaanduiding",'placeholder="bijv. ingang achterzijde"')+
+        '<div class="field"><label>Gebruiksdoel gebouw</label>'+sel(i,"gebruik",r.gebruik,[["","(niet opgeven)"]].concat(USAGE.map(u=>[u,u])))+"</div>"+
+        '<div class="field"><label>Tellocatie</label>'+sel(i,"telt",r.telt,[["","(niet opgeven)"],["true","ja, hier wordt geteld"],["false","nee"]])+"</div>"+
+        '<label class="inline"><input type="checkbox" data-i="'+i+'" data-f="gedeeld"'+(r.gedeeld==="true"?" checked":"")+"> Gedeelde locatie</label>"+
+        f("wijk","Wijknaam")+f("wijkcode","Wijkcode",'placeholder="WK010601"')+f("buurt","Buurtnaam")+f("buurtcode","Buurtcode",'placeholder="BU01060101"')+
+        f("bag","BAG nummeraanduiding-id",'inputmode="numeric" placeholder="16 cijfers"')+f("website","Website locatie",'placeholder="https://"')+f("kiesger","Kiesgerechtigden",'inputmode="numeric"')+
+        "</div></td></tr>";
+    }
+    return h;
+  }).join("");
+  $("sbTable").querySelector("tbody").innerHTML=rows||'<tr><td colspan="9" style="padding:18px;text-align:center;color:var(--muted)">Nog geen stembureaus. Voeg er een toe of lees een Excel-bestand in.</td></tr>';
+  $("formHint").textContent=N?"Dit zijn de gegevens die Abacus per stembureau kent. Nummer en naam zijn verplicht; een huisletter of toevoeging typ je achter het huisnummer (22a of 22-1). Het aantal kiesgerechtigden is optioneel.":"In de oude standaard zijn alleen nummer, naam en postcode nodig. Het aantal kiesgerechtigden is optioneel.";
+}
+function renderTabs(){
+  $("tabForm").setAttribute("aria-selected",S.tab==="form"); $("tabExcel").setAttribute("aria-selected",S.tab==="excel"); $("tabFile").setAttribute("aria-selected",S.tab==="file");
+  $("paneForm").hidden=S.tab!=="form"; $("paneExcel").hidden=S.tab!=="excel"; $("paneFile").hidden=S.tab!=="file";
+  renderLoaded();
+  $("vCards").setAttribute("aria-selected",S.view==="cards"); $("vXml").setAttribute("aria-selected",S.view==="xml");
+  $("cards").hidden=S.view!=="cards"; $("xml").hidden=S.view!=="xml";
+}
+function addrLine(r){
+  const s=[String(r.straat||"").trim(),[r.huisnr,r.letter].join("").trim()+(r.toev?"-"+r.toev:"")].filter(Boolean).join(" ");
+  return [s,[pc(r.postcode),r.plaats].filter(x=>String(x||"").trim()).join(" ")].filter(Boolean).join(", ");
+}
+function renderCards(){
+  const N=isNew();
+  if(!S.rows.length){ $("cards").innerHTML='<div class="empty">Hier verschijnen de stembureaus zodra je ze invult of inleest.</div>'; return; }
+  $("cards").innerHTML=S.rows.map(r=>{
+    const b=[];
+    if(N){ if(r.type==="Mobile") b.push("mobiel"); if(r.type==="Special") b.push("bijzonder"); if(r.gedeeld==="true") b.push("gedeelde locatie"); if(r.telt==="true") b.push("tellocatie"); if(r.gebruik) b.push(r.gebruik.toLowerCase()); if(r.wijk) b.push("wijk "+r.wijk); }
+    if(String(r.kiesger).trim()) b.push(Number(r.kiesger).toLocaleString("nl-NL")+" kiesgerechtigden");
+    const ad=N? addrLine(r) : pc(r.postcode);
+    return '<div class="card"><span class="nr">'+esc(r.nr||"?")+'</span><span class="nm">'+esc(r.naam||"(zonder naam)")+"</span>"+
+      '<span class="ad">'+esc(ad||(N?"geen adres":""))+(N&&r.extra?" · "+esc(r.extra):"")+"</span>"+
+      '<span class="bd">'+b.map(x=>'<span class="chip">'+esc(x)+"</span>").join("")+"</span></div>";
+  }).join("");
+}
+let currentXml="";
+function fileName(){ const id=slug(S.el.id)||"verkiezing", g=slug(S.gemName); return "Stembureaus_"+id+(g && id.toLowerCase().indexOf(g.toLowerCase())<0?"_"+g:"")+".eml.xml"; }
+function renderOut(){
+  currentXml=buildXml();
+  if(S.view==="xml") $("xml").innerHTML=highlight(currentXml);
+  renderCards();
+  const N=isNew();
+  $("fCount").textContent=S.rows.length;
+  $("fMob").textContent=N? S.rows.filter(r=>r.type==="Mobile").length+" / "+S.rows.filter(r=>r.type==="Special").length : "–";
+  $("fAddr").textContent=N? S.rows.filter(r=>r.straat&&r.huisnr&&r.plaats).length : S.rows.filter(r=>String(r.postcode).trim()).length+" pc";
+  const v=S.rows.reduce((s,r)=>s+(parseInt(r.kiesger,10)||0),0); $("fVoters").textContent=v?v.toLocaleString("nl-NL"):"–";
+  const res=validate(), nb=res.filter(r=>r[0]==="bad").length, nw=res.filter(r=>r[0]==="warn").length;
+  const st=$("status"); st.className="status "+(nb?"bad":nw?"warn":"ok");
+  st.textContent=nb? nb+(nb===1?" fout":" fouten")+" om op te lossen" : nw? "Bruikbaar, met "+nw+(nw===1?" aandachtspunt":" aandachtspunten") : "Klaar om te downloaden";
+  $("checks").innerHTML=res.map(([k,m])=>'<li class="'+k+'">'+esc(m)+"</li>").join("");
+  $("dlBtn").disabled=!!nb;
+  $("fname").textContent=fileName();
+  showHash(); save();
+}
+let tmr=null;
+function update(){ applyAuto(); renderElection(); clearTimeout(tmr); tmr=setTimeout(renderOut,150); }
+function full(){ applyAuto(); renderStd(); renderElection(); renderTable(); renderTabs(); renderOut(); }
+
+/* ---------- events: vraag 1 en 2 ---------- */
+document.querySelectorAll('input[name=std]').forEach(el=>el.addEventListener("change",e=>{ S.std=e.target.value; full(); }));
+$("gemPick").addEventListener("change",e=>{ S.gem=e.target.value; if(S.gem){ S.gemCode=S.gem; S.gemName=GEM_BY_CODE[S.gem]; } else { S.gemCode=""; S.gemName=""; } update(); if(!S.gem) $("gemName").focus(); });
+$("gemName").addEventListener("input",e=>{ S.gemName=e.target.value; update(); });
+$("gemCode").addEventListener("input",e=>{ S.gemCode=e.target.value.trim(); update(); });
+$("elCat").addEventListener("change",e=>{ S.el.cat=e.target.value; S.el.sub=CATS[S.el.cat].def; update(); });
+$("elSub").addEventListener("change",e=>{ S.el.sub=e.target.value; update(); });
+$("elDate").addEventListener("input",e=>{ S.el.date=e.target.value; update(); });
+$("elName").addEventListener("input",e=>{ S.el.name=e.target.value; edited.name=e.target.value!==""; update(); });
+$("elId").addEventListener("input",e=>{ S.el.id=e.target.value; edited.id=e.target.value!==""; update(); });
+$("defBtn").addEventListener("click",()=>$("defFile").click());
+$("defFile").addEventListener("change",async e=>{ const f=e.target.files[0]; if(f) openXml(await f.text(),f.name); e.target.value=""; });
+const defDrop=$("defDrop");
+defDrop.addEventListener("dragover",e=>{ e.preventDefault(); defDrop.classList.add("over"); });
+defDrop.addEventListener("dragleave",()=>defDrop.classList.remove("over"));
+defDrop.addEventListener("drop",async e=>{ e.preventDefault(); defDrop.classList.remove("over"); const f=e.dataTransfer.files[0]; if(f) openXml(await f.text(),f.name); });
+$("defClear").addEventListener("click",()=>{ S.el.fromFile=""; edited={}; full(); });
+["munContact","munSite","authId","authName"].forEach(k=>$(k).addEventListener("input",e=>{ S[k]=e.target.value; update(); }));
+$("txId").addEventListener("input",e=>{ S.tx=e.target.value; update(); });
+$("issueDate").addEventListener("input",e=>{ S.issueDate=e.target.value; update(); });
+
+/* ---------- 110a / 110b openen ---------- */
+function openXml(text,name,want){
+  try{
+    const doc=new DOMParser().parseFromString(text,"application/xml");
+    if(doc.getElementsByTagName("parsererror").length) throw new Error("Het bestand is geen geldige XML.");
+    const id=doc.documentElement.getAttribute("Id")||"";
+    if(id!=="110a" && id!=="110b") throw new Error("Dit is geen EML 110a- of 110b-bestand (Id="+(id||"?")+").");
+    if(want && id!==want) throw new Error("Dit is een "+id+"-bestand; kies hier een stembureaubestand (110b).");
+    const one=(ns,n,c)=>(c||doc).getElementsByTagNameNS(ns,n)[0], txt=(ns,n,c)=>{ const e=one(ns,n,c); return e?e.textContent.trim():""; };
+    const ei=one(NS_EML,"ElectionIdentifier"); if(!ei) throw new Error("Geen ElectionIdentifier gevonden.");
+    const cat=txt(NS_EML,"ElectionCategory");
+    const dom=one(NS_KR,"ElectionDomain");
+    S.el={cat:CATS[cat]?cat:"GR",sub:txt(NS_KR,"ElectionSubcategory"),date:txt(NS_KR,"ElectionDate"),name:txt(NS_EML,"ElectionName"),id:ei.getAttribute("Id")||"",
+          domId:dom?dom.getAttribute("Id")||"":"",domName:dom?dom.textContent.trim():"",fromFile:name};
+    S.el.realCat=cat;
+    let gc="", gn="";
+    if(id==="110b"){ const ru=one(NS_EML,"ReportingUnitIdentifier"); if(ru){ gc=ru.getAttribute("Id")||""; gn=ru.textContent.trim(); } }
+    if(!gc && CATS[cat]&&CATS[cat].local && S.el.domId){ gc=S.el.domId; gn=GEM_BY_CODE[gc]||S.el.domName; }
+    if(gc){ S.gemCode=gc; S.gemName=gn||GEM_BY_CODE[gc]||""; S.gem=GEM_BY_CODE[gc]?gc:""; }
+    if(id==="110b"){
+      const sch=one(NS_KR,"Schema"); const hasSb=doc.getElementsByTagNameNS(NS_SB,"Location").length>0;
+      S.std=(sch||hasSb)?"new":"old";
+      S.munContact=txt(NS_SB,"MunicipalityContactDetails"); S.munSite=txt(NS_SB,"MunicipalityElectionSite");
+      S.tx=txt(NS_EML,"TransactionId")||"1";
+      const map={BAGId:"bag",StreetName:"straat",Number:"huisnr",Letter:"letter",NumberAddition:"toev",City:"plaats",AdditionalAddressInformation:"extra",BuildingUsage:"gebruik",DistrictName:"wijk",DistrictCode:"wijkcode",NeighbourhoodName:"buurt",NeighbourhoodCode:"buurtcode",Website:"website",CountingLocation:"telt"};
+      S.rows=[...doc.getElementsByTagNameNS(NS_EML,"PollingPlace")].map(pp=>{
+        const r=emptyRow(), ps=one(NS_EML,"PollingStation",pp);
+        if(ps){ r.nr=ps.getAttribute("Id")||""; r.kiesger=[...ps.childNodes].filter(n=>n.nodeType===3).map(n=>n.nodeValue).join("").trim(); }
+        r.naam=txt(NS_XAL,"LocalityName",pp); r.postcode=txt(NS_XAL,"PostalCodeNumber",pp);
+        const loc=one(NS_SB,"Location",pp);
+        if(loc) [...loc.children].forEach(c=>{ if(map[c.localName]) r[map[c.localName]]=c.textContent.trim(); if(c.localName==="PostalCode"&&c.textContent.trim()) r.postcode=c.textContent.trim(); });
+        const t=txt(NS_KR,"ReportingUnitType",pp); if(t) r.type=t;
+        if(txt(NS_KR,"SharedLocation",pp)==="true") r.gedeeld="true";
+        return r;
+      });
+      S.open={};
+      S.loaded={name,std:S.std,n:S.rows.length,addr:S.rows.filter(r=>r.straat||r.plaats).length};
+      S.tab="file";
+    }
+    full();
+    toast(id==="110b"? "Ingelezen: "+S.rows.length+" stembureaus ("+(S.std==="new"?"nieuwe":"oude")+" standaard)" : "Verkiezing overgenomen: "+S.el.name);
+  }catch(err){ toast(err.message||"Inlezen mislukt."); }
+}
+function renderLoaded(){
+  const L=S.loaded; $("ebInfo").hidden=!L; if(!L) return;
+  $("ebFacts").innerHTML=[L.name,L.n+" stembureaus",(L.std==="new"?"nieuwe":"oude")+" standaard",S.gemName+" ("+S.gemCode+")",S.el.id].map(f=>'<span class="chip on">'+esc(f)+"</span>").join("");
+  const N=isNew();
+  $("ebConvert").hidden=N;
+  $("ebHint").textContent=N
+    ? (L.std==="old"?"Omgezet naar de nieuwe standaard. ":"")+S.rows.filter(r=>r.straat&&r.huisnr&&r.plaats).length+" van de "+S.rows.length+" stembureaus hebben een volledig adres. Vul de rest aan op het invoerscherm of met een Excel-bestand."
+    : "Dit bestand is in de oude standaard: per stembureau alleen nummer, naam en postcode. Zet het om naar de nieuwe standaard om adressen en het type stembureau toe te voegen, of wijzig het en houd de oude standaard aan.";
+}
+$("ebBtn").addEventListener("click",()=>$("ebFile").click());
+$("ebFile").addEventListener("change",async e=>{ const f=e.target.files[0]; if(f) openXml(await f.text(),f.name,"110b"); e.target.value=""; });
+const ebDrop=$("ebDrop");
+ebDrop.addEventListener("dragover",e=>{ e.preventDefault(); ebDrop.classList.add("over"); });
+ebDrop.addEventListener("dragleave",()=>ebDrop.classList.remove("over"));
+ebDrop.addEventListener("drop",async e=>{ e.preventDefault(); ebDrop.classList.remove("over"); const f=e.dataTransfer.files[0]; if(f) openXml(await f.text(),f.name,"110b"); });
+$("ebConvert").addEventListener("click",()=>{ S.std="new"; full(); toast("Omgezet naar de nieuwe standaard; vul nu de adressen aan"); });
+$("ebEdit").addEventListener("click",()=>{ S.tab="form"; renderTabs(); });
+$("ebExcel").addEventListener("click",()=>{ S.tab="excel"; renderTabs(); });
+$("tabFile").addEventListener("click",()=>{ S.tab="file"; renderTabs(); });
+$("openBtn").addEventListener("click",()=>$("openFile").click());
+$("openFile").addEventListener("change",async e=>{ const f=e.target.files[0]; if(f) openXml(await f.text(),f.name); e.target.value=""; });
+$("resetBtn").addEventListener("click",()=>{ freshState(); try{ localStorage.removeItem(STORE); }catch(e){} full(); toast("Opnieuw begonnen"); });
+
+/* ---------- events: tabel ---------- */
+const tb=$("sbTable").querySelector("tbody");
+tb.addEventListener("input",e=>{
+  const t=e.target, i=+t.dataset.i, f=t.dataset.f; if(!f||!S.rows[i]) return;
+  if(f==="huisnrfull"){ const r=S.rows[i]; r.huisnr=t.value.trim(); r.letter=""; r.toev=""; splitHuisnr(r); cleanToev(r); update(); return; }
+  S.rows[i][f]= t.type==="checkbox" ? (t.checked?"true":"") : t.value;
+  update();
+});
+tb.addEventListener("change",e=>{ const t=e.target; if(t.dataset.f==="postcode"){ const i=+t.dataset.i; S.rows[i].postcode=pc(t.value); t.value=S.rows[i].postcode; update(); } });
+tb.addEventListener("click",e=>{
+  const d=e.target.closest("[data-del]"), m=e.target.closest("[data-more]");
+  if(d){ const i=+d.dataset.del; S.rows.splice(i,1); const o={}; Object.keys(S.open).forEach(k=>{ k=+k; if(k<i) o[k]=1; else if(k>i) o[k-1]=1; }); S.open=o; renderTable(); update(); }
+  if(m){ const i=+m.dataset.more; S.open[i]=!S.open[i]; renderTable(); }
+});
+function nextNr(){ return S.rows.reduce((mx,r)=>Math.max(mx,parseInt(r.nr,10)||0),0)+1; }
+$("addRow").addEventListener("click",()=>{
+  const last=S.rows[S.rows.length-1], r=emptyRow(nextNr());
+  if(last){ r.plaats=last.plaats; }
+  else if(S.gemName) r.plaats=S.gemName.replace(/\s*\(.*\)$/,"");
+  S.rows.push(r); renderTable(); update();
+  const inputs=tb.querySelectorAll('input[data-f=naam]'); if(inputs.length) inputs[inputs.length-1].focus();
+});
+$("sortRows").addEventListener("click",()=>{ S.rows.sort((a,b)=>(parseInt(a.nr,10)||1e9)-(parseInt(b.nr,10)||1e9)); S.open={}; renderTable(); update(); });
+$("renumber").addEventListener("click",()=>{ S.rows.forEach((r,i)=>r.nr=String(i+1)); renderTable(); update(); toast("Stembureaus opnieuw genummerd"); });
+$("clearRows").addEventListener("click",()=>{ if(!S.rows.length) return; const keep=S.rows; S.rows=[]; S.open={}; renderTable(); update(); toastUndo(keep); });
+function toastUndo(keep){ const t=$("toast"); t.innerHTML='Lijst gewist. <button type="button" class="small" id="undoBtn" style="margin-left:8px;pointer-events:auto">Ongedaan maken</button>'; t.classList.add("show"); t.style.pointerEvents="auto";
+  $("undoBtn").addEventListener("click",()=>{ S.rows=keep; renderTable(); update(); t.classList.remove("show"); t.style.pointerEvents="none"; });
+  clearTimeout(toast._t); toast._t=setTimeout(()=>{ t.classList.remove("show"); t.style.pointerEvents="none"; },6000); }
+$("demoRows").addEventListener("click",()=>{
+  S.gem="0123"; S.gemCode="0123"; S.gemName="Heemdamseburg";
+  const D=[["1","Stadhuis","Grote Markt","1","1011 PN","Heemdamseburg","FixedLocation","1430"],
+    ["2","Basisschool De Regenboog","Schoolstraat","14","1012 AB","Heemdamseburg","FixedLocation","1210"],
+    ["3","Sporthal De Bongerd","Sportlaan","22a","1013 CD","Heemdamseburg","FixedLocation","1660"],
+    ["4","Mobiel stembureau Op Rolletjes","Stationsplein","1","1015 GH","Heemdamseburg","Mobile",""],
+    ["5","Woonzorgcentrum De Linde","Lindelaan","3-1","1014 EF","Juinen","Special","320"]];
+  S.rows=D.map(d=>{ const r=emptyRow(); ["nr","naam","straat","huisnr","postcode","plaats","type","kiesger"].forEach((k,i)=>r[k]=d[i]); splitHuisnr(r); return r; });
+  S.open={}; full(); toast("Voorbeeld met fictieve stembureaus ingevuld");
+});
+$("tabForm").addEventListener("click",()=>{ S.tab="form"; renderTabs(); });
+$("tabExcel").addEventListener("click",()=>{ S.tab="excel"; renderTabs(); });
+$("vCards").addEventListener("click",()=>{ S.view="cards"; renderTabs(); });
+$("vXml").addEventListener("click",()=>{ S.view="xml"; renderTabs(); $("xml").innerHTML=highlight(currentXml); });
+
+/* ---------- Excel inlezen ---------- */
+let XLSXlib=null;
+function loadXLSX(){
+  if(window.XLSX) return Promise.resolve(window.XLSX);
+  if(XLSXlib) return XLSXlib;
+  XLSXlib=new Promise((res,rej)=>{ const s=document.createElement("script"); s.src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"; s.onload=()=>res(window.XLSX); s.onerror=()=>{ XLSXlib=null; rej(new Error("De Excel-lezer kon niet laden. Sla het bestand op als csv of plak de cellen.")); }; document.head.appendChild(s); });
+  return XLSXlib;
+}
+let IMP=null; // {sheets:[{name,rows}], si, head, map:{k:colIndex}}
+function parseCsv(text){
+  const t=text.replace(/^﻿/,""); const first=t.split(/\r?\n/)[0]||"";
+  const d=first.includes("\t")?"\t":(first.split(";").length>=first.split(",").length?";":",");
+  const rows=[]; let row=[], cur="", q=false;
+  for(let i=0;i<t.length;i++){ const c=t[i];
+    if(q){ if(c==='"'){ if(t[i+1]==='"'){ cur+='"'; i++; } else q=false; } else cur+=c; }
+    else if(c==='"' && cur==="") q=true; else if(c===d){ row.push(cur); cur=""; } else if(c==="\n"||c==="\r"){ if(c==="\r"&&t[i+1]==="\n") i++; row.push(cur); rows.push(row); row=[]; cur=""; } else cur+=c; }
+  if(cur!==""||row.length){ row.push(cur); rows.push(row); }
+  return rows.filter(r=>r.some(x=>String(x).trim()!==""));
+}
+function guessHead(rows){
+  let best=0, bestScore=-1;
+  for(let i=0;i<Math.min(rows.length,15);i++){ const sc=rows[i].reduce((s,c)=>s+(matchField(c)?1:0),0); if(sc>bestScore){ bestScore=sc; best=i; } }
+  return best;
+}
+function matchField(h){ const n=norm(h); if(!n) return null;
+  for(const f of FIELDS) if(f.syn.includes(n)) return f.k;
+  for(const f of FIELDS) if(f.syn.some(s=>s.length>3 && n.startsWith(s))) return f.k;
+  return null; }
+function autoMap(){
+  const hdr=(IMP.sheets[IMP.si].rows[IMP.head]||[]); IMP.map={};
+  hdr.forEach((h,ci)=>{ const k=matchField(h); if(k && AB.includes(k) && IMP.map[k]==null) IMP.map[k]=ci; });
+  if(IMP.map.straat!=null || IMP.map.huisnr!=null) delete IMP.map.adres;
+}
+async function importFile(f){
+  try{
+    let sheets;
+    if(/\.(csv|txt)$/i.test(f.name)) sheets=[{name:f.name,rows:parseCsv(await f.text())}];
+    else {
+      const X=await loadXLSX(), wb=X.read(await f.arrayBuffer(),{type:"array"});
+      sheets=wb.SheetNames.map(n=>({name:n,rows:X.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:false,defval:""}).map(r=>r.map(c=>String(c==null?"":c))).filter(r=>r.some(c=>c.trim()!==""))})).filter(s=>s.rows.length);
+    }
+    startImport(sheets,f.name);
+  }catch(err){ toast(err.message||"Inlezen mislukt."); }
+}
+function startImport(sheets,label){
+  if(!sheets.length || !sheets.some(s=>s.rows.length>1)) { toast("Geen gegevens gevonden in "+label+"."); return; }
+  let si=0, bs=-1; sheets.forEach((s,i)=>{ const h=guessHead(s.rows), sc=(s.rows[h]||[]).filter(c=>matchField(c)).length; if(sc>bs){ bs=sc; si=i; } });
+  IMP={sheets,si,head:guessHead(sheets[si].rows),label,choice:{}}; autoMap(); renderMap();
+  toast("Ingelezen: "+label+". Controleer de koppeling van de kolommen.");
+}
+function importRows(){
+  const s=IMP.sheets[IMP.si], out=[];
+  s.rows.slice(IMP.head+1).forEach(src=>{
+    const g=k=>IMP.map[k]==null?"":String(src[IMP.map[k]]||"").trim();
+    const r=emptyRow();
+    ROWKEYS.forEach(k=>{ if(IMP.map[k]!=null) r[k]=g(k); });
+    if(IMP.map.adres!=null && !r.straat) splitAdres(r,g("adres"));
+    splitHuisnr(r); cleanToev(r);
+    r.nr=r.nr.replace(/^(sb|stembureau)\s*/i,"").replace(/\.0+$/,"");
+    r.postcode=pc(r.postcode); r.type=ruType(g("type")); r.gedeeld=yesno(r.gedeeld)==="true"?"true":""; r.telt=yesno(r.telt); r.gebruik=usage(r.gebruik);
+    r.kiesger=r.kiesger.replace(/[.\s]/g,"");
+    r._open=fmtTime(g("open")); r._close=fmtTime(g("close")); r._src=out.length;
+    r.bag=r.bag.replace(/\D/g,"").length===16? r.bag.replace(/\D/g,"") : r.bag;
+    if(r.website && !/^https?:\/\//i.test(r.website) && /\./.test(r.website)) r.website="https://"+r.website;
+    const has=new Set(); Object.keys(IMP.map).forEach(k=>{ if(k==="adres"||k==="huisnr"){ ["straat","huisnr","letter","toev"].forEach(x=>{ if(k==="adres"||x!=="straat") has.add(x); }); } else if(k!=="type" && k!=="open" && k!=="close") has.add(k); });
+    if(g("type")) has.add("type");
+    r._has=[...has].filter(k=>k==="type"||String(r[k]).trim()!=="" || ((k==="letter"||k==="toev") && String(r.huisnr).trim()!==""));
+    if(r.naam||r.nr) out.push(r);
+  });
+  return out;
+}
+function fmtTime(v){ v=String(v||"").trim(); if(!v) return "";
+  if(/^0?\.\d+$/.test(v)){ const m=Math.round(parseFloat(v)*1440); return String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0"); }
+  const m=v.match(/(\d{1,2})[:.u](\d{2})/); return m? m[1].padStart(2,"0")+":"+m[2] : v; }
+function complete(r){ return !!(String(r.straat).trim() && String(r.huisnr).trim() && String(r.plaats).trim()); }
+function pcOk(r){ return /^\d{4} [A-Z]{2}$/.test(pc(r.postcode)); }
+function dupGroups(rows){
+  const by={}; rows.forEach((r,i)=>{ const n=String(r.nr).trim(); if(n){ (by[n]=by[n]||[]).push(i); } });
+  return Object.keys(by).filter(n=>by[n].length>1).sort((a,b)=>(+a)-(+b)).map(n=>{
+    const idx=by[n].slice().sort((a,b)=>(rows[a]._open||"99").localeCompare(rows[b]._open||"99") || a-b);
+    return {nr:n, idx};
+  });
+}
+function defaultChoice(g,rows){
+  const mob=g.idx.some(i=>rows[i].type==="Mobile");
+  const sameName=new Set(g.idx.map(i=>norm(rows[i].naam))).size===1;
+  const pick=g.idx.find(i=>complete(rows[i])&&pcOk(rows[i]));
+  return {mode:(mob||sameName)?"merge":"renumber", pick:pick!=null?pick:g.idx[0]};
+}
+function resolveDups(rows,baseMax){
+  const groups=dupGroups(rows); if(!groups.length) return rows;
+  IMP.choice=IMP.choice||{};
+  const drop=new Set(); let next=Math.max(baseMax||0, rows.reduce((m,r)=>Math.max(m,parseInt(r.nr,10)||0),0))+1;
+  groups.forEach(g=>{
+    const c=IMP.choice[g.nr]||defaultChoice(g,rows);
+    if(c.mode==="merge"){
+      const t=rows[c.pick];
+      t.type="Mobile";
+      if(!String(t.naam).trim()) t.naam=(g.idx.map(i=>rows[i].naam).find(x=>String(x).trim())||"");
+      if(!String(t.kiesger).trim()) t.kiesger=(g.idx.map(i=>rows[i].kiesger).find(x=>String(x).trim())||"");
+      t._has=[...new Set([].concat(...g.idx.map(i=>rows[i]._has||[])).concat(["type"]))];
+      g.idx.forEach(i=>{ if(i!==c.pick) drop.add(i); });
+    } else {
+      g.idx.slice().sort((a,b)=>a-b).slice(1).forEach(i=>{ rows[i].nr=String(next++); });
+    }
+  });
+  return rows.filter((r,i)=>!drop.has(i));
+}
+function renderDups(rows){
+  const box=$("dupBox"), groups=dupGroups(rows), N=isNew();
+  box.hidden=!groups.length; if(!groups.length) return;
+  IMP.choice=IMP.choice||{};
+  groups.forEach(g=>{ const c=IMP.choice[g.nr]; if(!c || !g.idx.includes(c.pick)) IMP.choice[g.nr]=defaultChoice(g,rows); });
+  const times=IMP.map.open!=null||IMP.map.close!=null;
+  box.innerHTML="<h3>"+groups.length+(groups.length===1?" stembureaunummer komt":" stembureaunummers komen")+" meer dan eens voor</h3>"+
+    '<p class="hint" style="margin:0">Is het een mobiel stembureau met meerdere standplaatsen? Dan voegt de app de regels samen tot één stembureau. Abacus kent één adres per stembureau: kies welk adres in het bestand komt. De andere standplaatsen'+(times?" en de tijden":"")+" komen niet in het bestand; die vult het stembureau op het proces-verbaal in.</p>"+
+    groups.map(g=>{
+      const c=IMP.choice[g.nr], nm=esc(rows[g.idx[0]].naam||"");
+      let h='<div class="dupg" data-nr="'+esc(g.nr)+'"><div class="qq"><span>Stembureau <b>'+esc(g.nr)+"</b> "+nm+" · "+g.idx.length+" regels</span>"+
+        '<label class="inline"><input type="radio" name="dm_'+esc(g.nr)+'" value="merge"'+(c.mode==="merge"?" checked":"")+"> Ja, mobiel stembureau: samenvoegen</label>"+
+        '<label class="inline"><input type="radio" name="dm_'+esc(g.nr)+'" value="renumber"'+(c.mode==="renumber"?" checked":"")+"> Nee, verschillende stembureaus: nieuwe nummers geven</label></div>";
+      h+='<div class="tbl-wrap"><table class="pt"><thead><tr>'+(c.mode==="merge"?"<th>Adres in bestand</th>":"")+"<th>Naam</th>"+(N?"<th>Adres</th><th>Plaats</th>":"")+"<th>Postcode</th>"+(times?"<th>Tijden</th>":"")+"<th>Type</th><th>Controle</th></tr></thead><tbody>"+
+        g.idx.map(i=>{ const r=rows[i], ok=complete(r), pok=pcOk(r);
+          const chk=!N? (pok?'<span class="okc">postcode ✓</span>':'<span class="badc">postcode ontbreekt of onjuist</span>')
+            : (ok&&pok?'<span class="okc">volledig ✓</span>':'<span class="badc">'+[!String(r.straat).trim()&&"straat",!String(r.huisnr).trim()&&"huisnummer",!String(r.plaats).trim()&&"plaats",!pok&&"postcode"].filter(Boolean).join(", ")+" ontbreekt of onjuist</span>");
+          return "<tr>"+(c.mode==="merge"?'<td><input type="radio" name="dp_'+esc(g.nr)+'" value="'+i+'"'+(c.pick===i?" checked":"")+' aria-label="Gebruik dit adres"></td>':"")+
+            "<td>"+esc(r.naam)+"</td>"+(N?"<td>"+esc([r.straat,[r.huisnr,r.letter].join("")+(r.toev?"-"+r.toev:"")].join(" ").trim())+"</td><td>"+esc(r.plaats)+"</td>":"")+"<td>"+esc(pc(r.postcode))+"</td>"+
+            (times?"<td>"+esc([r._open,r._close].filter(Boolean).join("–"))+"</td>":"")+"<td>"+esc((RUTYPES.find(t=>t[0]===r.type)||["",""])[1])+"</td><td>"+chk+"</td></tr>"; }).join("")+"</tbody></table></div>";
+      if(c.mode==="merge" && !(complete(rows[c.pick])&&pcOk(rows[c.pick])) && N) h+='<p class="hint badc" style="margin:0">Het gekozen adres is niet volledig. Kies een andere standplaats of vul het adres daarna aan op het invoerscherm.</p>';
+      return h+"</div>";
+    }).join("");
+}
+$("dupBox").addEventListener("change",e=>{
+  const g=e.target.closest(".dupg"); if(!g) return; const nr=g.dataset.nr, c=IMP.choice[nr];
+  if(e.target.name==="dm_"+nr) c.mode=e.target.value;
+  if(e.target.name==="dp_"+nr) c.pick=+e.target.value;
+  renderMap();
+});
+function renderMap(){
+  $("mapBox").hidden=!IMP; if(!IMP) return;
+  const s=IMP.sheets[IMP.si], hdr=s.rows[IMP.head]||[];
+  $("sheetWrap").hidden=IMP.sheets.length<2;
+  $("sheetPick").innerHTML=IMP.sheets.map((x,i)=>'<option value="'+i+'"'+(i===IMP.si?" selected":"")+">"+esc(x.name)+" ("+x.rows.length+" rijen)</option>").join("");
+  $("headRow").value=IMP.head+1;
+  const cols=['<option value="">— niet gebruiken —</option>'].concat(hdr.map((h,ci)=>'<option value="'+ci+'">'+esc(h||("kolom "+(ci+1)))+"</option>"));
+  const N=isNew();
+  $("mapGrid").innerHTML=FIELDS.filter(f=>AB.includes(f.k)&&(N||f.old)).map(f=>{
+    const v=IMP.map[f.k];
+    return '<div class="field'+(v!=null?" hit":"")+'"><label>'+esc(f.l)+(f.k==="nr"||f.k==="naam"?" *":"")+'</label><select data-map="'+f.k+'">'+cols.join("").replace('value="'+v+'"','value="'+v+'" selected')+"</select></div>";
+  }).join("");
+  const rows=importRows(), used=Object.keys(IMP.map).length;
+  const unmapped=hdr.filter((h,ci)=>String(h).trim() && !Object.values(IMP.map).includes(ci));
+  const ng=dupGroups(rows).length;
+  $("mapHint").innerHTML=esc(rows.length+" regels"+(ng?" ("+ng+" nummers dubbel, zie hieronder)":"")+" gevonden in ‘"+s.name+"’, "+used+" kolommen gekoppeld.")+(unmapped.length?" Niet gebruikt: "+unmapped.map(h=>"<i>"+esc(h)+"</i>").join(", ")+".":"")+(!N?" In de oude standaard worden alleen nummer, naam, postcode en kiesgerechtigden gebruikt.":"");
+  const pk=N?["nr","naam","straat","huisnr","letter","toev","postcode","plaats","type"]:["nr","naam","postcode","kiesger"];
+  const lab={nr:"Nr",naam:"Naam",straat:"Straat",huisnr:"Huisnr",letter:"Lt",toev:"Toev",postcode:"Postcode",plaats:"Plaats",type:"Type",kiesger:"Kiesger."};
+  $("mapPreview").innerHTML="<thead><tr>"+pk.map(k=>"<th>"+lab[k]+"</th>").join("")+"</tr></thead><tbody>"+rows.slice(0,6).map(r=>"<tr>"+pk.map(k=>"<td>"+esc(k==="type"?(RUTYPES.find(t=>t[0]===r.type)||["",""])[1]:r[k])+"</td>").join("")+"</tr>").join("")+(rows.length>6?'<tr><td colspan="'+pk.length+'" style="color:var(--muted)">… en nog '+(rows.length-6)+"</td></tr>":"")+"</tbody>";
+  $("mapReplace").disabled=!rows.length; $("mapAppend").disabled=!rows.length;
+  renderDups(rows);
+  $("mapMerge").hidden=!S.rows.length; $("mapMerge").disabled=!rows.length || IMP.map.nr==null;
+}
+$("mapGrid").addEventListener("change",e=>{ const k=e.target.dataset.map; if(!k) return; if(e.target.value==="") delete IMP.map[k]; else IMP.map[k]=+e.target.value; renderMap(); });
+$("sheetPick").addEventListener("change",e=>{ IMP.si=+e.target.value; IMP.head=guessHead(IMP.sheets[IMP.si].rows); autoMap(); renderMap(); });
+$("headRow").addEventListener("change",e=>{ const v=Math.max(1,Math.min(IMP.sheets[IMP.si].rows.length,+e.target.value||1)); IMP.head=v-1; autoMap(); renderMap(); });
+function takeImport(append){
+  const maxNow=append? S.rows.reduce((m,r)=>Math.max(m,parseInt(r.nr,10)||0),0) : 0;
+  const rows=resolveDups(importRows(),maxNow); if(!rows.length) return;
+  const merged=dupGroups(importRows()).filter(g=>(IMP.choice[g.nr]||{}).mode==="merge").length;
+  rows.forEach(r=>{ delete r._has; delete r._open; delete r._close; delete r._src; });
+  S.rows= append? S.rows.concat(rows) : rows; S.open={};
+  const empty=rows.filter(r=>!r.nr).length; if(empty){ let n=nextNr(); S.rows.forEach(r=>{ if(!r.nr) r.nr=String(n++); }); }
+  S.tab="form"; full();
+  toast(rows.length+" stembureaus "+(append?"toegevoegd":"overgenomen")+(merged?"; "+merged+" mobiel(e) stembureau(s) samengevoegd":"")+(empty?"; "+empty+" kregen een nummer":""));
+}
+function mergeImport(){
+  const rows=resolveDups(importRows(),S.rows.reduce((m,r)=>Math.max(m,parseInt(r.nr,10)||0),0)); if(!rows.length) return;
+  rows.forEach(r=>{ delete r._open; delete r._close; delete r._src; });
+  const byNr={}; S.rows.forEach(r=>{ byNr[String(r.nr).trim()]=r; });
+  let upd=0, add=0, skip=0; const seen=new Set();
+  rows.forEach(n=>{
+    const nr=String(n.nr).trim(); if(!nr){ skip++; return; }
+    const t=byNr[nr];
+    if(t){ n._has.forEach(k=>{ t[k]=n[k]; }); upd++; seen.add(nr); }
+    else { delete n._has; S.rows.push(n); byNr[nr]=n; add++; }
+  });
+  const rest=S.rows.filter(r=>!seen.has(String(r.nr).trim())).length-add;
+  S.rows.forEach(r=>delete r._has); S.open={}; S.tab="form"; full();
+  toast(upd+" stembureaus aangevuld, "+add+" nieuw toegevoegd"+(rest>0?", "+rest+" niet in Excel (ongewijzigd)":"")+(skip?", "+skip+" rijen zonder nummer overgeslagen":""));
+}
+$("mapMerge").addEventListener("click",mergeImport);
+$("mapReplace").addEventListener("click",()=>takeImport(false));
+$("mapAppend").addEventListener("click",()=>takeImport(true));
+$("xlBtn").addEventListener("click",()=>$("xlFile").click());
+$("xlFile").addEventListener("change",e=>{ const f=e.target.files[0]; if(f) importFile(f); e.target.value=""; });
+const xlDrop=$("xlDrop");
+xlDrop.addEventListener("dragover",e=>{ e.preventDefault(); xlDrop.classList.add("over"); });
+xlDrop.addEventListener("dragleave",()=>xlDrop.classList.remove("over"));
+xlDrop.addEventListener("drop",e=>{ e.preventDefault(); xlDrop.classList.remove("over"); const f=e.dataTransfer.files[0]; if(f) importFile(f); });
+$("pasteBtn").addEventListener("click",()=>{ const t=$("paste").value; if(!t.trim()){ toast("Plak eerst de cellen uit Excel."); return; } startImport([{name:"geplakte cellen",rows:parseCsv(t)}],"geplakte cellen"); });
+
+/* invulsjabloon */
+$("tplBtn").addEventListener("click",async()=>{
+  try{
+    const X=await loadXLSX();
+    const N=isNew();
+    const hdr=N?["Nummer stembureau","Naam stembureau","Type stembureau","Straatnaam en huisnummer","Postcode","Plaats","Aantal kiesgerechtigden (optioneel)"]:["Nummer stembureau","Naam stembureau","Postcode","Aantal kiesgerechtigden (optioneel)"];
+    const exs=N?[["1","Stadhuis","vast","Grote Markt 1","1011 PN","Heemdamseburg","1430"],["2","Sporthal De Bongerd","vast","Sportlaan 22a","1013 CD","Heemdamseburg",""],["3","Mobiel stembureau","mobiel","Stationsplein 1","1015 GH","Heemdamseburg",""]]
+               :[["1","Stadhuis","1011 PN","1430"],["2","Sporthal De Bongerd","1013 CD",""]];
+    const ws=X.utils.aoa_to_sheet([hdr].concat(exs)); ws["!cols"]=hdr.map(h=>({wch:Math.max(14,h.length+2)}));
+    const uitleg=[["Kolom","Uitleg"],["Nummer stembureau","Verplicht. Alleen cijfers, uniek binnen de gemeente."],["Naam stembureau","Verplicht."]]
+      .concat(N?[["Type stembureau","vast, mobiel of bijzonder. Leeg = vast."],["Straatnaam en huisnummer","Bijv. 'Sportlaan 22a' of 'Lindelaan 3-1'. De app splitst straat, huisnummer, huisletter en toevoeging."]]:[])
+      .concat([["Postcode","1234 AB."+(N?"":" Optioneel.")]]).concat(N?[["Plaats","Plaatsnaam van het stembureau."]]:[])
+      .concat([["Aantal kiesgerechtigden","Optioneel, geheel getal."],["",""],["Let op","Dit sjabloon hoort bij de "+(N?"nieuwe standaard (EML_NL 1.3.1).":"oude standaard (EML_NL 1.2.2).")+" Vervang de voorbeeldrijen door je eigen stembureaus."]]);
+    const wu=X.utils.aoa_to_sheet(uitleg); wu["!cols"]=[{wch:26},{wch:90}];
+    const wb=X.utils.book_new(); X.utils.book_append_sheet(wb,ws,"Stembureaus"); X.utils.book_append_sheet(wb,wu,"Uitleg");
+    const data=new Blob([X.write(wb,{bookType:"xlsx",type:"array"})],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+    await saveFile("Invulsjabloon_stembureaus_"+(N?"nieuw":"oud")+".xlsx",data);
+  }catch(err){ toast(err.message||"Het sjabloon kon niet worden gemaakt."); }
+});
+
+/* ---------- hash, zip, download ---------- */
+const K256=new Uint32Array([0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2]);
+function sha256js(msg){
+  const l=msg.length, withPad=((l+9+63)>>6)<<6, buf=new Uint8Array(withPad); buf.set(msg); buf[l]=0x80;
+  const dv=new DataView(buf.buffer); dv.setUint32(withPad-4,(l*8)>>>0); dv.setUint32(withPad-8,Math.floor(l/0x20000000));
+  const H=new Uint32Array([0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19]), W=new Uint32Array(64), r=(x,n)=>(x>>>n)|(x<<(32-n));
+  for(let o=0;o<withPad;o+=64){
+    for(let i=0;i<16;i++) W[i]=dv.getUint32(o+i*4);
+    for(let i=16;i<64;i++){ const s0=r(W[i-15],7)^r(W[i-15],18)^(W[i-15]>>>3), s1=r(W[i-2],17)^r(W[i-2],19)^(W[i-2]>>>10); W[i]=(W[i-16]+s0+W[i-7]+s1)>>>0; }
+    let [a,b,c,d,e,f,g,h]=H;
+    for(let i=0;i<64;i++){ const t1=(h+(r(e,6)^r(e,11)^r(e,25))+((e&f)^(~e&g))+K256[i]+W[i])>>>0, t2=((r(a,2)^r(a,13)^r(a,22))+((a&b)^(a&c)^(b&c)))>>>0; h=g; g=f; f=e; e=(d+t1)>>>0; d=c; c=b; b=a; a=(t1+t2)>>>0; }
+    H[0]+=a;H[1]+=b;H[2]+=c;H[3]+=d;H[4]+=e;H[5]+=f;H[6]+=g;H[7]+=h;
+  }
+  return Array.from(H,x=>x.toString(16).padStart(8,"0")).join("");
+}
+async function sha256hex(bytes){ try{ if(window.crypto&&crypto.subtle){ const d=await crypto.subtle.digest("SHA-256",bytes); return Array.from(new Uint8Array(d),b=>b.toString(16).padStart(2,"0")).join(""); } }catch(e){} return sha256js(bytes); }
+const groupHash=h=>h.toUpperCase().match(/.{4}/g).join(" ");
+let hashSeq=0;
+async function showHash(){ const seq=++hashSeq, hex=await sha256hex(new TextEncoder().encode(currentXml)); if(seq===hashSeq) $("hash").innerHTML="SHA-256 <b>"+groupHash(hex)+"</b>"; }
+function hashText(name,hex){
+  const d=new Date(), z=n=>String(n).padStart(2,"0");
+  return ["Hashcode stembureaus (EML 110b)","","Bestand:      "+name,"Verkiezing:   "+S.el.name+" ("+S.el.id+")","Gemeente:     "+S.gemName+" ("+S.gemCode+")",
+    "Standaard:    "+(isNew()?"EML_NL 1.3.1 (nieuw)":"EML_NL 1.2.2 (oud)"),"Stembureaus:  "+S.rows.length,
+    "Gemaakt op:   "+z(d.getDate())+"-"+z(d.getMonth()+1)+"-"+d.getFullYear()+" "+z(d.getHours())+":"+z(d.getMinutes()),"Algoritme:    SHA-256","",
+    "Hashcode:",groupHash(hex),"","Zonder spaties:",hex,"","Controleren:","  Windows:  certutil -hashfile \""+name+"\" SHA256","  Linux:    sha256sum \""+name+"\"","  macOS:    shasum -a 256 \""+name+"\"","",
+    "De uitkomst moet gelijk zijn aan de hashcode hierboven (hoofd- of kleine letters maakt niet uit).",""].join("\r\n");
+}
+const CRC=(()=>{ const t=new Uint32Array(256); for(let n=0;n<256;n++){ let c=n; for(let k=0;k<8;k++) c=c&1?0xEDB88320^(c>>>1):c>>>1; t[n]=c>>>0; } return t; })();
+function crc32(b){ let c=0xFFFFFFFF; for(let i=0;i<b.length;i++) c=CRC[(c^b[i])&255]^(c>>>8); return (c^0xFFFFFFFF)>>>0; }
+function zipFiles(files){
+  const enc=new TextEncoder(), d=new Date(), time=(d.getHours()<<11)|(d.getMinutes()<<5)|(d.getSeconds()>>1), date=((d.getFullYear()-1980)<<9)|((d.getMonth()+1)<<5)|d.getDate();
+  const parts=[], central=[]; let off=0;
+  files.forEach(f=>{
+    const nb=enc.encode(f.name), data=f.data, crc=crc32(data), sz=data.length;
+    const lh=new DataView(new ArrayBuffer(30));
+    lh.setUint32(0,0x04034b50,true); lh.setUint16(4,20,true); lh.setUint16(6,0x0800,true); lh.setUint16(8,0,true); lh.setUint16(10,time,true); lh.setUint16(12,date,true);
+    lh.setUint32(14,crc,true); lh.setUint32(18,sz,true); lh.setUint32(22,sz,true); lh.setUint16(26,nb.length,true); lh.setUint16(28,0,true);
+    const cd=new DataView(new ArrayBuffer(46));
+    cd.setUint32(0,0x02014b50,true); cd.setUint16(4,20,true); cd.setUint16(6,20,true); cd.setUint16(8,0x0800,true); cd.setUint16(10,0,true); cd.setUint16(12,time,true); cd.setUint16(14,date,true);
+    cd.setUint32(16,crc,true); cd.setUint32(20,sz,true); cd.setUint32(24,sz,true); cd.setUint16(28,nb.length,true); cd.setUint16(30,0,true); cd.setUint16(32,0,true); cd.setUint16(34,0,true); cd.setUint16(36,0,true);
+    cd.setUint32(38,0,true); cd.setUint32(42,off,true);
+    parts.push(lh,nb,data); central.push(cd,nb); off+=30+nb.length+sz;
+  });
+  const cdSize=central.reduce((s,p)=>s+p.byteLength,0), end=new DataView(new ArrayBuffer(22));
+  end.setUint32(0,0x06054b50,true); end.setUint16(8,files.length,true); end.setUint16(10,files.length,true); end.setUint32(12,cdSize,true); end.setUint32(16,off,true);
+  return new Blob(parts.concat(central,[end]),{type:"application/zip"});
+}
+let downloads=null;
+if(window.claude && typeof window.claude.use==="function"){
+  window.claude.use("downloads").then(d=>{ downloads=d; if(d) $("dlBtn").textContent="Download .zip (eml + hashcode)"; }).catch(()=>{});
+}
+async function saveFile(name,blob){
+  if(downloads){
+    try{ await downloads.save({filename:name,data:blob}); toast("Download gestart: "+name); }
+    catch(e){ toast(e&&e.code==="declined"?"Download geannuleerd":"Downloaden lukt hier niet; gebruik Kopieer XML"); }
+    return;
+  }
+  const url=URL.createObjectURL(blob), a=document.createElement("a"); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),4000);
+  toast("Gedownload: "+name);
+}
+$("dlBtn").addEventListener("click",async()=>{
+  const name=fileName(), enc=new TextEncoder(), bytes=enc.encode(currentXml), hex=await sha256hex(bytes);
+  const txtName=name.replace(/\.eml\.xml$/,"")+"_hashcode.txt";
+  await saveFile(name.replace(/\.eml\.xml$/,"")+".zip", zipFiles([{name,data:bytes},{name:txtName,data:enc.encode(hashText(name,hex))}]));
+});
+$("copyBtn").addEventListener("click",async()=>{
+  try{ await navigator.clipboard.writeText(currentXml); toast("XML gekopieerd"); }
+  catch(e){ S.view="xml"; renderTabs(); $("xml").innerHTML=highlight(currentXml); const r=document.createRange(); r.selectNodeContents($("xml")); const s=getSelection(); s.removeAllRanges(); s.addRange(r); toast("Kopiëren lukt hier niet; de XML is geselecteerd, druk op Ctrl/Cmd+C"); }
+});
+
+/* ---------- start ---------- */
+$("gemPick").innerHTML=gemOptions();
+if(!load()) freshState();
+["munContact","munSite","authId","authName"].forEach(k=>$(k).value=S[k]||""); $("txId").value=S.tx; $("issueDate").value=S.issueDate;
+full();
+})();
+</script>
+</body>
+</html>

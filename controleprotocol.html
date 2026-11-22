@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Controleprotocol</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#17202b; --muted:#5b6673; --paper:#f5f6f4; --panel:#ffffff; --line:#d9ddd8;
+  --accent:#c4122f; --accent-soft:#fbe7ea;
+  --ok:#1f7a4a; --warn:#a15c00; --bad:#b3122a; --ok-soft:#e3f3ea; --warn-soft:#fdf0dc; --bad-soft:#fbe4e8;
+  --font-display:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;
+  --font-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --ink:#e6e9ec; --muted:#9aa4ae; --paper:#12161b; --panel:#1a2027; --line:#2e3640;
+    --accent:#ff5468; --accent-soft:#3a1d23;
+    --ok:#5fd398; --warn:#f0b357; --bad:#ff7a8a; --ok-soft:#163026; --warn-soft:#33260f; --bad-soft:#3a1a20;
+    color-scheme:dark;
+  }
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font:15px/1.5 var(--font-body)}
+header.top{padding:22px 24px 14px;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px 24px;align-items:end;justify-content:space-between}
+header.top h1{font:600 26px/1.1 var(--font-display);margin:0;text-wrap:balance}
+header.top h1 .tag{font:500 12px/1 var(--font-mono);color:var(--accent);border:1px solid var(--accent);border-radius:3px;padding:3px 6px;margin-left:8px;vertical-align:4px}
+header.top p{margin:4px 0 0;color:var(--muted);max-width:72ch}
+nav.steps{display:flex;gap:0;padding:0 24px;border-bottom:1px solid var(--line);overflow-x:auto;background:var(--panel)}
+nav.steps button{border:0;border-bottom:3px solid transparent;border-radius:0;background:none;padding:13px 16px 11px;display:flex;gap:9px;align-items:center;white-space:nowrap;color:var(--muted);font-weight:600}
+nav.steps button:hover{color:var(--ink);border-color:var(--line)}
+nav.steps button[aria-current="step"]{color:var(--ink);border-bottom-color:var(--accent)}
+nav.steps .n{font:500 12px/1 var(--font-mono);color:#fff;background:var(--muted);border-radius:3px;padding:3px 6px}
+nav.steps [aria-current="step"] .n{background:var(--accent)}
+nav.steps .badge{font:500 11.5px/1 var(--font-mono);border-radius:999px;padding:3px 7px;background:var(--paper);border:1px solid var(--line);color:var(--muted)}
+nav.steps .badge.ok{background:var(--ok-soft);border-color:transparent;color:var(--ok)}
+nav.steps .badge.bad{background:var(--bad-soft);border-color:transparent;color:var(--bad)}
+nav.steps .badge.warn{background:var(--warn-soft);border-color:transparent;color:var(--warn)}
+main{padding:20px 24px 40px;display:grid;gap:16px;max-width:1500px}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:980px){.cols{grid-template-columns:1fr}}
+.q{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:16px 18px;display:grid;gap:12px;min-width:0;align-content:start}
+.q h2{margin:0;font:600 17px/1.25 var(--font-display)}
+.q h3{margin:0;font:600 15px/1.25 var(--font-display)}
+.hint{color:var(--muted);font-size:13.5px;margin:0}
+.hint code{font:500 12.5px var(--font-mono)}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:end}
+.field{display:grid;gap:4px;flex:1 1 180px;min-width:0}
+.field.narrow{flex:0 1 120px}
+label{font-size:13px;font-weight:600;color:var(--muted)}
+label.inline{display:flex;gap:6px;align-items:center;color:var(--ink);font-weight:500;font-size:14px}
+input[type=text],input[type=number],select,textarea{font:inherit;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:7px 9px;width:100%}
+textarea{min-height:90px;resize:vertical}
+textarea.mono{font:13px/1.45 var(--font-mono)}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+button{font:500 14px/1 var(--font-body);border-radius:4px;padding:9px 13px;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+button:hover{border-color:var(--ink)}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button.primary:hover{filter:brightness(1.08)}
+button:disabled{opacity:.5;cursor:not-allowed;filter:none}
+button.small{padding:6px 9px;font-size:12.5px}
+button.armed{background:var(--bad);border-color:var(--bad);color:#fff}
+.btns{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btns.end{justify-content:flex-end}
+.drop{border:1.5px dashed var(--line);border-radius:6px;padding:16px;text-align:center;display:grid;gap:10px;justify-items:center;background:var(--paper)}
+.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:500 12px/1 var(--font-mono);border-radius:999px;padding:5px 9px;background:var(--paper);border:1px solid var(--line);display:inline-flex;gap:6px;align-items:center;max-width:100%}
+.chip.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.chip.bad{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip button{border:0;background:none;padding:0;font-size:13px;line-height:1;color:inherit}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:5px;overflow:hidden;flex-wrap:wrap}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label{padding:8px 12px;cursor:pointer;color:var(--ink);font-weight:500;font-size:14px;border-left:1px solid var(--line);background:var(--paper)}
+.seg label:first-of-type{border-left:0}
+.seg input:checked+label{background:var(--accent);color:#fff}
+.seg input:focus-visible+label{outline:2px solid var(--accent);outline-offset:-2px}
+.seg input:disabled+label{opacity:.55;cursor:not-allowed}
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:620px){.facts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.fact small{display:block;color:var(--muted);font-size:12px}
+.fact strong{font:600 17px/1.25 var(--font-display);font-variant-numeric:tabular-nums;word-break:break-word}
+.fact strong.mono{font:500 13px/1.35 var(--font-mono)}
+.status{font-weight:600;font-size:14px;padding:9px 11px;border-radius:4px}
+.status.ok{background:var(--ok-soft);color:var(--ok)} .status.warn{background:var(--warn-soft);color:var(--warn)} .status.bad{background:var(--bad-soft);color:var(--bad)}
+.status.idle{background:var(--paper);color:var(--muted)}
+.status.big{font:600 20px/1.3 var(--font-display);padding:14px 16px}
+.status small{display:block;font:400 14px/1.45 var(--font-body);margin-top:4px}
+ul.checks{margin:0;padding:0;list-style:none;display:grid;gap:4px;font-size:13.5px}
+ul.checks li{padding-left:16px;position:relative}
+ul.checks li::before{content:"";position:absolute;left:2px;top:.55em;width:7px;height:7px;border-radius:50%}
+ul.checks li.bad::before{background:var(--bad)} ul.checks li.warn::before{background:var(--warn)} ul.checks li.info::before{background:var(--muted)} ul.checks li.ok::before{background:var(--ok)}
+.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:5px;max-height:70vh;background:var(--panel)}
+table{border-collapse:separate;border-spacing:0;width:100%;font-size:14px}
+th,td{padding:6px 9px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+thead th{position:sticky;top:0;background:var(--panel);z-index:2;font:600 13px/1.25 var(--font-body);color:var(--muted);vertical-align:bottom;border-bottom:1.5px solid var(--ink)}
+thead th small{display:block;font-weight:400;max-width:16ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+tfoot td{position:sticky;bottom:0;background:var(--panel);font-weight:600;border-top:1.5px solid var(--ink);border-bottom:0;z-index:2}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+td.mono{font:500 12.5px var(--font-mono);color:var(--muted);white-space:nowrap}
+.grid th.stick,.grid td.stick{position:sticky;left:0;background:var(--panel);z-index:1;min-width:200px;max-width:320px}
+.grid thead th.stick{z-index:3}
+.grid tfoot td.stick{z-index:3}
+.grid td.cell{padding:3px 4px;min-width:92px}
+.grid input{width:100%;text-align:right;font:500 15px var(--font-mono);font-variant-numeric:tabular-nums;padding:6px 7px;background:var(--paper)}
+.grid input:not(:placeholder-shown){background:var(--panel)}
+.grid tr.done td.stick{box-shadow:inset 3px 0 0 var(--ok)}
+.grid tr.cur td{background:var(--accent-soft)}
+.grid tr.cur td.stick{background:var(--accent-soft)}
+.rowst{font:500 12px var(--font-mono);color:var(--muted);white-space:nowrap}
+.rowst.ok{color:var(--ok)}
+td.diff{color:var(--bad);font-weight:600}
+td.okc{color:var(--ok);font-weight:600}
+.progress{height:8px;border-radius:99px;background:var(--paper);border:1px solid var(--line);overflow:hidden}
+.progress i{display:block;height:100%;background:var(--ok);width:0;transition:width .2s}
+.lots{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}
+.lot{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;align-items:center;text-align:left;padding:10px 12px;border:1px solid var(--line);border-radius:5px;background:var(--paper);font-weight:500;line-height:1.25;position:relative}
+.lot b{font:600 20px/1 var(--font-display);color:var(--accent);min-width:28px}
+.lot span{font-size:13.5px;overflow:hidden;text-overflow:ellipsis}
+.lot.picked{border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 3px 0 0 var(--accent)}
+.lot.picked::after{content:attr(data-order);position:absolute;top:-8px;right:-8px;background:var(--accent);color:#fff;font:600 12px/1 var(--font-mono);border-radius:99px;padding:4px 7px}
+.lot.flash{animation:flash .6s ease}
+@keyframes flash{0%{transform:scale(1.08)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.lot.flash{animation:none}.progress i{transition:none}}
+.drawn{display:flex;flex-wrap:wrap;gap:10px}
+.drawn .lot{min-width:200px}
+.report{background:#fff;color:#17202b;border:1px solid var(--line);border-radius:6px;padding:28px 32px;font:14px/1.5 var(--font-body);max-width:860px}
+.report h1{font:600 22px/1.2 var(--font-display);margin:0 0 4px}
+.report h2{font:600 16px/1.25 var(--font-display);margin:20px 0 6px}
+.report table{font-size:13.5px}
+.report th,.report td{border-bottom:1px solid #d9ddd8}
+.report .meta{color:#5b6673;margin:0}
+.report .verdict{padding:10px 12px;border-radius:4px;font-weight:600;margin:12px 0}
+.report .verdict.ok{background:#e3f3ea;color:#1f7a4a} .report .verdict.bad{background:#fbe4e8;color:#b3122a} .report .verdict.warn{background:#fdf0dc;color:#a15c00}
+.report .box{border:1px solid #17202b;display:inline-block;width:13px;height:13px;vertical-align:-2px;margin-right:6px;text-align:center;font:700 11px/12px var(--font-mono)}
+.report .note{white-space:pre-wrap;border:1px solid #d9ddd8;border-radius:4px;padding:8px 10px;min-height:40px}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:9px 14px;border-radius:4px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw;z-index:10}
+.toast.show{opacity:1}
+footer{padding:0 24px 30px;color:var(--muted);font-size:12.5px;max-width:110ch}
+details summary{cursor:pointer;font-weight:600;font-size:14px}
+details[open] summary{margin-bottom:10px}
+.kbd{font:500 11.5px var(--font-mono);border:1px solid var(--line);border-bottom-width:2px;border-radius:3px;padding:1px 5px;background:var(--paper)}
+header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace);color:var(--accent,#c8102e);text-decoration:none;margin-bottom:10px}header.top .back:hover{text-decoration:underline}header.top .nk{font:400 12px/1 var(--font-mono,monospace);color:var(--muted,#666)}
+</style>
+</head>
+<body>
+<header class="top">
+  <div>
+    <a class="back" href="index.html">← Alle hulpmiddelen</a><span class="nk"> · Onafhankelijk hulpmiddel, niet van de Kiesraad</span>
+    <h1>Controleprotocol <span class="tag">GSB · HSB · CSB</span></h1>
+    <p>Controleer de optellingen van de uitslagsoftware. Laad de EML-bestanden, loot de te controleren lijsten, voer de lijsttotalen per stembureau, gemeente of kieskring in vanaf de papieren processen-verbaal en vergelijk de som met de uitslag-EML (510b, 510c of 510d).</p>
+  </div>
+  <div class="btns">
+    <input type="file" id="sessFile" accept=".json,application/json" hidden>
+    <button type="button" id="sessSave">Sessie opslaan</button>
+    <button type="button" id="sessLoad">Sessie laden</button>
+    <button type="button" id="demoBtn">Voorbeeld</button>
+    <button type="button" id="resetBtn">Opnieuw beginnen</button>
+  </div>
+</header>
+
+<nav class="steps" aria-label="Stappen">
+  <button type="button" data-step="1"><span class="n">1</span>Gegevens <span class="badge" id="b1">–</span></button>
+  <button type="button" data-step="2"><span class="n">2</span>Loting <span class="badge" id="b2">–</span></button>
+  <button type="button" data-step="3"><span class="n">3</span>Invoer <span class="badge" id="b3">–</span></button>
+  <button type="button" data-step="4"><span class="n">4</span>Vergelijking en verslag <span class="badge" id="b4">–</span></button>
+</nav>
+
+<main>
+<!-- ======================= STAP 1 ======================= -->
+<section data-pane="1">
+  <div class="cols">
+    <div class="q">
+      <h2>EML-bestanden inladen</h2>
+      <div class="drop" id="drop">
+        <div>Sleep hier de EML-bestanden heen. De app herkent het soort bestand zelf.</div>
+        <div class="btns"><input type="file" id="openFile" accept=".xml,.eml,text/xml" multiple hidden><button type="button" class="primary" id="openBtn">Kies bestanden</button></div>
+      </div>
+      <div class="chips" id="loaded"></div>
+      <ul class="checks">
+        <li class="info"><b>110b</b>: de stembureaus (gemeentelijk stembureau).</li>
+        <li class="info"><b>110a</b>: de gemeenten per kieskring (hoofdstembureau) of de kieskringen (centraal stembureau).</li>
+        <li class="info"><b>230b</b>: de kandidatenlijsten. Hieruit komen de loten.</li>
+      </ul>
+      <p class="hint">De uitslag-EML (510b, 510c of 510d) lees je pas in bij stap 4, als alle invoer klaar is. Zo kan niemand de uitkomst al zien tijdens het invoeren.</p>
+    </div>
+
+    <div class="q">
+      <h2>Welk orgaan voert de controle uit?</h2>
+      <div class="seg" role="radiogroup" aria-label="Niveau">
+        <input type="radio" name="level" id="lvGSB" value="GSB"><label for="lvGSB">Gemeentelijk stembureau</label>
+        <input type="radio" name="level" id="lvHSB" value="HSB"><label for="lvHSB">Hoofdstembureau</label>
+        <input type="radio" name="level" id="lvCSB" value="CSB"><label for="lvCSB">Centraal stembureau</label>
+      </div>
+      <p class="hint" id="levelHint"></p>
+      <div class="row" id="kkRow" hidden>
+        <div class="field"><label for="kkSel">Kieskring van dit hoofdstembureau</label><select id="kkSel"></select></div>
+      </div>
+      <div class="facts">
+        <div class="fact"><small>Verkiezing</small><strong class="mono" id="fElection">–</strong></div>
+        <div class="fact"><small>Orgaan</small><strong id="fAuth">–</strong></div>
+        <div class="fact"><small id="fUnitsLbl">Eenheden</small><strong id="fUnits">–</strong></div>
+        <div class="fact"><small>Lijsten</small><strong id="fLists">–</strong></div>
+      </div>
+      <ul class="checks" id="checks1"></ul>
+    </div>
+  </div>
+
+  <div class="q" style="margin-top:16px">
+    <div class="row" style="justify-content:space-between;align-items:center">
+      <h2 id="unitsTitle">Stembureaus</h2>
+      <div class="btns">
+        <button type="button" class="small" id="pasteToggle">Zelf invullen of plakken uit Excel</button>
+        <button type="button" class="small" id="manualClear" hidden>Terug naar de EML</button>
+      </div>
+    </div>
+    <div id="pasteBox" hidden>
+      <p class="hint">Eén per regel: nummer en naam, gescheiden door een tab (zo plak je twee kolommen uit de spreadsheet van de Kiesraad), een puntkomma of een spatie. Bij het hoofdstembureau is het nummer de gemeentecode, bij het centraal stembureau het kieskringnummer.</p>
+      <textarea class="mono" id="pasteArea" placeholder="1	Stadhuis&#10;2	Sporthal De Linde&#10;3	Basisschool Het Anker"></textarea>
+      <div class="btns" style="margin-top:8px"><button type="button" class="primary small" id="pasteApply">Lijst overnemen</button></div>
+    </div>
+    <div class="tablewrap" style="max-height:42vh"><table id="unitsTable"></table></div>
+  </div>
+
+  <div class="q" style="margin-top:16px">
+    <div class="row" style="justify-content:space-between;align-items:center">
+      <h2 id="listsTitle">Lijsten</h2>
+      <div class="btns">
+        <button type="button" class="small" id="lpasteToggle">Zelf invullen of plakken</button>
+        <button type="button" class="small" id="lmanualClear" hidden>Terug naar de 230b</button>
+      </div>
+    </div>
+    <div id="lpasteBox" hidden>
+      <p class="hint">Eén lijst per regel: lijstnummer en naam, gescheiden door een tab, een puntkomma of een spatie.</p>
+      <textarea class="mono" id="lpasteArea" placeholder="1	Partij A&#10;2	Partij B"></textarea>
+      <div class="btns" style="margin-top:8px"><button type="button" class="primary small" id="lpasteApply">Lijsten overnemen</button></div>
+    </div>
+    <div class="chips" id="listChips"></div>
+    <div class="btns end"><button type="button" class="primary" data-goto="2">Naar de loting →</button></div>
+  </div>
+</section>
+
+<!-- ======================= STAP 2 ======================= -->
+<section data-pane="2" hidden>
+  <div class="cols">
+    <div class="q">
+      <h2>Wat wordt er gecontroleerd?</h2>
+      <div class="seg" role="radiogroup" aria-label="Omvang">
+        <input type="radio" name="dmode" id="dmS" value="steekproef"><label for="dmS">Steekproef via loting</label>
+        <input type="radio" name="dmode" id="dmA" value="alle"><label for="dmA">Alle lijsten</label>
+      </div>
+      <div class="row" id="nRow">
+        <div class="field narrow"><label for="drawN">Aantal lijsten</label><input type="number" id="drawN" min="1" value="3"></div>
+        <div class="field"><label>Manier van loten</label>
+          <div class="seg" role="radiogroup" aria-label="Manier">
+            <input type="radio" name="dmeth" id="dhH" value="handmatig"><label for="dhH">Loten uit de pot (klik aan)</label>
+            <input type="radio" name="dmeth" id="dhD" value="digitaal"><label for="dhD">Digitaal trekken</label>
+          </div>
+        </div>
+      </div>
+      <p class="hint" id="drawHint"></p>
+      <div class="btns">
+        <button type="button" class="primary" id="drawBtn">Trek loten</button>
+        <button type="button" id="drawFix">Loting vastleggen</button>
+        <button type="button" id="drawUndo">Loting opnieuw</button>
+      </div>
+      <div class="status idle" id="drawStatus"></div>
+    </div>
+    <div class="q">
+      <h2>Te controleren lijsten</h2>
+      <div class="drawn" id="drawn"></div>
+      <p class="hint" id="drawMeta"></p>
+    </div>
+  </div>
+  <div class="q" style="margin-top:16px">
+    <h2>Alle loten</h2>
+    <div class="lots" id="lots"></div>
+    <div class="btns end"><button type="button" class="primary" data-goto="3" id="toEntry">Naar de invoer →</button></div>
+  </div>
+</section>
+
+<!-- ======================= STAP 3 ======================= -->
+<section data-pane="3" hidden>
+  <div class="q">
+    <div class="row" style="justify-content:space-between;align-items:center">
+      <h2 id="entryTitle">Lijsttotalen invoeren</h2>
+      <div class="row" style="gap:10px;align-items:center">
+        <label class="inline" for="enterDir">Enter gaat naar</label>
+        <select id="enterDir" style="width:auto"><option value="row">volgende lijst (per stembureau)</option><option value="col">volgende rij (per lijst)</option></select>
+      </div>
+    </div>
+    <p class="hint" id="entryHint"></p>
+    <div class="row" style="align-items:center"><div style="flex:1"><div class="progress"><i id="prog"></i></div></div><span class="rowst" id="progTxt"></span></div>
+    <div class="tablewrap" id="gridWrap"></div>
+    <details>
+      <summary>Meer</summary>
+      <div class="btns" style="margin-top:8px">
+        <span id="demoFillBox" class="btns">
+          <label class="inline"><input type="checkbox" id="testErr"> met één afwijking</label>
+          <button type="button" class="small" id="testFill">Voorbeeld: vul de getallen van de processen-verbaal in</button>
+        </span>
+        <button type="button" class="small" id="clearEntries">Invoer wissen</button>
+      </div>
+    </details>
+    <div class="btns end"><button type="button" class="primary" data-goto="4">Naar de vergelijking →</button></div>
+  </div>
+</section>
+
+<!-- ======================= STAP 4 ======================= -->
+<section data-pane="4" hidden>
+  <div class="q" style="margin-bottom:16px">
+    <h2>Uitslag-EML inlezen</h2>
+    <div class="status idle" id="resStatus"></div>
+    <div class="drop" id="resDrop">
+      <div id="resDropTxt">Sleep hier de uitslag-EML heen.</div>
+      <div class="btns"><input type="file" id="resFile" accept=".xml,.eml,text/xml" hidden><button type="button" class="primary" id="resBtn">Kies de uitslag-EML</button><button type="button" id="demoRes" hidden>Voorbeeld-uitslag inlezen</button></div>
+    </div>
+    <div class="chips" id="resChip"></div>
+    <div class="row" id="contestRow" hidden>
+      <div class="field"><label for="contestSel">Contest in de uitslag</label><select id="contestSel"></select></div>
+    </div>
+    <ul class="checks" id="checksRes"></ul>
+  </div>
+  <div class="cols">
+    <div class="q">
+      <h2>Vergelijking met de uitslag</h2>
+      <div class="status big idle" id="verdict"></div>
+      <div class="tablewrap" style="max-height:none"><table id="cmpTable"></table></div>
+      <div id="diffBox" hidden class="q" style="padding:12px 14px;background:var(--paper)">
+        <h3>Waar zit het verschil?</h3>
+        <p class="hint" id="diffHint"></p>
+        <div class="tablewrap" style="max-height:40vh"><table id="diffTable"></table></div>
+      </div>
+      <div class="btns" id="nextSteps"></div>
+      <ul class="checks" id="checks4"></ul>
+    </div>
+    <div class="q">
+      <h2>Verslag</h2>
+      <div class="field"><label for="noteTxt">Verklaring of opmerkingen</label><textarea id="noteTxt" placeholder="Bijvoorbeeld: verschil bij stembureau 4 verklaard door een invoerfout in de spreadsheet."></textarea></div>
+      <div class="row">
+        <div class="field"><label for="placeTxt">Plaats</label><input type="text" id="placeTxt"></div>
+        <div class="field"><label for="chairTxt">Voorzitter (niet publiceren)</label><input type="text" id="chairTxt"></div>
+      </div>
+      <div class="btns">
+        <button type="button" class="primary" id="dlReport">Verslag downloaden (.html)</button>
+        <button type="button" id="dlXlsx">Spreadsheet (.xlsx)</button>
+        <button type="button" id="dlCsv">CSV</button>
+      </div>
+      <p class="hint">Het verslag volgt de opbouw van het Verslag controleprotocol van de Kiesraad. Open het .html-bestand in je browser om het af te drukken of als pdf te bewaren. Het officiële formulier van de Kiesraad blijft leidend.</p>
+    </div>
+  </div>
+  <div style="margin-top:16px" id="reportView"></div>
+</section>
+</main>
+
+<footer>
+  Alles gebeurt in je browser; er gaan geen gegevens naar een server. De invoer wordt in deze browser bewaard, zodat een herladen pagina niets kwijtraakt. Sla de sessie op als .json om op een andere computer verder te gaan of om de invoer te archiveren. De werkwijze volgt de controleprotocollen van de Kiesraad (artikel Na 27 Kieswet): loting van drie lijsten of controle van alle lijsten, invoer van de lijsttotalen vanaf papier en vergelijking met het totaal van de software.
+</footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+"use strict";
+/* ============================== helpers ============================== */
+const $ = id => document.getElementById(id);
+const all = (el, n) => Array.from(el.getElementsByTagNameNS("*", n));
+const one = (el, n) => { const l = el.getElementsByTagNameNS("*", n); return l.length ? l[0] : null; };
+const txt = (el, n) => { const e = el && one(el, n); return e ? e.textContent.trim() : ""; };
+const kids = (el, n) => Array.from(el.children).filter(c => c.localName === n);
+const esc = s => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const pad4 = c => /^\d+$/.test(c) ? c.padStart(4, "0") : c;
+const nl = x => (x === null || x === undefined || x === "") ? "–" : Number(x).toLocaleString("nl-NL");
+const sgn = x => x > 0 ? "+" + nl(x) : nl(x);
+const safe = s => String(s).replace(/[\\/:*?"<>|]+/g, "_").replace(/\s+/g, "_");
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("show"), 2600); }
+function armed(btn, label, fn) {
+  btn.onclick = () => {
+    if (btn.classList.contains("armed")) { btn.classList.remove("armed"); btn.textContent = btn.dataset.l; clearTimeout(btn.t); fn(); return; }
+    btn.dataset.l = btn.textContent; btn.textContent = label; btn.classList.add("armed");
+    btn.t = setTimeout(() => { btn.classList.remove("armed"); btn.textContent = btn.dataset.l; }, 4000);
+  };
+}
+
+const LV = {
+  GSB: { eml: "510b", unit: "stembureau", units: "stembureaus", Unit: "Stembureau", Units: "Stembureaus", org: "gemeentelijk stembureau", pv: "de processen-verbaal van de stembureaus", keyLbl: "Nr." },
+  HSB: { eml: "510c", unit: "gemeente", units: "gemeenten", Unit: "Gemeente", Units: "Gemeenten", org: "hoofdstembureau", pv: "de processen-verbaal van de gemeentelijk stembureaus", keyLbl: "Code" },
+  CSB: { eml: "510d", unit: "kieskring", units: "kieskringen", Unit: "Kieskring", Units: "Kieskringen", org: "centraal stembureau", pv: "de processen-verbaal van de hoofdstembureaus", keyLbl: "Nr." },
+};
+const LEVEL_OF = { "510b": "GSB", "510c": "HSB", "510d": "CSB" };
+
+/* ============================== state ============================== */
+const STORE = "controleprotocol.session.v1";
+const fresh = () => ({
+  files: [], level: "GSB", kk: "", contestIdx: 0, manualUnits: null, manualLists: null, demo: false, step: 1,
+  draw: { mode: "steekproef", n: 3, method: "handmatig", picked: [], done: false, at: "", extended: false },
+  entries: {}, enterDir: "row", note: "", place: "", chair: "",
+});
+let S = fresh();
+let M = null; // afgeleid model
+
+/* ============================== parsing ============================== */
+function parseFile(text) {
+  const doc = new DOMParser().parseFromString(text, "application/xml");
+  if (doc.getElementsByTagName("parsererror").length) throw new Error("geen geldige XML");
+  const root = doc.documentElement;
+  if (root.localName !== "EML") throw new Error("geen EML-document");
+  const id = (root.getAttribute("Id") || "").toLowerCase();
+  if (/^510[bcd]$/.test(id)) return { type: id, data: parse510(doc, id) };
+  if (id === "110a") return { type: id, data: parse110a(doc) };
+  if (id === "110b") return { type: id, data: parse110b(doc) };
+  if (id === "230b") return { type: id, data: parse230b(doc) };
+  if (id === "510a") throw new Error("510a is een stembureau-uitslag; gebruik 510b, 510c of 510d");
+  throw new Error("EML " + (id || "?") + " wordt hier niet gebruikt");
+}
+function parseElectionId(doc) {
+  const e = one(doc, "ElectionIdentifier"); if (!e) return null;
+  const dom = one(e, "ElectionDomain");
+  return { id: e.getAttribute("Id") || "", name: txt(e, "ElectionName"), category: txt(e, "ElectionCategory"), domain: dom ? { id: dom.getAttribute("Id") || "", name: dom.textContent.trim() } : null, date: txt(e, "ElectionDate") };
+}
+function parseVotes(el) {
+  const affs = new Map(); let cur = null;
+  for (const sel of kids(el, "Selection")) {
+    const ai = kids(sel, "AffiliationIdentifier")[0];
+    const v = parseInt(kids(sel, "ValidVotes")[0]?.textContent || "0", 10) || 0;
+    if (ai) { cur = ai.getAttribute("Id") || ""; affs.set(cur, { name: txt(ai, "RegisteredName"), votes: v, cand: 0 }); }
+    else if (cur && affs.has(cur)) affs.get(cur).cand += v;
+  }
+  const n = name => { const e = kids(el, name)[0]; return e ? parseInt(e.textContent, 10) || 0 : null; };
+  return { affs, cast: n("Cast"), counted: n("TotalCounted") };
+}
+function parse510(doc, eml) {
+  const auth = one(doc, "AuthorityIdentifier");
+  const contests = all(doc, "Contest").map(ct => {
+    const ci = kids(ct, "ContestIdentifier")[0];
+    const tv = kids(ct, "TotalVotes")[0];
+    return {
+      id: ci ? ci.getAttribute("Id") || "" : "", name: ci ? txt(ci, "ContestName") : "",
+      total: tv ? parseVotes(tv) : { affs: new Map() },
+      units: kids(ct, "ReportingUnitVotes").map(r => { const ri = kids(r, "ReportingUnitIdentifier")[0]; return { id: ri?.getAttribute("Id") || "", name: ri?.textContent.trim() || "", votes: parseVotes(r) }; }),
+    };
+  });
+  return { eml, election: parseElectionId(doc), authority: auth ? { id: auth.getAttribute("Id") || "", name: auth.textContent.trim() } : null, contests };
+}
+function parse110a(doc) {
+  return { election: parseElectionId(doc), regions: all(doc, "Region").map(r => ({ number: r.getAttribute("RegionNumber") || "", category: (r.getAttribute("RegionCategory") || "").toUpperCase(), superior: r.getAttribute("SuperiorRegionNumber") || "", superiorCategory: (r.getAttribute("SuperiorRegionCategory") || "").toUpperCase(), name: txt(r, "RegionName") })) };
+}
+function parse110b(doc) {
+  const auth = one(doc, "AuthorityIdentifier");
+  const stations = all(doc, "PollingPlace").map((pp, i) => {
+    const ps = one(pp, "PollingStation"); const loc = txt(pp, "LocalityName"); const pc = txt(pp, "PostalCodeNumber") || txt(pp, "PostalCode");
+    const nr = ps ? (ps.getAttribute("Id") || String(i + 1)) : String(i + 1);
+    return { nr, name: (loc || "Stembureau " + nr) + (pc ? ` (postcode: ${pc})` : "") };
+  });
+  return { election: parseElectionId(doc), gemeente: auth ? pad4(auth.getAttribute("Id") || "") : "", gemeenteName: auth ? auth.textContent.trim() : "", stations };
+}
+function parse230b(doc) {
+  return { election: parseElectionId(doc), contests: all(doc, "Contest").map(ct => {
+    const ci = one(ct, "ContestIdentifier");
+    return { id: ci ? ci.getAttribute("Id") : "", affiliations: kids(ct, "Affiliation").map(a => { const ai = one(a, "AffiliationIdentifier"); const c1 = kids(a, "Candidate")[0]; return { id: ai ? ai.getAttribute("Id") : "", name: ai ? txt(ai, "RegisteredName") : "", first: c1 ? (txt(c1, "LastName") || "") : "" }; }) };
+  }) };
+}
+
+/* ID van een stembureau, gemeente of kieskring zo maken dat 110x en 510x op elkaar passen */
+function canonKey(level, id) {
+  id = String(id || "").trim();
+  if (level === "HSB") { const p = id.split("::").pop(); return /^\d+$/.test(p) ? p.padStart(4, "0") : p.toLowerCase(); }
+  const m = id.match(/(\d+)\D*$/);
+  return m ? String(+m[1]) : id.toLowerCase();
+}
+
+/* ============================== bestanden ============================== */
+async function addFiles(list, where) { for (const f of list) addText(f.name, await f.text(), where); afterFiles(); }
+/* where = "struct" (stap 1: 110a/110b/230b) of "res" (stap 4: 510b/c/d, pas na complete invoer) */
+function addText(name, text, where) {
+  let f; try { f = { name, text, ...parseFile(text) }; } catch (e) { f = { name, text: "", type: "fout", error: e.message }; }
+  const isRes = /^510/.test(f.type);
+  if (where === "struct" && isRes) { toast("De uitslag-EML lees je in bij stap 4, als alle invoer klaar is"); return false; }
+  if (where === "struct" && locked()) { toast("De uitslag is al ingelezen; haal die eerst weg bij stap 4"); return false; }
+  if (where === "res" && !isRes) { toast(f.type === "fout" ? "Dit bestand kon niet worden gelezen: " + f.error : "Hier hoort een uitslag-EML (510b, 510c of 510d)"); return false; }
+  if (isRes) {
+    if (!progress().complete) { toast("Rond eerst alle invoer af"); return false; }
+    if (LEVEL_OF[f.type] !== S.level) { toast(`Dit is een ${f.type}; voor het ${LV[S.level].org} hoort een ${LV[S.level].eml}`); return false; }
+    S.files = S.files.filter(x => !/^510/.test(x.type));
+    const ci = f.data.contests.findIndex(c => c.id === S.kk);
+    S.contestIdx = S.level === "HSB" && ci >= 0 ? ci : 0;
+  } else if (f.type !== "fout") S.files = S.files.filter(x => !(x.type === f.type && f.type !== "110b") && !(x.type === "110b" && f.type === "110b" && x.data.gemeente === f.data.gemeente));
+  S.files.push(f);
+  return true;
+}
+const locked = () => S.files.some(f => /^510/.test(f.type));
+function afterFiles() { renderAll(); save(); }
+function revive() { S.files = S.files.map(f => { if (f.type === "fout" || !f.text) return f; try { return { name: f.name, text: f.text, ...parseFile(f.text) }; } catch (e) { return { name: f.name, text: "", type: "fout", error: e.message }; } }); }
+
+/* ============================== model ============================== */
+function derive() {
+  const warn = [], warnRes = [];
+  const fRes = S.files.find(f => /^510/.test(f.type));
+  const res = fRes?.data || null;
+  const d110a = S.files.find(f => f.type === "110a")?.data;
+  const d110b = S.files.filter(f => f.type === "110b").map(f => f.data);
+  const d230b = S.files.filter(f => f.type === "230b").map(f => f.data);
+  const level = S.level;
+  const L = LV[level];
+  const election = d110a?.election || d230b[0]?.election || d110b[0]?.election || res?.election || null;
+  const kks = (d110a?.regions || []).filter(r => r.category === "KIESKRING");
+  let kk = S.kk;
+  if (level === "HSB" && kks.length && !kks.find(k => k.number === kk)) kk = kks[0].number;
+
+  let contest = null;
+  if (res) { contest = res.contests[Math.min(S.contestIdx, res.contests.length - 1)] || null; if (!contest) warnRes.push(["bad", "De uitslag-EML bevat geen contest."]); }
+
+  // eenheden: alleen uit 110a/110b of zelf ingevuld, nooit uit de uitslag
+  let struct = [];
+  if (level === "GSB") for (const b of d110b) for (const st of b.stations) struct.push({ key: canonKey("GSB", st.nr), nr: st.nr, name: st.name, gem: b.gemeenteName });
+  if (level === "HSB" && d110a) struct = d110a.regions.filter(r => r.category === "GEMEENTE" && (!kks.length || (r.superiorCategory === "KIESKRING" && r.superior === kk))).map(r => ({ key: canonKey("HSB", r.number), nr: pad4(r.number), name: r.name }));
+  if (level === "CSB" && d110a) struct = kks.map(k => ({ key: canonKey("CSB", k.number), nr: k.number, name: k.name || "Kieskring " + k.number }));
+  if (level === "GSB" && d110b.length > 1) warn.push(["warn", "Er zijn stembureaus van meerdere gemeenten geladen."]);
+  let units, unitSrc;
+  if (S.manualUnits) { units = S.manualUnits; unitSrc = "zelf ingevuld"; }
+  else { units = struct; unitSrc = struct.length ? (level === "GSB" ? "110b" : "110a") : ""; }
+  const dupe = units.map(u => u.key).filter((k, i, a) => a.indexOf(k) !== i);
+  if (dupe.length) warn.push(["bad", `Dubbele nummers: ${[...new Set(dupe)].join(", ")}. Geef elke ${L.unit} een eigen nummer.`]);
+
+  // lijsten: uit 230b of zelf ingevuld
+  let lists = [], listSrc = "";
+  if (S.manualLists) { lists = S.manualLists.map(l => ({ ...l })); listSrc = "zelf ingevuld"; }
+  else if (d230b.length) {
+    const cts = d230b.flatMap(d => d.contests);
+    const use = level === "HSB" && cts.find(c => c.id === kk) ? [cts.find(c => c.id === kk)] : cts;
+    for (const c of use) for (const a of c.affiliations) if (!lists.find(x => x.id === a.id)) lists.push({ id: a.id, name: a.name || (a.first ? `Blanco lijst (${a.first})` : "") });
+    listSrc = "230b";
+  }
+  lists.sort((a, b) => (+a.id || 0) - (+b.id || 0) || a.id.localeCompare(b.id));
+  for (const l of lists) l.label = l.name || "Blanco lijst";
+
+  // uitslag tegen de invoerstructuur
+  const ruByKey = new Map();
+  if (contest) {
+    for (const u of contest.units) ruByKey.set(canonKey(level, u.id), u);
+    const keys = new Set(units.map(u => u.key));
+    const notInRes = units.filter(u => !ruByKey.has(u.key));
+    const notInUnits = contest.units.filter(u => !keys.has(canonKey(level, u.id)));
+    if (notInRes.length) warnRes.push(["warn", `${notInRes.length} ${notInRes.length === 1 ? L.unit : L.units} uit de invoer niet in de uitslag-EML gevonden: ${notInRes.slice(0, 6).map(u => u.name || u.nr).join(", ")}${notInRes.length > 6 ? " …" : ""}.`]);
+    if (notInUnits.length) warnRes.push(["bad", `${notInUnits.length} ${notInUnits.length === 1 ? L.unit : L.units} in de uitslag-EML zijn niet ingevoerd: ${notInUnits.slice(0, 6).map(u => u.name || u.id).join(", ")}${notInUnits.length > 6 ? " …" : ""}.`]);
+    const extra = [...contest.total.affs.keys()].filter(id => !lists.find(l => l.id === id));
+    if (extra.length) warnRes.push(["warn", `Lijst ${extra.join(", ")} staat wel in de uitslag-EML maar niet in de lijsten van stap 1.`]);
+    if (election && res.election && res.election.id !== election.id) warnRes.push(["bad", `De uitslag hoort bij ${res.election.id}, de invoer bij ${election.id}.`]);
+    if (!warnRes.length) warnRes.push(["ok", `Alle ${L.units} en lijsten uit de invoer staan in de uitslag-EML.`]);
+  }
+
+  if (S.files.some(f => f.type !== "fout" && !/^510/.test(f.type) && f.data.election && election && f.data.election.id !== election.id)) warn.push(["bad", "Niet alle bestanden horen bij dezelfde verkiezing."]);
+  if (S.files.some(f => f.type === "fout")) warn.push(["bad", "Niet alle bestanden konden worden gelezen (zie de rode bestanden)."]);
+
+  let authority = "";
+  if (level === "GSB") authority = d110b[0]?.gemeenteName || election?.domain?.name || "";
+  if (level === "HSB") authority = kks.find(k => k.number === kk)?.name || "";
+  if (level === "CSB") authority = election?.domain?.name || "";
+  if (!authority) authority = res?.authority?.name || "";
+  return { level, L, election, authority, kk, kks, res, fRes, contest, units, unitSrc, lists, listSrc, ruByKey, warn, warnRes };
+}
+
+/* geselecteerde lijsten */
+const checkedLists = () => !S.draw.done ? [] : (S.draw.mode === "alle" || S.draw.extended) ? M.lists : S.draw.picked.map(id => M.lists.find(l => l.id === id) || { id, label: "Lijst " + id, name: "" });
+const val = (k, id) => { const v = S.entries[k]?.[id]; return v === undefined || v === "" ? null : +v; };
+
+/* ============================== render ============================== */
+function renderAll() { M = derive(); renderStep1(); renderStep2(); renderStep3(); renderStep4(); renderBadges(); showStep(S.step, true); }
+
+function renderStep1() {
+  const lk = locked();
+  const shown = S.files.map((f, i) => [f, i]).filter(([f]) => !/^510/.test(f.type));
+  $("loaded").innerHTML = shown.map(([f, i]) => `<span class="chip ${f.type === "fout" ? "bad" : "on"}" title="${esc(f.error || f.name)}"><b>${esc(f.type)}</b><span>${esc(f.name)}</span>${lk ? "" : `<button type="button" data-rm="${i}" aria-label="Verwijder ${esc(f.name)}">×</button>`}</span>`).join("");
+  $("loaded").querySelectorAll("[data-rm]").forEach(b => b.onclick = () => { S.files.splice(+b.dataset.rm, 1); afterFiles(); });
+  $("openBtn").disabled = lk;
+  for (const lv of ["GSB", "HSB", "CSB"]) { const r = $("lv" + lv); r.checked = M.level === lv; r.disabled = lk && M.level !== lv; }
+  $("levelHint").innerHTML = lk ? "De uitslag is ingelezen, daarom liggen de gegevens vast. Haal de uitslag bij stap 4 weg om iets te wijzigen." : `De invoer gaat per ${M.L.unit}. Bij stap 4 hoort hier een <code>${M.L.eml}</code> bij.`;
+  $("kkRow").hidden = !(M.level === "HSB" && M.kks.length);
+  $("kkSel").disabled = lk;
+  $("kkSel").innerHTML = M.kks.map(k => `<option value="${esc(k.number)}" ${k.number === M.kk ? "selected" : ""}>${esc(k.number)} – ${esc(k.name)}</option>`).join("");
+  $("fElection").textContent = M.election?.id || "–";
+  $("fAuth").textContent = M.authority || "–";
+  $("fUnitsLbl").textContent = M.L.Units;
+  $("fUnits").textContent = M.units.length ? nl(M.units.length) : "–";
+  $("fLists").textContent = M.lists.length ? nl(M.lists.length) : "–";
+  const checks = [...M.warn];
+  if (!shown.length && !S.manualUnits && !S.manualLists) checks.push(["info", "Nog geen bestanden geladen. Probeer eventueel het voorbeeld."]);
+  if (!M.units.length) checks.push(["warn", `Nog geen ${M.L.units}: laad een ${M.level === "GSB" ? "110b" : "110a"} of vul ze zelf in.`]);
+  else checks.push(["info", `${M.L.Units} komen uit: ${M.unitSrc}.`]);
+  if (!M.lists.length) checks.push(["warn", "Nog geen lijsten: laad een 230b of vul ze zelf in."]);
+  else checks.push(["info", `Lijsten komen uit: ${M.listSrc}.`]);
+  $("checks1").innerHTML = checks.map(c => `<li class="${c[0]}">${esc(c[1])}</li>`).join("");
+  $("unitsTitle").textContent = M.L.Units + (M.units.length ? ` (${M.units.length})` : "");
+  $("manualClear").hidden = !S.manualUnits || lk;
+  $("pasteToggle").disabled = lk; $("lpasteToggle").disabled = lk;
+  $("unitsTable").innerHTML = M.units.length
+    ? `<thead><tr><th>${M.L.keyLbl}</th><th>${M.L.Unit}</th></tr></thead><tbody>${M.units.map(u => `<tr><td class="mono">${esc(u.nr)}</td><td>${esc(u.name)}</td></tr>`).join("")}</tbody>`
+    : `<tbody><tr><td class="hint" style="padding:18px">Nog geen ${M.L.units}. Laad een EML-bestand of vul ze zelf in.</td></tr></tbody>`;
+  $("listsTitle").textContent = "Lijsten" + (M.lists.length ? ` (${M.lists.length})` : "");
+  $("lmanualClear").hidden = !S.manualLists || lk;
+  $("listChips").innerHTML = M.lists.map(l => `<span class="chip"><b>${esc(l.id)}</b><span>${esc(l.label)}</span></span>`).join("") || '<p class="hint">Nog geen lijsten.</p>';
+}
+
+function renderStep2() {
+  const d = S.draw;
+  $("dmS").checked = d.mode === "steekproef"; $("dmA").checked = d.mode === "alle";
+  $("dhH").checked = d.method === "handmatig"; $("dhD").checked = d.method === "digitaal";
+  $("drawN").value = d.n; $("drawN").max = Math.max(1, M.lists.length);
+  [$("dmS"), $("dmA"), $("dhH"), $("dhD"), $("drawN")].forEach(x => x.disabled = d.done);
+  $("nRow").hidden = d.mode === "alle";
+  const n = Math.min(d.n, M.lists.length);
+  $("drawHint").innerHTML = d.mode === "alle"
+    ? "Alle lijsten worden gecontroleerd. Dit adviseert de Kiesraad als je ook manipulatie binnen het orgaan wilt uitsluiten."
+    : d.method === "handmatig"
+      ? `Maak van elke lijst een lot en stop de loten in een pot. Trek ${n} loten en klik de getrokken lijsten hieronder aan, in de volgorde van trekken.`
+      : `De app trekt ${n} lijsten met een cryptografisch veilige toevalsgenerator. Doe dit in het openbaar, op een scherm dat iedereen kan zien.`;
+  $("drawBtn").hidden = d.done || d.mode === "alle" || d.method !== "digitaal";
+  $("drawBtn").disabled = !M.lists.length;
+  $("drawFix").hidden = d.done;
+  $("drawFix").disabled = !M.lists.length || (d.mode === "steekproef" && d.picked.length !== n);
+  $("drawUndo").hidden = (!d.done && !d.picked.length) || locked();
+  const st = $("drawStatus");
+  if (!M.lists.length) { st.className = "status warn"; st.textContent = "Laad eerst een uitslag-EML of een kandidatenlijst (230b)."; }
+  else if (d.done) { st.className = "status ok"; st.textContent = d.mode === "alle" ? "Vastgelegd: alle lijsten worden gecontroleerd." : d.extended ? "Na een verschil uitgebreid naar alle lijsten." : `Loting vastgelegd op ${d.at}.`; }
+  else if (d.mode === "alle") { st.className = "status idle"; st.textContent = "Klik op ‘Loting vastleggen’ om te beginnen."; }
+  else { st.className = "status idle"; st.textContent = `${d.picked.length} van ${n} lijsten getrokken.`; }
+  const lotHtml = (l, i) => `<div class="lot ${i >= 0 ? "picked" : ""}" data-order="${i + 1}"><b>${esc(l.id)}</b><span>${esc(l.label)}</span></div>`;
+  const shown = checkedLists();
+  const pickedShow = d.done ? shown : d.picked.map(id => M.lists.find(l => l.id === id)).filter(Boolean);
+  $("drawn").innerHTML = pickedShow.length ? pickedShow.map((l, i) => lotHtml(l, d.mode === "alle" || d.extended ? -1 : i)).join("") : '<p class="hint">Nog geen lijsten getrokken.</p>';
+  $("drawMeta").textContent = d.done && d.extended && d.picked.length ? `Oorspronkelijke steekproef: lijst ${d.picked.join(", ")}.` : "";
+  const clickable = !d.done && d.mode === "steekproef" && d.method === "handmatig";
+  $("lots").innerHTML = M.lists.map(l => { const i = d.picked.indexOf(l.id); return `<button type="button" class="lot ${i >= 0 ? "picked" : ""}" data-order="${i + 1}" data-lot="${esc(l.id)}" ${clickable ? "" : "disabled"} aria-pressed="${i >= 0}"><b>${esc(l.id)}</b><span>${esc(l.label)}</span></button>`; }).join("") || '<p class="hint">Geen lijsten geladen.</p>';
+  if (clickable) $("lots").querySelectorAll("[data-lot]").forEach(b => b.onclick = () => {
+    const id = b.dataset.lot, i = d.picked.indexOf(id);
+    if (i >= 0) d.picked.splice(i, 1); else if (d.picked.length < n) d.picked.push(id); else return toast(`Er zijn al ${n} lijsten getrokken`);
+    renderStep2(); renderBadges(); save();
+  });
+  $("toEntry").disabled = !d.done;
+}
+
+function renderStep3() {
+  const cols = checkedLists();
+  $("entryTitle").textContent = `Lijsttotalen per ${M.L.unit} invoeren`;
+  $("enterDir").value = S.enterDir;
+  $("demoFillBox").hidden = !S.demo;
+  if (!S.draw.done) { $("gridWrap").innerHTML = '<p class="hint" style="padding:18px">Leg eerst de loting vast.</p>'; $("entryHint").textContent = ""; updateProgress(); return; }
+  if (!M.units.length) { $("gridWrap").innerHTML = `<p class="hint" style="padding:18px">Er zijn nog geen ${M.L.units}.</p>`; updateProgress(); return; }
+  $("entryHint").innerHTML = `Neem per ${M.L.unit} het totaal van de gecontroleerde lijsten over uit ${M.L.pv}. Doe dit op een andere computer dan die met de uitslagsoftware. <span class="kbd">Enter</span> gaat naar het volgende vak, <span class="kbd">↑</span> <span class="kbd">↓</span> naar de rij erboven of eronder.`;
+  const head = `<thead><tr><th class="stick">${M.L.Unit}</th>${cols.map(l => `<th class="num" title="${esc(l.label)}">Lijst ${esc(l.id)}<small>${esc(l.label)}</small></th>`).join("")}<th></th></tr></thead>`;
+  const body = M.units.map((u, r) => `<tr data-r="${r}"><td class="stick"><span class="rowst">${esc(u.nr)}</span> ${esc(u.name)}</td>${cols.map((l, c) => { const v = S.entries[u.key]?.[l.id]; return `<td class="cell"><input inputmode="numeric" autocomplete="off" placeholder=" " data-r="${r}" data-c="${c}" value="${v ?? ""}" aria-label="${esc(u.name)}, lijst ${esc(l.id)}"></td>`; }).join("")}<td class="rowst" data-rs="${r}"></td></tr>`).join("");
+  const foot = `<tfoot><tr><td class="stick">Totaal ingevoerd</td>${cols.map((l, c) => `<td class="num" data-sum="${c}"></td>`).join("")}<td></td></tr></tfoot>`;
+  $("gridWrap").innerHTML = `<table class="grid">${head}<tbody>${body}</tbody>${foot}</table>`;
+  const grid = $("gridWrap");
+  grid.querySelectorAll("input").forEach(inp => {
+    inp.addEventListener("input", () => {
+      const clean = inp.value.replace(/\D/g, "").replace(/^0+(?=\d)/, "");
+      if (clean !== inp.value) inp.value = clean;
+      const u = M.units[+inp.dataset.r], l = cols[+inp.dataset.c];
+      (S.entries[u.key] ||= {})[l.id] = clean;
+      updateRow(+inp.dataset.r); updateSum(+inp.dataset.c); updateProgress(); renderBadges(); saveSoon();
+    });
+    inp.addEventListener("keydown", e => {
+      const r = +inp.dataset.r, c = +inp.dataset.c, R = M.units.length, C = cols.length;
+      let t = null;
+      if (e.key === "Enter") { e.preventDefault(); const back = e.shiftKey ? -1 : 1; if (S.enterDir === "row") { let i = r * C + c + back; if (i >= 0 && i < R * C) t = [Math.floor(i / C), i % C]; } else { let i = c * R + r + back; if (i >= 0 && i < R * C) t = [i % R, Math.floor(i / R)]; } }
+      if (e.key === "ArrowDown" && r < R - 1) t = [r + 1, c];
+      if (e.key === "ArrowUp" && r > 0) t = [r - 1, c];
+      if (t) { e.preventDefault(); const n = grid.querySelector(`input[data-r="${t[0]}"][data-c="${t[1]}"]`); n?.focus(); n?.select(); }
+    });
+    inp.addEventListener("focus", () => { grid.querySelectorAll("tr.cur").forEach(x => x.classList.remove("cur")); inp.closest("tr").classList.add("cur"); });
+  });
+  M.units.forEach((_, r) => updateRow(r)); cols.forEach((_, c) => updateSum(c)); updateProgress();
+}
+function updateRow(r) {
+  const cols = checkedLists(), u = M.units[r]; if (!u) return;
+  const n = cols.filter(l => val(u.key, l.id) !== null).length;
+  const cell = $("gridWrap").querySelector(`[data-rs="${r}"]`); if (!cell) return;
+  cell.textContent = n === cols.length ? "✓" : `${n}/${cols.length}`; cell.className = "rowst" + (n === cols.length ? " ok" : "");
+  cell.closest("tr").classList.toggle("done", n === cols.length);
+}
+function updateSum(c) { const l = checkedLists()[c]; const cell = $("gridWrap").querySelector(`[data-sum="${c}"]`); if (cell && l) cell.textContent = nl(M.units.reduce((a, u) => a + (val(u.key, l.id) || 0), 0)); }
+function progress() {
+  const cols = checkedLists(); const tot = cols.length * M.units.length;
+  const filled = M.units.reduce((a, u) => a + cols.filter(l => val(u.key, l.id) !== null).length, 0);
+  const rows = M.units.filter(u => cols.every(l => val(u.key, l.id) !== null)).length;
+  return { tot, filled, rows, complete: tot > 0 && filled === tot };
+}
+function updateProgress() { const p = progress(); $("prog").style.width = p.tot ? (100 * p.filled / p.tot) + "%" : "0"; $("progTxt").textContent = p.tot ? `${p.rows} van ${M.units.length} ${M.L.units} compleet` : ""; }
+
+/* ============================== vergelijking ============================== */
+function compare() {
+  const cols = checkedLists(), p = progress();
+  const rows = cols.map(l => {
+    const entered = M.units.reduce((a, u) => a + (val(u.key, l.id) || 0), 0);
+    const t = M.contest?.total.affs.get(l.id);
+    const eml = t ? t.votes : null;
+    const emlUnits = M.contest ? M.contest.units.reduce((a, u) => a + (u.votes.affs.get(l.id)?.votes || 0), 0) : null;
+    return { l, entered, eml, diff: eml === null ? null : entered - eml, emlUnits, internal: eml !== null && M.contest.units.length ? emlUnits - eml : 0, cand: t ? t.cand : null };
+  });
+  const unitDiffs = [];
+  if (M.contest) for (const u of M.units) { const r = M.ruByKey.get(u.key); for (const l of cols) { const v = val(u.key, l.id); const e = r ? (r.votes.affs.get(l.id)?.votes ?? 0) : null; if (v !== null && e !== null && v !== e) unitDiffs.push({ u, l, v, e }); } }
+  let state = "idle";
+  if (!S.draw.done) state = "nodraw"; else if (!p.complete) state = "incomplete"; else if (!M.contest) state = "nores"; else state = rows.every(r => r.diff === 0) ? "ok" : "diff";
+  if (state !== "ok" && state !== "diff") { for (const r of rows) { r.eml = null; r.diff = null; r.emlUnits = null; r.internal = 0; r.cand = null; } unitDiffs.length = 0; }
+  return { cols, rows, unitDiffs, state, p, missing: rows.filter(r => r.eml === null) };
+}
+function renderStep4() {
+  const C = compare(), v = $("verdict");
+  const msgs = {
+    nodraw: ["idle", "Nog geen loting vastgelegd.", ""],
+    nores: ["idle", "Klaar om te vergelijken.", `Alle ${M.L.units} zijn ingevoerd. Lees hierboven de uitslag-EML in.`],
+    incomplete: ["warn", "De invoer is nog niet compleet.", `${C.p.rows} van ${M.units.length} ${M.L.units} zijn helemaal ingevoerd. De vergelijking volgt als alles is ingevoerd${M.res ? "" : " en de uitslag-EML is ingelezen"}.`],
+    ok: ["ok", "De totalen komen overeen.", S.draw.extended ? "Na het eerdere verschil zijn alle lijsten gecontroleerd en de totalen komen nu overeen." : `De som van de ingevoerde ${M.L.units} is voor elke gecontroleerde lijst gelijk aan de uitslag-EML.`],
+    diff: ["bad", "Er is een verschil.", "Controleer eerst je invoer tegen de processen-verbaal. Blijft het verschil, controleer dan alle lijsten. Is het daarna nog steeds niet verklaard, neem dan contact op met de Kiesraad."],
+  };
+  const m = msgs[C.state]; v.className = "status big " + m[0]; v.innerHTML = esc(m[1]) + (m[2] ? `<small>${esc(m[2])}</small>` : "");
+  renderRes(C);
+  const show = C.state === "ok" || C.state === "diff";
+  $("cmpTable").innerHTML = show && C.cols.length ? `<thead><tr><th>Lijst</th><th class="num">Ingevoerd</th><th class="num">Uitslag-EML</th><th class="num">Verschil</th></tr></thead><tbody>${C.rows.map(r => `<tr><td><b>${esc(r.l.id)}</b> ${esc(r.l.label)}</td><td class="num">${nl(r.entered)}</td><td class="num">${nl(r.eml)}</td><td class="num ${r.diff === 0 ? "okc" : r.diff === null ? "" : "diff"}">${r.diff === null ? "–" : r.diff === 0 ? "✓ 0" : sgn(r.diff)}</td></tr>`).join("")}</tbody>` : "";
+  $("diffBox").hidden = !(C.unitDiffs.length && C.state === "diff");
+  $("diffHint").textContent = `Hier wijkt je invoer af van de waarde die in de uitslag-EML voor deze ${M.L.unit} staat. Klopt je invoer met het proces-verbaal, dan zit het verschil in de invoer in de uitslagsoftware.`;
+  $("diffTable").innerHTML = `<thead><tr><th>${M.L.Unit}</th><th>Lijst</th><th class="num">Ingevoerd</th><th class="num">In EML</th><th class="num">Verschil</th><th></th></tr></thead><tbody>${C.unitDiffs.map(d => `<tr><td>${esc(d.u.nr)} ${esc(d.u.name)}</td><td>${esc(d.l.id)}</td><td class="num">${nl(d.v)}</td><td class="num">${nl(d.e)}</td><td class="num diff">${sgn(d.v - d.e)}</td><td><button type="button" class="small" data-fix="${esc(d.u.key)}|${esc(d.l.id)}">Naar invoer</button></td></tr>`).join("")}</tbody>`;
+  $("diffTable").querySelectorAll("[data-fix]").forEach(b => b.onclick = () => { const [k, id] = b.dataset.fix.split("|"); showStep(3); const r = M.units.findIndex(u => u.key === k), c = checkedLists().findIndex(l => l.id === id); const inp = $("gridWrap").querySelector(`input[data-r="${r}"][data-c="${c}"]`); inp?.focus(); inp?.select(); inp?.scrollIntoView({ block: "center" }); });
+  const ns = $("nextSteps"); ns.innerHTML = "";
+  if (C.state === "diff" && S.draw.mode === "steekproef" && !S.draw.extended) {
+    ns.innerHTML = `<button type="button" class="primary" id="extendBtn">Alle lijsten controleren</button><span class="hint">De ingevoerde lijsten blijven staan; de overige lijsten komen erbij.</span>`;
+    $("extendBtn").onclick = () => { S.draw.extended = true; renderAll(); showStep(3); save(); toast("Alle lijsten toegevoegd aan de invoer"); };
+  }
+  const checks = [];
+  for (const r of C.missing) checks.push(["bad", `Lijst ${r.l.id} staat niet in de uitslag-EML.`]);
+  for (const r of C.rows) if (r.internal) checks.push(["bad", `In de uitslag-EML is de som van de ${M.L.units} voor lijst ${r.l.id} (${nl(r.emlUnits)}) niet gelijk aan het totaal (${nl(r.eml)}).`]);
+  for (const r of C.rows) if (r.cand !== null && r.cand > 0 && r.cand !== r.eml) checks.push(["warn", `In de uitslag-EML is de som van de kandidaatstemmen van lijst ${r.l.id} (${nl(r.cand)}) niet gelijk aan het lijsttotaal (${nl(r.eml)}).`]);
+  if (!show) checks.length = 0;
+  else if (C.rows.length && !checks.length) checks.push(["ok", "De uitslag-EML is intern consistent voor de gecontroleerde lijsten (eenheden tellen op tot het totaal)."]);
+  $("checks4").innerHTML = checks.map(c => `<li class="${c[0]}">${esc(c[1])}</li>`).join("");
+  $("noteTxt").value = S.note; $("placeTxt").value = S.place; $("chairTxt").value = S.chair;
+  $("reportView").innerHTML = `<div class="report">${reportBody(C, false)}</div>`;
+}
+
+function renderRes(C) {
+  const st = $("resStatus"), done = C.p.complete && S.draw.done;
+  if (M.res) { st.className = "status ok"; st.textContent = "Uitslag ingelezen. De gegevens van stap 1 en de loting liggen nu vast."; }
+  else if (!S.draw.done) { st.className = "status idle"; st.textContent = "Leg eerst de loting vast en voer alles in."; }
+  else if (!done) { st.className = "status warn"; st.textContent = `Nog niet mogelijk: ${C.p.rows} van ${M.units.length} ${M.L.units} zijn helemaal ingevoerd. De uitslag-EML kan pas worden ingelezen als alle invoer klaar is.`; }
+  else { st.className = "status idle"; st.textContent = `Alle invoer is klaar. Lees nu de uitslag-EML (${M.L.eml}) in.`; }
+  $("resDrop").hidden = !!M.res;
+  $("resBtn").disabled = !done;
+  $("resDropTxt").textContent = done ? `Sleep hier de ${M.L.eml} heen.` : "Beschikbaar zodra alle invoer klaar is.";
+  $("demoRes").hidden = !(S.demo && done && !M.res);
+  $("resChip").innerHTML = M.res ? `<span class="chip on" title="${esc(M.fRes.name)}"><b>${esc(M.fRes.type)}</b><span>${esc(M.fRes.name)}</span></span><button type="button" class="small" id="resRemove">Uitslag weghalen</button>` : "";
+  if (M.res) armed($("resRemove"), "Zeker? Klik nogmaals", () => { S.files = S.files.filter(f => !/^510/.test(f.type)); afterFiles(); });
+  $("contestRow").hidden = !(M.res && M.res.contests.length > 1);
+  if (M.res) $("contestSel").innerHTML = M.res.contests.map((c, i) => `<option value="${i}" ${i === Math.min(S.contestIdx, M.res.contests.length - 1) ? "selected" : ""}>${esc(c.id)}${c.name ? " – " + esc(c.name) : ""}</option>`).join("");
+  $("checksRes").innerHTML = M.warnRes.map(c => `<li class="${c[0]}">${esc(c[1])}</li>`).join("");
+}
+function renderBadges() {
+  const set = (id, cls, t) => { const b = $(id); b.className = "badge " + cls; b.textContent = t; };
+  set("b1", M.units.length && M.lists.length ? "ok" : "", M.units.length && M.lists.length ? "✓" : "–");
+  set("b2", S.draw.done ? "ok" : "", S.draw.done ? (S.draw.mode === "alle" || S.draw.extended ? "alle" : S.draw.picked.join(" · ")) : "–");
+  const p = progress(); set("b3", p.complete ? "ok" : "", p.tot ? `${p.rows}/${M.units.length}` : "–");
+  const C = compare(); set("b4", C.state === "ok" ? "ok" : C.state === "diff" ? "bad" : "", C.state === "ok" ? "gelijk" : C.state === "diff" ? "verschil" : "–");
+}
+function showStep(n, quiet) {
+  S.step = n;
+  document.querySelectorAll("[data-pane]").forEach(p => p.hidden = +p.dataset.pane !== n);
+  document.querySelectorAll("nav.steps [data-step]").forEach(b => { if (+b.dataset.step === n) b.setAttribute("aria-current", "step"); else b.removeAttribute("aria-current"); });
+  if (!quiet) { if (n === 4) renderStep4(); window.scrollTo({ top: 0 }); save(); }
+}
+
+/* ============================== loting ============================== */
+function randInt(n) { const max = Math.floor(0x100000000 / n) * n; const a = new Uint32Array(1); do crypto.getRandomValues(a); while (a[0] >= max); return a[0] % n; }
+async function digitalDraw() {
+  const d = S.draw, n = Math.min(d.n, M.lists.length);
+  const pot = M.lists.map(l => l.id).filter(id => !d.picked.includes(id));
+  $("drawBtn").disabled = true;
+  while (d.picked.length < n && pot.length) {
+    const id = pot.splice(randInt(pot.length), 1)[0];
+    d.picked.push(id); renderStep2();
+    const el = $("lots").querySelector(`[data-lot="${CSS.escape(id)}"]`); el?.classList.add("flash");
+    if (!reduced) await sleep(700);
+  }
+  renderStep2(); renderBadges(); save();
+}
+function fixDraw() {
+  const d = S.draw;
+  if (d.mode === "alle") d.picked = [];
+  d.done = true; d.at = new Date().toLocaleString("nl-NL", { dateStyle: "long", timeStyle: "short" });
+  renderAll(); save(); toast("Loting vastgelegd");
+}
+
+/* ============================== verslag ============================== */
+function reportBody(C, forFile) {
+  const e = M.election || {}, d = S.draw, now = new Date().toLocaleString("nl-NL", { dateStyle: "long", timeStyle: "short" });
+  const verdict = C.state === "ok" ? ["ok", "De totalen komen overeen."] : C.state === "diff" ? ["bad", "De totalen komen niet overeen."] : ["warn", "De controle is nog niet afgerond."];
+  const box = on => `<span class="box">${on ? "✕" : ""}</span>`;
+  const oa = C.state === "ok" && !d.extended, ob = C.state === "ok" && d.extended, oc = C.state === "diff" && (d.extended || d.mode === "alle");
+  const drawTxt = d.mode === "alle" ? "Alle lijsten zijn gecontroleerd." : `De controletelling is uitgevoerd aan de hand van de steekproef van de volgende ${d.picked.length} lijsten, die getrokken zijn middels een loting (${d.method === "digitaal" ? "digitaal getrokken" : "loten uit een pot"}${d.at ? ", " + esc(d.at) : ""}):`;
+  return `
+<h1>Verslag controleprotocol ${esc(M.L.org)}</h1>
+<p class="meta">${esc(e.name || e.id || "Verkiezing")}${e.date ? " · " + esc(e.date) : ""} · ${esc(M.authority || "")}</p>
+<h2>Trekking van de steekproef</h2>
+<p>${drawTxt}</p>
+${d.mode === "alle" ? "" : `<ol>${d.picked.map(id => { const l = M.lists.find(x => x.id === id); return `<li>Lijst ${esc(id)} – ${esc(l?.label || "")}</li>`; }).join("")}</ol>`}
+${d.extended ? "<p>Na het aantreffen van een verschil is de controle uitgebreid naar alle lijsten.</p>" : ""}
+<h2>Resultaat</h2>
+<div class="verdict ${verdict[0]}">${verdict[1]}</div>
+<table><thead><tr><th>Lijst</th><th class="num">Som ${esc(M.L.units)} (ingevoerd)</th><th class="num">Uitslag software</th><th class="num">Verschil</th></tr></thead>
+<tbody>${C.rows.map(r => `<tr><td>${esc(r.l.id)} – ${esc(r.l.label)}</td><td class="num">${nl(r.entered)}</td><td class="num">${nl(r.eml)}</td><td class="num">${r.diff === null ? "–" : r.diff === 0 ? "0" : sgn(r.diff)}</td></tr>`).join("")}</tbody></table>
+<p class="meta" style="margin-top:6px">${nl(M.units.length)} ${esc(M.L.units)} ingevoerd vanaf ${esc(M.L.pv)}. Vergeleken met ${esc(M.fRes?.name || "–")}.</p>
+<h2>Kruis aan wat van toepassing is</h2>
+<p>${box(oa)} De totalen komen overeen.</p>
+<p>${box(ob)} Na aantreffen van een verschil is er een controletelling gedaan voor alle lijsten. De totalen komen nu overeen.</p>
+<p>${box(oc)} Na aantreffen van een verschil is er een controletelling gedaan voor alle lijsten. De totalen komen nog steeds niet overeen. Er is contact opgenomen met de Kiesraad over vervolgstappen.</p>
+<h2>Verklaring of opmerkingen</h2>
+<div class="note">${esc(S.note) || "&nbsp;"}</div>
+${forFile ? `<h2>Invoer per ${esc(M.L.unit)}</h2>
+<table><thead><tr><th>${esc(M.L.Unit)}</th>${C.cols.map(l => `<th class="num">Lijst ${esc(l.id)}</th>`).join("")}</tr></thead><tbody>
+${M.units.map(u => `<tr><td>${esc(u.nr)} ${esc(u.name)}</td>${C.cols.map(l => `<td class="num">${nl(val(u.key, l.id))}</td>`).join("")}</tr>`).join("")}
+</tbody><tfoot><tr><td>Totaal</td>${C.rows.map(r => `<td class="num">${nl(r.entered)}</td>`).join("")}</tr></tfoot></table>
+<div style="page-break-before:always"></div>
+<h2>Ondertekening voorzitter ${esc(M.L.org)}</h2>
+<p class="meta">Deze pagina niet publiceren.</p>
+<table><tbody><tr><td style="width:30%">Plaats</td><td>${esc(S.place)}</td></tr><tr><td>Datum en tijd</td><td>${esc(now)}</td></tr><tr><td>Naam voorzitter</td><td>${esc(S.chair)}</td></tr><tr><td style="height:70px">Handtekening</td><td></td></tr></tbody></table>` : ""}
+<p class="meta" style="margin-top:16px;font-size:12px">Opgemaakt met de app Controleprotocol op ${esc(now)}.</p>`;
+}
+function reportFile() {
+  const C = compare();
+  const css = `body{font:14px/1.5 "IBM Plex Sans",system-ui,sans-serif;color:#17202b;max-width:820px;margin:32px auto;padding:0 24px}h1{font-size:22px;margin:0 0 4px}h2{font-size:16px;margin:22px 0 6px}table{border-collapse:collapse;width:100%;font-size:13.5px}th,td{padding:5px 8px;border-bottom:1px solid #d9ddd8;text-align:left}th{border-bottom:1.5px solid #17202b}.num{text-align:right;font-variant-numeric:tabular-nums}tfoot td{font-weight:600;border-top:1.5px solid #17202b}.meta{color:#5b6673;margin:0}.verdict{padding:10px 12px;border-radius:4px;font-weight:600}.verdict.ok{background:#e3f3ea;color:#1f7a4a}.verdict.bad{background:#fbe4e8;color:#b3122a}.verdict.warn{background:#fdf0dc;color:#a15c00}.box{border:1px solid #17202b;display:inline-block;width:13px;height:13px;vertical-align:-2px;margin-right:6px;text-align:center;font:700 11px/12px monospace}.note{white-space:pre-wrap;border:1px solid #d9ddd8;border-radius:4px;padding:8px 10px;min-height:40px}@media print{body{margin:0}}`;
+  return `<!DOCTYPE html><html lang="nl"><head><meta charset="utf-8"><title>Verslag controleprotocol ${esc(M.authority || "")}</title><style>${css}</style></head><body>${reportBody(C, true)}</body></html>`;
+}
+function tableRows() {
+  const C = compare(), cols = C.cols;
+  const invoer = [[M.L.keyLbl, M.L.Unit, ...cols.map(l => `Lijst ${l.id} ${l.label}`)], ...M.units.map(u => [u.nr, u.name, ...cols.map(l => val(u.key, l.id))]), ["", "Totaal ingevoerd", ...C.rows.map(r => r.entered)], ["", "Uitslag-EML", ...C.rows.map(r => r.eml)], ["", "Verschil", ...C.rows.map(r => r.diff)]];
+  const cmp = [["Lijst", "Naam", "Ingevoerd", "Uitslag-EML", "Verschil"], ...C.rows.map(r => [r.l.id, r.l.label, r.entered, r.eml, r.diff])];
+  const info = [["Verkiezing", M.election?.id || ""], ["Orgaan", `${M.L.org} ${M.authority || ""}`], ["Uitslag-EML", M.fRes?.name || ""], ["Loting", S.draw.mode === "alle" ? "alle lijsten" : S.draw.picked.join(", ")], ["Uitgebreid naar alle lijsten", S.draw.extended ? "ja" : "nee"], ["Moment loting", S.draw.at], ["Conclusie", C.state === "ok" ? "totalen komen overeen" : C.state === "diff" ? "verschil" : "niet afgerond"], ["Opmerkingen", S.note]];
+  return { invoer, cmp, info };
+}
+function csvText() {
+  const { invoer } = tableRows();
+  return "﻿" + invoer.map(r => r.map(c => { const s = c === null || c === undefined ? "" : String(c); return /[;"\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; }).join(";")).join("\r\n");
+}
+let xlsxP = null;
+function loadXLSX() { return xlsxP ||= new Promise((ok, no) => { if (window.XLSX) return ok(window.XLSX); const s = document.createElement("script"); s.src = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"; s.onload = () => ok(window.XLSX); s.onerror = () => { xlsxP = null; no(new Error("xlsx-bibliotheek niet geladen")); }; document.head.appendChild(s); }); }
+async function xlsxBytes() {
+  const X = await loadXLSX(), { invoer, cmp, info } = tableRows(), wb = X.utils.book_new();
+  const ws1 = X.utils.aoa_to_sheet(invoer); ws1["!cols"] = [{ wch: 10 }, { wch: 36 }, ...invoer[0].slice(2).map(() => ({ wch: 16 }))];
+  X.utils.book_append_sheet(wb, ws1, "Invoer");
+  X.utils.book_append_sheet(wb, X.utils.aoa_to_sheet(cmp), "Vergelijking");
+  X.utils.book_append_sheet(wb, X.utils.aoa_to_sheet(info), "Verslag");
+  return new Uint8Array(X.write(wb, { type: "array", bookType: "xlsx" }));
+}
+const baseName = () => `Controleprotocol_${safe(M.election?.id || "verkiezing")}_${M.level}_${safe(M.authority || "orgaan")}`;
+
+/* ============================== opslaan ============================== */
+let downloads = null;
+(async () => { try { if (window.claude?.use) downloads = await window.claude.use("downloads"); } catch {} })();
+async function saveFile(filename, data, type) {
+  const blob = new Blob([data], { type: type || "application/octet-stream" });
+  if (downloads) { try { await downloads.save({ filename, data: blob }); toast(filename + " opgeslagen"); } catch (e) { if (e?.code !== "declined") toast("Opslaan lukte niet (" + (e?.code || e?.message || e) + ")"); } return; }
+  try { const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = filename; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); } catch { toast("Downloaden is hier niet beschikbaar"); }
+}
+function snapshot(withFiles = true) { return { format: "controleprotocol/1", saved: new Date().toISOString(), ...S, files: withFiles ? S.files.map(f => ({ name: f.name, text: f.text, type: f.type, error: f.error })) : [] }; }
+function save() {
+  try { localStorage.setItem(STORE, JSON.stringify(snapshot(true))); }
+  catch { try { localStorage.setItem(STORE, JSON.stringify(snapshot(false))); toast("Bestanden te groot om in de browser te bewaren; de invoer wordt wel bewaard"); } catch {} }
+}
+function saveSoon() { clearTimeout(saveSoon.t); saveSoon.t = setTimeout(save, 400); }
+function restore(obj) { S = { ...fresh(), ...obj, draw: { ...fresh().draw, ...(obj.draw || {}) } }; delete S.format; delete S.saved; revive(); }
+
+/* ============================== voorbeeld ============================== */
+const DEMO_NS = 'xmlns="urn:oasis:names:tc:evs:schema:eml" xmlns:kr="http://www.kiesraad.nl/extensions" xmlns:xal="urn:oasis:names:tc:ciq:xsdschema:xAL:2.0"';
+const DEMO_EID = '<ElectionIdentifier Id="GR2026_Juinen"><ElectionName>Gemeenteraad Juinen 2026</ElectionName><ElectionCategory>GR</ElectionCategory><kr:ElectionDomain Id="9999">Juinen</kr:ElectionDomain><kr:ElectionDate>2026-03-18</kr:ElectionDate></ElectionIdentifier>';
+function demoData() {
+  const lists = ["Partij voor de Juinen", "Juinens Belang", "Groen Juinen", "Sociaal Juinen", "Liberaal Juinen", "", "Dorpslijst Oost", "Ouderenpartij Juinen"];
+  const sbs = ["Stadhuis", "Sporthal De Linde", "Basisschool Het Anker", "Wijkcentrum Oost", "Bibliotheek", "Dorpshuis Westerveld"];
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const w = [30, 22, 15, 12, 9, 2, 6, 4];
+  const data = sbs.map(() => w.map(x => Math.round(x * (14 + rnd() * 10) * (0.7 + rnd() * 0.6))));
+  return { lists, sbs, data, tot: w.map((_, i) => data.reduce((a, r) => a + r[i], 0)) };
+}
+function demo110b() {
+  const { sbs } = demoData();
+  return `<?xml version="1.0" encoding="UTF-8"?><EML ${DEMO_NS} Id="110b" SchemaVersion="5"><ManagingAuthority><AuthorityIdentifier Id="9999">Juinen</AuthorityIdentifier></ManagingAuthority><ElectionEvent><Election>${DEMO_EID}<Contest><ContestIdentifier Id="geen"/>${sbs.map((n, i) => `<PollingPlace Channel="polling"><PhysicalLocation><Address><Locality><xal:LocalityName>${n}</xal:LocalityName></Locality></Address><PollingStation Id="${i + 1}">2000</PollingStation></PhysicalLocation></PollingPlace>`).join("")}</Contest></Election></ElectionEvent></EML>`;
+}
+function demo230b() {
+  const { lists } = demoData();
+  return `<?xml version="1.0" encoding="UTF-8"?><EML ${DEMO_NS} Id="230b" SchemaVersion="5"><CandidateList><Election>${DEMO_EID}<Contest><ContestIdentifier Id="geen"/>${lists.map((n, i) => `<Affiliation><AffiliationIdentifier Id="${i + 1}"><RegisteredName>${n}</RegisteredName></AffiliationIdentifier><Candidate><CandidateIdentifier Id="1"/><CandidateFullName><LastName>Kandidaat${i + 1}</LastName></CandidateFullName></Candidate></Affiliation>`).join("")}</Contest></Election></CandidateList></EML>`;
+}
+function demo510b() {
+  const { lists, sbs, data, tot } = demoData();
+  const sel = arr => arr.map((v, i) => `<Selection><AffiliationIdentifier Id="${i + 1}"><RegisteredName>${lists[i]}</RegisteredName></AffiliationIdentifier><ValidVotes>${v}</ValidVotes></Selection>`).join("") + `<Cast>0</Cast><TotalCounted>${arr.reduce((a, b) => a + b, 0)}</TotalCounted>`;
+  return `<?xml version="1.0" encoding="UTF-8"?><EML ${DEMO_NS} Id="510b" SchemaVersion="5"><TransactionId>1</TransactionId><ManagingAuthority><AuthorityIdentifier Id="9999">Juinen</AuthorityIdentifier></ManagingAuthority><Count><Election>${DEMO_EID}<Contests><Contest><ContestIdentifier Id="geen"/><TotalVotes>${sel(tot)}</TotalVotes>${sbs.map((n, i) => `<ReportingUnitVotes><ReportingUnitIdentifier Id="9999::SB${i + 1}">${n}</ReportingUnitIdentifier>${sel(data[i])}</ReportingUnitVotes>`).join("")}</Contest></Contests></Election></Count></EML>`;
+}
+function parseLines(text, keyLevel) {
+  return text.split(/\r?\n/).map(x => x.trim()).filter(Boolean).map((x, i) => {
+    let m = x.split(/\t|;/);
+    if (m.length < 2) { const y = x.match(/^(\S+)\s+(.+)$/); m = y && /\d/.test(y[1]) ? [y[1], y[2]] : [String(i + 1), x]; }
+    const nr = m[0].trim(), name = m.slice(1).join(" ").trim();
+    return { key: canonKey(keyLevel, nr), nr, name };
+  }).filter(u => u.nr && !/^(nr|nummer|code|stembureau|lijst|lijstnummer)\.?$/i.test(u.nr));
+}
+
+/* ============================== koppelingen ============================== */
+const drop = $("drop"), fileIn = $("openFile");
+$("openBtn").onclick = () => fileIn.click();
+fileIn.onchange = () => { addFiles(fileIn.files, "struct"); fileIn.value = ""; };
+drop.ondragover = e => { e.preventDefault(); drop.classList.add("over"); };
+drop.ondragleave = () => drop.classList.remove("over");
+drop.ondrop = e => { e.preventDefault(); drop.classList.remove("over"); addFiles(e.dataTransfer.files, "struct"); };
+const rDrop = $("resDrop"), rIn = $("resFile");
+$("resBtn").onclick = () => rIn.click();
+rIn.onchange = () => { addFiles(rIn.files, "res"); rIn.value = ""; };
+rDrop.ondragover = e => { e.preventDefault(); if (!$("resBtn").disabled) rDrop.classList.add("over"); };
+rDrop.ondragleave = () => rDrop.classList.remove("over");
+rDrop.ondrop = e => { e.preventDefault(); rDrop.classList.remove("over"); if ($("resBtn").disabled) return toast("Rond eerst alle invoer af"); addFiles([e.dataTransfer.files[0]].filter(Boolean), "res"); };
+$("demoRes").onclick = () => { if (addText("Telling_GR2026_Juinen_gemeente_Juinen.eml.xml", demo510b(), "res")) afterFiles(); };
+document.querySelectorAll("nav.steps [data-step]").forEach(b => b.onclick = () => showStep(+b.dataset.step));
+document.querySelectorAll("[data-goto]").forEach(b => b.addEventListener("click", () => showStep(+b.dataset.goto)));
+document.querySelectorAll('input[name="level"]').forEach(r => r.onchange = () => { S.level = r.value; afterFiles(); });
+$("kkSel").onchange = () => { S.kk = $("kkSel").value; afterFiles(); };
+$("contestSel").onchange = () => { S.contestIdx = +$("contestSel").value; afterFiles(); };
+$("pasteToggle").onclick = () => { const b = $("pasteBox"); b.hidden = !b.hidden; if (!b.hidden && !$("pasteArea").value && M.units.length) $("pasteArea").value = M.units.map(u => `${u.nr}\t${u.name}`).join("\n"); };
+$("pasteApply").onclick = () => {
+  const units = parseLines($("pasteArea").value, S.level).map(u => ({ ...u, name: u.name || u.nr }));
+  if (!units.length) return toast("Geen regels gevonden");
+  S.manualUnits = units; $("pasteBox").hidden = true; afterFiles(); toast(`${units.length} ${M.L.units} overgenomen`);
+};
+$("manualClear").onclick = () => { S.manualUnits = null; afterFiles(); };
+$("lpasteToggle").onclick = () => { const b = $("lpasteBox"); b.hidden = !b.hidden; if (!b.hidden && !$("lpasteArea").value && M.lists.length) $("lpasteArea").value = M.lists.map(l => `${l.id}\t${l.name}`).join("\n"); };
+$("lpasteApply").onclick = () => {
+  const lists = parseLines($("lpasteArea").value, "GSB").map(l => ({ id: l.nr, name: l.name }));
+  if (!lists.length) return toast("Geen regels gevonden");
+  S.manualLists = lists; $("lpasteBox").hidden = true; afterFiles(); toast(`${lists.length} lijsten overgenomen`);
+};
+$("lmanualClear").onclick = () => { S.manualLists = null; afterFiles(); };
+document.querySelectorAll('input[name="dmode"]').forEach(r => r.onchange = () => { S.draw.mode = r.value; S.draw.picked = []; renderStep2(); save(); });
+document.querySelectorAll('input[name="dmeth"]').forEach(r => r.onchange = () => { S.draw.method = r.value; S.draw.picked = []; renderStep2(); save(); });
+$("drawN").onchange = () => { S.draw.n = Math.max(1, Math.min(M.lists.length || 1, parseInt($("drawN").value, 10) || 3)); S.draw.picked = S.draw.picked.slice(0, S.draw.n); renderStep2(); save(); };
+$("drawBtn").onclick = digitalDraw;
+$("drawFix").onclick = fixDraw;
+armed($("drawUndo"), "Zeker? Klik nogmaals", () => { S.draw = { ...S.draw, picked: [], done: false, at: "", extended: false }; renderAll(); save(); });
+$("enterDir").onchange = () => { S.enterDir = $("enterDir").value; save(); };
+$("testFill").onclick = () => {
+  const cols = checkedLists(); if (!cols.length) return toast("Leg eerst de loting vast");
+  const { data } = demoData();
+  M.units.forEach(u => { const row = data[+u.key - 1]; if (!row) return; for (const l of cols) (S.entries[u.key] ||= {})[l.id] = String(row[+l.id - 1] ?? 0); });
+  if ($("testErr").checked) { const u = M.units[randInt(M.units.length)], l = cols[randInt(cols.length)]; const v = (+S.entries[u.key]?.[l.id] || 0) + (randInt(2) ? 1 : -1) * (1 + randInt(9)); (S.entries[u.key] ||= {})[l.id] = String(Math.max(0, v)); }
+  renderAll(); save(); toast("Voorbeeldgetallen ingevuld");
+};
+armed($("clearEntries"), "Zeker? Klik nogmaals", () => { S.entries = {}; renderAll(); save(); });
+$("noteTxt").oninput = () => { S.note = $("noteTxt").value; saveSoon(); clearTimeout(saveSoon.r); saveSoon.r = setTimeout(() => $("reportView").innerHTML = `<div class="report">${reportBody(compare(), false)}</div>`, 300); };
+$("placeTxt").oninput = () => { S.place = $("placeTxt").value; saveSoon(); };
+$("chairTxt").oninput = () => { S.chair = $("chairTxt").value; saveSoon(); };
+$("dlReport").onclick = () => saveFile(baseName() + "_verslag.html", reportFile(), "text/html");
+$("dlCsv").onclick = () => saveFile(baseName() + ".csv", csvText(), "text/csv");
+$("dlXlsx").onclick = async () => { try { saveFile(baseName() + ".xlsx", await xlsxBytes(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"); } catch { toast("Excel lukt niet; de CSV wordt opgeslagen"); saveFile(baseName() + ".csv", csvText(), "text/csv"); } };
+$("sessSave").onclick = () => saveFile(baseName() + "_sessie.json", JSON.stringify(snapshot(true)), "application/json");
+$("sessLoad").onclick = () => $("sessFile").click();
+$("sessFile").onchange = async () => { const f = $("sessFile").files[0]; $("sessFile").value = ""; if (!f) return; try { const j = JSON.parse(await f.text()); if (j.format !== "controleprotocol/1") throw 0; restore(j); renderAll(); save(); toast("Sessie geladen"); } catch { toast("Dit is geen sessiebestand van deze app"); } };
+$("demoBtn").onclick = () => { S = fresh(); S.demo = true; addText("Stembureaus_GR2026_Juinen.eml.xml", demo110b(), "struct"); addText("Kandidatenlijsten_GR2026_Juinen.eml.xml", demo230b(), "struct"); afterFiles(); toast("Voorbeeld geladen: gemeenteraad Juinen"); };
+armed($("resetBtn"), "Alles wissen? Klik nogmaals", () => { S = fresh(); renderAll(); save(); });
+
+try { const j = JSON.parse(localStorage.getItem(STORE) || "null"); if (j && j.format === "controleprotocol/1") restore(j); } catch {}
+renderAll();
+</script>
+</body>
+</html>

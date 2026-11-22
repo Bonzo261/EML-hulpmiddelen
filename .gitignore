@@ -1,0 +1,8 @@
+# Nooit sleutels of geëxporteerde sessies meeleveren
+*.key
+*.pem
+*sleutel*.json
+*sleutels*.json
+*keys*.json
+*sessie*.json
+.DS_Store

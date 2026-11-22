@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Uitslagen-generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#17202b; --muted:#5b6673; --paper:#f5f6f4; --panel:#ffffff; --line:#d9ddd8;
+  --accent:#c4122f; --accent-soft:#fbe7ea; --code-bg:#1b2430; --code-ink:#dfe6ee;
+  --ok:#1f7a4a; --warn:#a15c00; --bad:#b3122a; --ok-soft:#e3f3ea; --warn-soft:#fdf0dc; --bad-soft:#fbe4e8;
+  --font-display:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;
+  --font-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --ink:#e6e9ec; --muted:#9aa4ae; --paper:#12161b; --panel:#1a2027; --line:#2e3640;
+    --accent:#ff5468; --accent-soft:#3a1d23; --code-bg:#0c1015; --code-ink:#d6dde5;
+    --ok:#5fd398; --warn:#f0b357; --bad:#ff7a8a; --ok-soft:#163026; --warn-soft:#33260f; --bad-soft:#3a1a20;
+    color-scheme:dark;
+  }
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font:15px/1.5 var(--font-body)}
+header.top{padding:22px 24px 14px;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px 24px;align-items:end;justify-content:space-between}
+header.top h1{font:600 26px/1.1 var(--font-display);margin:0;text-wrap:balance}
+header.top h1 .tag{font:500 12px/1 var(--font-mono);color:var(--accent);border:1px solid var(--accent);border-radius:3px;padding:3px 6px;margin-left:8px;vertical-align:4px}
+header.top p{margin:4px 0 0;color:var(--muted);max-width:66ch}
+main{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:24px;padding:20px 24px 40px;align-items:start}
+@media (max-width:1060px){main{grid-template-columns:1fr}}
+.questions{display:grid;gap:14px;min-width:0}
+.q{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:16px 18px;display:grid;gap:12px;min-width:0}
+.q h2{margin:0;font:600 17px/1.25 var(--font-display);display:flex;gap:10px;align-items:baseline}
+.q h2 .n{font:500 13px/1 var(--font-mono);color:#fff;background:var(--accent);border-radius:3px;padding:3px 6px;min-width:22px;text-align:center}
+.hint{color:var(--muted);font-size:13.5px;margin:0}
+.hint code,.why code{font:500 12.5px var(--font-mono)}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:end}
+.field{display:grid;gap:4px;flex:1 1 180px;min-width:0}
+.field.narrow{flex:0 1 140px}
+label{font-size:13px;font-weight:600;color:var(--muted)}
+label.inline{display:flex;gap:6px;align-items:center;color:var(--ink);font-weight:500;font-size:14px}
+input[type=text],input[type=number],select{font:inherit;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:7px 9px;width:100%}
+input.mono{font:500 13px var(--font-mono)}
+input:focus,select:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+button{font:500 14px/1 var(--font-body);border-radius:4px;padding:9px 13px;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+button:hover{border-color:var(--ink)}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button.primary:hover{filter:brightness(1.08)}
+button:disabled{opacity:.5;cursor:not-allowed;filter:none}
+button.small{padding:5px 8px;font-size:12.5px}
+.grp{font:600 12px/1 var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:4px 0 -4px}
+.types{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px}
+.types label{display:block;cursor:pointer;border:1px solid var(--line);border-radius:5px;padding:11px 12px;color:var(--ink);font-weight:500;background:var(--paper);position:relative}
+.types input{position:absolute;opacity:0;pointer-events:none}
+.types label b{display:flex;gap:6px;align-items:center;font:600 13px/1 var(--font-mono);color:var(--accent);margin-bottom:6px}
+.types label b i{font-style:normal;font:500 10.5px/1 var(--font-mono);color:var(--muted);border:1px solid var(--line);border-radius:3px;padding:2px 4px}
+.types label span{font-size:14px;font-weight:600;display:block}
+.types label small{display:block;color:var(--muted);font-size:12.5px;font-weight:400;margin-top:3px}
+.types input:checked+label{border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 3px 0 0 var(--accent)}
+.types input:focus-visible+label{outline:2px solid var(--accent)}
+.drop{border:1.5px dashed var(--line);border-radius:6px;padding:16px;text-align:center;display:grid;gap:10px;justify-items:center;background:var(--paper)}
+.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+.btns{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:500 12px/1 var(--font-mono);border-radius:999px;padding:5px 9px;background:var(--paper);border:1px solid var(--line);display:inline-flex;gap:6px;align-items:center;max-width:100%}
+.chip.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.chip.bad{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip button{border:0;background:none;padding:0;font-size:13px;line-height:1;color:inherit}
+ul.needs{list-style:none;margin:0;padding:0;display:grid;gap:0}
+ul.needs li{display:grid;grid-template-columns:22px 1fr auto;gap:10px;align-items:start;padding:9px 0;border-top:1px solid var(--line)}
+ul.needs li:first-child{border-top:0}
+.st{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font:600 12px/1 var(--font-mono);margin-top:1px}
+.st.ok{background:var(--ok-soft);color:var(--ok)} .st.miss{background:var(--bad-soft);color:var(--bad)} .st.opt{background:var(--paper);color:var(--muted);border:1px solid var(--line)}
+.needs .nm{font-weight:600;font-size:14px}
+.needs .nm code{font:600 12.5px var(--font-mono);color:var(--accent);margin-right:4px}
+.needs .why{color:var(--muted);font-size:13px}
+.needs .fn{font:500 12px/1.4 var(--font-mono);color:var(--ok);word-break:break-all}
+details summary{cursor:pointer;font-weight:600;font-size:14px}
+details[open] summary{margin-bottom:10px}
+.out{position:sticky;top:16px;display:grid;gap:12px;min-width:0}
+.summary{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:14px 16px;display:grid;gap:10px}
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:520px){.facts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.fact small{display:block;color:var(--muted);font-size:12px}
+.fact strong{font:600 18px/1.2 var(--font-display);font-variant-numeric:tabular-nums;word-break:break-word}
+.status{font-weight:600;font-size:14px;padding:8px 10px;border-radius:4px}
+.status.ok{background:var(--ok-soft);color:var(--ok)} .status.warn{background:var(--warn-soft);color:var(--warn)} .status.bad{background:var(--bad-soft);color:var(--bad)}
+.status.idle{background:var(--paper);color:var(--muted)}
+ul.checks{margin:0;padding:0;list-style:none;display:grid;gap:4px;font-size:13.5px;max-height:220px;overflow:auto}
+ul.checks li{padding-left:16px;position:relative}
+ul.checks li::before{content:"";position:absolute;left:2px;top:.55em;width:7px;height:7px;border-radius:50%}
+ul.checks li.bad::before{background:var(--bad)} ul.checks li.warn::before{background:var(--warn)} ul.checks li.info::before{background:var(--muted)} ul.checks li.ok::before{background:var(--ok)}
+.actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.files{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:12px 14px;display:grid;gap:0;max-height:56vh;overflow:auto}
+.files h3{margin:0 0 6px;font:600 15px/1.3 var(--font-display)}
+.file{display:grid;gap:4px;padding:9px 0;border-top:1px solid var(--line)}
+.file:first-of-type{border-top:0}
+.file .top{display:flex;gap:8px;align-items:baseline;justify-content:space-between;flex-wrap:wrap}
+.file .nm{font:500 13px/1.35 var(--font-mono);word-break:break-all}
+.lvl{font:600 11px/1 var(--font-mono);color:var(--accent);border:1px solid var(--accent);border-radius:3px;padding:2px 5px;margin-right:6px;white-space:nowrap}
+.lvl.sig{color:var(--ok);border-color:var(--ok)}
+.nums{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.hash{font:500 11.5px/1.4 var(--font-mono);color:var(--muted);word-break:break-all}
+.preview{background:var(--code-bg);color:var(--code-ink);border-radius:6px;padding:12px 14px;display:grid;gap:8px;min-width:0}
+.preview .top{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.preview strong{font:500 12.5px var(--font-mono);word-break:break-all}
+.preview pre{margin:0;font:12px/1.45 var(--font-mono);max-height:48vh;overflow:auto;white-space:pre}
+.preview button{background:transparent;color:var(--code-ink);border-color:#3a4654}
+.empty{background:var(--panel);border:1px dashed var(--line);border-radius:6px;padding:36px 20px;text-align:center;color:var(--muted)}
+.keys{display:grid;gap:0;max-height:240px;overflow:auto;border:1px solid var(--line);border-radius:5px;background:var(--paper)}
+.key{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:7px 10px;border-top:1px solid var(--line);font-size:13.5px}
+.key:first-child{border-top:0}
+.key .fp{font:500 11.5px var(--font-mono);color:var(--muted);word-break:break-all}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:9px 14px;border-radius:4px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw;z-index:10}
+.toast.show{opacity:1}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+footer{padding:0 24px 30px;color:var(--muted);font-size:12.5px;max-width:110ch}
+footer code{font-family:var(--font-mono);font-size:12px}
+.busy{display:inline-block;width:12px;height:12px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin .8s linear infinite;vertical-align:-2px;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace);color:var(--accent,#c8102e);text-decoration:none;margin-bottom:10px}header.top .back:hover{text-decoration:underline}header.top .nk{font:400 12px/1 var(--font-mono,monospace);color:var(--muted,#666)}
+</style>
+</head>
+<body>
+<header class="top">
+  <div>
+    <a class="back" href="index.html">← Alle hulpmiddelen</a><span class="nk"> · Onafhankelijk hulpmiddel, niet van de Kiesraad</span>
+    <h1>Uitslagen-generator <span class="tag">510b · 510c · 510d</span></h1>
+    <p>Maak test-uitslagen voor Abacus. Laad de verkiezingsdefinitie, kandidatenlijsten en stembureaus uit je andere apps; de app verzint een consistente uitslag per stembureau en telt die op tot GSB-, HSB- en CSB-niveau. Alle uitslagen kunnen worden ondertekend zoals Abacus dat doet.</p>
+  </div>
+  <div class="actions">
+    <input type="file" id="openFile" accept=".xml,.eml,text/xml" multiple hidden>
+    <button type="button" id="openBtn">EML-bestanden openen</button>
+    <button type="button" id="demoBtn">Voorbeeld: gemeenteraad</button>
+    <button type="button" id="resetBtn">Opnieuw beginnen</button>
+  </div>
+</header>
+
+<main>
+<section class="questions" aria-label="Vragen">
+
+  <div class="q">
+    <h2><span class="n">1</span>Welke EML-bestanden?</h2>
+    <ul class="needs" id="needs"></ul>
+    <div class="drop" id="drop">
+      <div>Sleep hier de EML-bestanden uit de Verkiezingsdefinitie-maker (110a), de Kandidatenlijsten-maker (230b) en de Stembureaus-maker (110b). Meerdere 230b’s (per kieskring) en 110b’s (per gemeente) mag. Het soort bestand wordt automatisch herkend.</div>
+      <div class="btns"><button type="button" class="primary" id="dropBtn">Kies bestanden</button></div>
+    </div>
+    <div class="chips" id="loaded"></div>
+  </div>
+
+  <div class="q">
+    <h2><span class="n">2</span>Welke uitslagen?</h2>
+    <div class="types">
+      <input type="checkbox" id="lGSB" checked><label for="lGSB"><b>510b <i>GSB</i></b><span>Gemeentelijk stembureau</span><small>Eén bestand per gemeente, met de uitslag per stembureau.</small></label>
+      <input type="checkbox" id="lHSB" checked><label for="lHSB"><b>510c <i>HSB</i></b><span>Hoofdstembureau</span><small>Eén bestand per kieskring, met de uitslag per gemeente.</small></label>
+      <input type="checkbox" id="lCSB" checked><label for="lCSB"><b>510d <i>CSB</i></b><span>Centraal stembureau</span><small>De totaaltelling, met de uitslag per hoofdstembureau.</small></label>
+    </div>
+    <div class="row">
+      <div class="field"><label for="gemMode">Gemeenten</label>
+        <select id="gemMode"><option value="all">Alle gemeenten uit 110a en 110b</option><option value="110b">Alleen gemeenten met een 110b</option></select></div>
+      <div class="field narrow"><label for="fakeSb">Fictieve stembureaus</label><input type="number" id="fakeSb" value="3" min="1" max="200"></div>
+      <div class="field"><label for="method">Stemopneming</label>
+        <select id="method"><option value="centrale stemopneming">Centraal (CSO)</option><option value="decentrale stemopneming">Decentraal (DSO)</option></select></div>
+    </div>
+    <p class="hint">Gemeenten zonder 110b krijgen het opgegeven aantal fictieve stembureaus. De indeling in kieskringen komt uit de 110a.</p>
+  </div>
+
+  <div class="q">
+    <h2><span class="n">3</span>Hoe moet de uitslag eruitzien?</h2>
+    <div class="row">
+      <div class="field narrow"><label for="seed">Seed</label><input type="number" id="seed" value="2026"></div>
+      <div class="field narrow"><label for="tMin">Opkomst min. %</label><input type="number" id="tMin" value="55" min="0" max="100"></div>
+      <div class="field narrow"><label for="tMax">Opkomst max. %</label><input type="number" id="tMax" value="80" min="0" max="100"></div>
+      <div class="field narrow"><label for="spread">Spreiding partijen</label>
+        <select id="spread"><option value="0.15">Klein</option><option value="0.35" selected>Normaal</option><option value="0.7">Groot</option></select></div>
+    </div>
+    <div class="row">
+      <div class="field narrow"><label for="blank">Blanco %</label><input type="number" id="blank" value="0.4" step="0.1" min="0"></div>
+      <div class="field narrow"><label for="invalid">Ongeldig %</label><input type="number" id="invalid" value="0.3" step="0.1" min="0"></div>
+      <div class="field narrow"><label for="diffPct">Telverschil %</label><input type="number" id="diffPct" value="0" min="0" max="100"></div>
+      <div class="field"><label for="kgRange">Kiesgerechtigden per stembureau</label>
+        <select id="kgRange"><option value="800-1800">800 – 1.800</option><option value="1500-3000" selected>1.500 – 3.000</option><option value="3000-6000">3.000 – 6.000</option></select></div>
+    </div>
+    <p class="hint">Dezelfde seed en invoer geven steeds dezelfde uitslag. <em>Telverschil</em> is het percentage stembureaus met 1–3 meer of minder getelde stembiljetten dan toegelaten kiezers. Abacus geeft daar waarschuwingen op, dus laat het op 0 als je een schone import wilt testen.</p>
+    <details>
+      <summary>ID-formaten (geavanceerd)</summary>
+      <div class="row">
+        <div class="field"><label for="fmtSb">Stembureau in 510b</label><input type="text" class="mono" id="fmtSb" value="{gemeente}::SB{nr}"></div>
+        <div class="field"><label for="fmtGem">Gemeente in 510c</label><input type="text" class="mono" id="fmtGem" value="HSB{hsb}::{gemeente}"></div>
+        <div class="field"><label for="fmtHsb">HSB in 510d</label><input type="text" class="mono" id="fmtHsb" value="HSB{hsb}"></div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <div class="field"><label for="fmtAuthHsb">Afzender 510c</label><input type="text" class="mono" id="fmtAuthHsb" value="HSB{hsb}"></div>
+        <div class="field"><label for="fmtAuthCsb">Afzender 510d</label><input type="text" class="mono" id="fmtAuthCsb" value="CSB"></div>
+        <div class="field"><label for="fmtCsbContest">Contest bij meerdere kieskringen</label><input type="text" class="mono" id="fmtCsbContest" value="alle"></div>
+      </div>
+      <p class="hint" style="margin-top:8px">Velden: <code>{gemeente}</code> 4-cijferige code, <code>{nr}</code> stembureaunummer, <code>{hsb}</code> kieskringnummer. Het formaat van 510b volgt het testbestand van Abacus (EML_NL 1.3.1).</p>
+    </details>
+  </div>
+
+  <div class="q">
+    <h2><span class="n">4</span>Ondertekenen voor Abacus</h2>
+    <label class="inline"><input type="checkbox" id="sign" checked> Alle uitslagen ondertekenen en als Abacus-importzip aanleveren (GSB, HSB en CSB)</label>
+    <p class="hint">Per orgaan maakt de app een RSA-4096-sleutelpaar met een certificaat zoals Abacus dat maakt (<code>C, L, O=&lt;verkiezing&gt;, OU, CN, UID</code>). Lees in Abacus bij het ontvangende orgaan het <code>.crt</code>-bestand van de afzender in als publieke sleutel: GSB-sleutels bij het HSB of CSB, HSB-sleutels bij het CSB. Daarna is elk importbestand (zip met <code>.eml.xml</code> + <code>.eml.xml.signature</code>) geldig ondertekend. De sleutels worden in je browser bewaard; zo hoef je elk <code>.crt</code> maar één keer in te lezen.</p>
+    <div class="row">
+      <div class="field"><label for="uidGsb">UID van een GSB</label><input type="text" class="mono" id="uidGsb" value="PSB{gemeente}"></div>
+      <div class="field"><label for="uidHsb">UID van een HSB</label><input type="text" class="mono" id="uidHsb" value="HSB{hsb}"></div>
+      <div class="field"><label for="uidCsb">UID van het CSB</label><input type="text" class="mono" id="uidCsb" value="CSB"></div>
+    </div>
+    <p class="hint"><code>PSB{gemeente}</code> is het formaat dat Abacus nu gebruikt. Voor HSB en CSB legt Abacus nog geen formaat vast; <code>HSB{hsb}</code> en <code>CSB</code> volgen de afzender-ID's in de EML en het voorbeeld in de Abacus-testcode. Wijzig je een UID, dan hoort daar een nieuwe sleutel bij.</p>
+    <div class="keys" id="keys"></div>
+    <div class="btns">
+      <button type="button" class="small" id="keysExport">Sleutels opslaan (.json)</button>
+      <input type="file" id="keysFile" accept=".json,application/json" hidden>
+      <button type="button" class="small" id="keysImport">Sleutels laden</button>
+      <button type="button" class="small" id="keysCrt">Alle publieke sleutels (.zip)</button>
+      <button type="button" class="small" id="keysForget">Sleutels vergeten</button>
+    </div>
+  </div>
+</section>
+
+<section class="out" aria-label="Resultaat">
+  <div class="summary">
+    <div class="facts">
+      <div class="fact"><small>Verkiezing</small><strong id="fElection" style="font-size:14px;font-family:var(--font-mono);font-weight:500;word-break:break-all">–</strong></div>
+      <div class="fact"><small>Gemeenten</small><strong id="fGem">–</strong></div>
+      <div class="fact"><small>Stembureaus</small><strong id="fSb">–</strong></div>
+      <div class="fact"><small>Hoofdstembureaus</small><strong id="fHsb">–</strong></div>
+    </div>
+    <div class="status idle" id="status">Laad minstens een kandidatenlijst (230b).</div>
+    <ul class="checks" id="checks"></ul>
+    <div class="actions">
+      <button type="button" class="primary" id="genBtn" disabled>Uitslagen genereren</button>
+      <button type="button" id="zipBtn" disabled>Alles downloaden (.zip)</button>
+    </div>
+  </div>
+  <div class="files" id="files" hidden></div>
+  <div class="preview" id="preview" hidden>
+    <div class="top"><strong id="pvName"></strong><button type="button" class="small" id="pvClose">Sluiten</button></div>
+    <div class="hash" id="pvHash" style="color:#9fb0c2"></div>
+    <pre id="pvBody"></pre>
+  </div>
+</section>
+</main>
+
+<footer>
+  Het formaat van de 510b en van de handtekening volgt de broncode van Abacus (<code>github.com/kiesraad/abacus</code>: <code>backend/src/eml/tests/eml510b_test.eml.xml</code> en <code>backend/eml_signature</code>; EUPL-1.2): een zelfondertekend X.509-certificaat met RSA-4096 en SHA-256, en een CMS <code>signedData</code> zonder signed attributes over de exacte bytes van het EML-bestand. Alles gebeurt in je browser; sleutels en bestanden gaan niet naar een server. Abacus leest op dit moment alleen GSB-uitslagen (510b) met een handtekening in; HSB- en CSB-ondertekening (510c en 510d) gebruikt hetzelfde formaat met een instelbare UID, zodat je die functies kunt testen zodra Abacus ze ondersteunt. Deze bestanden en sleutels zijn uitsluitend bedoeld voor testomgevingen.
+</footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+"use strict";
+/* ============================== state ============================== */
+const S = { files: [], d110a: null, d230b: [], d110b: [], outputs: [], model: null, keys: {} };
+const $ = id => document.getElementById(id);
+const enc = new TextEncoder();
+
+/* ============================== XML helpers ============================== */
+const all = (el, n) => Array.from(el.getElementsByTagNameNS("*", n));
+const one = (el, n) => { const l = el.getElementsByTagNameNS("*", n); return l.length ? l[0] : null; };
+const txt = (el, n) => { const e = el && one(el, n); return e ? e.textContent.trim() : ""; };
+const kids = (el, n) => Array.from(el.children).filter(c => c.localName === n);
+const esc = s => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const pad4 = c => /^\d+$/.test(c) ? c.padStart(4, "0") : c;
+const nl = x => Number(x).toLocaleString("nl-NL");
+
+function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("show"), 2600); }
+
+/* ============================== parsing ============================== */
+function parseFile(text) {
+  const doc = new DOMParser().parseFromString(text, "application/xml");
+  if (doc.getElementsByTagName("parsererror").length) throw new Error("geen geldige XML");
+  const root = doc.documentElement;
+  if (root.localName !== "EML") throw new Error("geen EML-document");
+  const id = (root.getAttribute("Id") || "").toLowerCase();
+  if (id === "110a") return { type: "110a", data: parse110a(doc) };
+  if (id === "230b") return { type: "230b", data: parse230b(doc) };
+  if (id === "110b") return { type: "110b", data: parse110b(doc) };
+  throw new Error("EML " + (id || "?") + " is geen invoer voor deze app");
+}
+function parseElectionId(doc) {
+  const e = one(doc, "ElectionIdentifier");
+  if (!e) return null;
+  const dom = one(e, "ElectionDomain");
+  return {
+    id: e.getAttribute("Id") || "", name: txt(e, "ElectionName"), category: txt(e, "ElectionCategory"),
+    subcategory: txt(e, "ElectionSubcategory"),
+    domain: dom ? { id: dom.getAttribute("Id") || "", name: dom.textContent.trim() } : null,
+    date: txt(e, "ElectionDate"),
+  };
+}
+function parse110a(doc) {
+  const regions = all(doc, "Region").map(r => ({
+    number: r.getAttribute("RegionNumber") || "",
+    category: (r.getAttribute("RegionCategory") || "").toUpperCase(),
+    superior: r.getAttribute("SuperiorRegionNumber") || "",
+    superiorCategory: (r.getAttribute("SuperiorRegionCategory") || "").toUpperCase(),
+    name: txt(r, "RegionName"),
+    committees: all(r, "Committee").map(c => ({ cat: c.getAttribute("CommitteeCategory") || "", name: c.getAttribute("CommitteeName") || "" })),
+  }));
+  return { election: parseElectionId(doc), seats: txt(doc, "NumberOfSeats"), regions };
+}
+function personName(c) {
+  const s = [txt(c, "NameLine") || txt(c, "FirstName"), txt(c, "NamePrefix"), txt(c, "LastName")].filter(Boolean).join(" ");
+  return s || txt(c, "CandidateFullName");
+}
+function parse230b(doc) {
+  const contests = all(doc, "Contest").map(ct => {
+    const ci = one(ct, "ContestIdentifier");
+    const affiliations = kids(ct, "Affiliation").map(a => {
+      const ai = one(a, "AffiliationIdentifier");
+      return {
+        id: ai ? ai.getAttribute("Id") : "", name: ai ? txt(ai, "RegisteredName") : "",
+        candidates: kids(a, "Candidate").map(c => { const x = one(c, "CandidateIdentifier"); return { id: x ? x.getAttribute("Id") : "", name: personName(c) }; }),
+      };
+    });
+    return { id: ci ? ci.getAttribute("Id") : "geen", affiliations };
+  });
+  return { election: parseElectionId(doc), contests };
+}
+function parse110b(doc) {
+  const auth = one(doc, "AuthorityIdentifier");
+  const ci = one(doc, "ContestIdentifier");
+  const stations = all(doc, "PollingPlace").map((pp, i) => {
+    const ps = one(pp, "PollingStation");
+    const loc = txt(pp, "LocalityName");
+    const pc = txt(pp, "PostalCodeNumber") || txt(pp, "PostalCode");
+    const nr = ps ? (ps.getAttribute("Id") || String(i + 1)) : String(i + 1);
+    const pst = ps ? ps.textContent.trim() : "";
+    const name = (loc || "Stembureau " + nr) + (pc ? ` (postcode: ${pc})` : "");
+    return { nr, name, voters: /^\d+$/.test(pst) ? +pst : null, ruType: txt(pp, "ReportingUnitType") || "FixedLocation" };
+  });
+  return { gemeente: auth ? pad4(auth.getAttribute("Id") || "") : "", gemeenteName: auth ? auth.textContent.trim() : "", contestId: ci ? ci.getAttribute("Id") : "", election: parseElectionId(doc), stations };
+}
+
+/* ============================== loading ============================== */
+async function addFiles(list) { for (const f of list) addText(f.name, await f.text()); refresh(); }
+function addText(name, text) {
+  try { S.files.push({ name, ...parseFile(text) }); }
+  catch (e) { S.files.push({ name, type: "fout", error: e.message }); }
+}
+function rebuild() {
+  S.d110a = null; S.d230b = []; S.d110b = [];
+  for (const f of S.files) {
+    if (f.type === "110a") S.d110a = f.data;
+    if (f.type === "230b") S.d230b.push(f.data);
+    if (f.type === "110b") S.d110b.push(f.data);
+  }
+}
+function refresh() {
+  rebuild();
+  $("loaded").innerHTML = S.files.map((f, i) => `<span class="chip ${f.type === "fout" ? "bad" : "on"}" title="${esc(f.error || f.name)}"><b>${esc(f.type)}</b><span>${esc(f.name)}</span><button type="button" data-rm="${i}" aria-label="Verwijder ${esc(f.name)}">×</button></span>`).join("");
+  $("loaded").querySelectorAll("[data-rm]").forEach(b => b.onclick = () => { S.files.splice(+b.dataset.rm, 1); refresh(); });
+  const n110b = S.d110b.length, n230b = S.d230b.reduce((a, d) => a + d.contests.length, 0);
+  const st = (ok, opt) => ok ? '<span class="st ok">✓</span>' : opt ? '<span class="st opt">–</span>' : '<span class="st miss">!</span>';
+  const e = S.d110a?.election;
+  $("needs").innerHTML = [
+    [st(!!S.d110a, true), "110a", "Verkiezingsdefinitie", "Voor de kieskringen en de gemeenten. Zonder 110a valt alles onder één HSB.", e ? `${e.id} · ${S.d110a.regions.length} regio's` : ""],
+    [st(n230b > 0, false), "230b", "Kandidatenlijsten", "Verplicht: de lijsten en kandidaten waarop stemmen worden verdeeld.", n230b ? `${n230b} contest(s), ${new Set(S.d230b.flatMap(d => d.contests.flatMap(c => c.affiliations.map(a => a.id)))).size} lijsten` : ""],
+    [st(n110b > 0, true), "110b", "Stembureaus", "Per gemeente. Gemeenten zonder 110b krijgen fictieve stembureaus.", n110b ? S.d110b.map(b => `${b.gemeenteName || b.gemeente}: ${b.stations.length}`).join(" · ") : ""],
+  ].map(r => `<li>${r[0]}<div><div class="nm"><code>${r[1]}</code>${r[2]}</div><div class="why">${r[3]}</div>${r[4] ? `<div class="fn">${esc(r[4])}</div>` : ""}</div><span></span></li>`).join("");
+  summary();
+}
+
+/* ============================== model ============================== */
+const LOCAL = ["GR"];
+function buildModel(opts) {
+  const warn = [];
+  const election = S.d110a?.election || S.d230b[0]?.election || S.d110b[0]?.election;
+  const contests = [];
+  for (const d of S.d230b) for (const c of d.contests) if (!contests.find(x => x.id === c.id)) contests.push(c);
+  const regions = S.d110a?.regions || [];
+  const kk = regions.filter(r => r.category === "KIESKRING");
+  const gemMap = new Map();
+  if (opts.gemMode === "all") {
+    for (const r of regions.filter(r => r.category === "GEMEENTE")) {
+      const code = pad4(r.number);
+      gemMap.set(code, { code, name: r.name || code, hsb: r.superiorCategory === "KIESKRING" ? r.superior : "", stations: null });
+    }
+    if (!gemMap.size && election?.domain && /^\d+$/.test(election.domain.id)) {
+      const code = pad4(election.domain.id);
+      gemMap.set(code, { code, name: election.domain.name || code, hsb: "", stations: null });
+    }
+  }
+  for (const b of S.d110b) {
+    const code = b.gemeente || "0000";
+    const g = gemMap.get(code) || { code, name: b.gemeenteName || code, hsb: "", stations: null };
+    if (!g.name || g.name === code) g.name = b.gemeenteName || code;
+    if (!g.hsb && b.contestId && kk.find(k => k.number === b.contestId)) g.hsb = b.contestId;
+    g.stations = (g.stations || []).concat(b.stations);
+    gemMap.set(code, g);
+  }
+  if (!gemMap.size) {
+    gemMap.set("0001", { code: "0001", name: election?.domain?.name || "Testgemeente", hsb: "", stations: null });
+    warn.push(["warn", "Geen gemeenten in 110a of 110b gevonden; er wordt één testgemeente gebruikt."]);
+  }
+  const gemeenten = [...gemMap.values()];
+  let fake = 0;
+  for (const g of gemeenten) if (!g.stations || !g.stations.length) {
+    fake++;
+    g.stations = Array.from({ length: opts.fakeSb }, (_, i) => ({ nr: String(i + 1), name: `Stembureau ${i + 1} (fictief)`, voters: null, ruType: "FixedLocation" }));
+  }
+  if (fake) warn.push(["info", `${fake} gemeente(n) zonder 110b krijgen ${opts.fakeSb} fictieve stembureaus.`]);
+  const hsbs = new Map();
+  for (const g of gemeenten) {
+    let nr = g.hsb || (kk.length === 1 ? kk[0].number : "1");
+    g.hsb = nr;
+    if (!hsbs.has(nr)) {
+      const r = kk.find(k => k.number === nr);
+      hsbs.set(nr, { nr, name: r?.name || (kk.length ? "Kieskring " + nr : (election?.domain?.name || g.name)), gemeenten: [] });
+    }
+    hsbs.get(nr).gemeenten.push(g);
+  }
+  if (!kk.length) warn.push(["info", "Geen kieskringen in 110a; alle gemeenten vallen onder één HSB."]);
+  for (const g of gemeenten) {
+    g.contest = contests.find(c => c.id === g.hsb) || contests[0];
+    if (contests.length > 1 && !contests.find(c => c.id === g.hsb)) warn.push(["warn", `Geen 230b-contest ${g.hsb} voor ${g.name}; contest ${g.contest?.id} gebruikt.`]);
+  }
+  if (S.d110a && election && S.d230b.some(d => d.election && d.election.id !== election.id)) warn.push(["bad", "De 230b hoort bij een andere verkiezing dan de 110a."]);
+  const seen = new Set();
+  return { election, contests, gemeenten, hsbs: [...hsbs.values()].sort((a, b) => (+a.nr || 0) - (+b.nr || 0)), warn: warn.filter(w => !seen.has(w[1]) && seen.add(w[1])) };
+}
+
+function summary() {
+  const ready = S.d230b.length > 0;
+  $("genBtn").disabled = !ready;
+  if (!S.files.length) {
+    ["fElection", "fGem", "fSb", "fHsb"].forEach(id => $(id).textContent = "–");
+    setStatus("idle", "Laad minstens een kandidatenlijst (230b).");
+    $("checks").innerHTML = ""; renderKeys(); return;
+  }
+  const m = buildModel(readOpts());
+  S.model = m;
+  $("fElection").textContent = m.election?.id || "–";
+  $("fGem").textContent = nl(m.gemeenten.length);
+  $("fSb").textContent = nl(m.gemeenten.reduce((a, g) => a + g.stations.length, 0));
+  $("fHsb").textContent = nl(m.hsbs.length);
+  const checks = [...m.warn];
+  if (!S.d110a) checks.unshift(["warn", "Geen 110a: verkiezingsgegevens komen uit de 230b."]);
+  if (S.files.some(f => f.type === "fout")) checks.push(["bad", "Niet alle bestanden konden worden gelezen (zie de rode bestanden)."]);
+  if (!ready) setStatus("bad", "Er is nog geen kandidatenlijst (230b) geladen.");
+  else if (S.outputs.length) setStatus("ok", `${S.outputs.length} bestanden gegenereerd. Pas je iets aan? Genereer opnieuw.`);
+  else setStatus("idle", "Klaar om te genereren.");
+  $("checks").innerHTML = checks.map(c => `<li class="${c[0]}">${esc(c[1])}</li>`).join("");
+  renderKeys();
+}
+function setStatus(cls, msg) { const s = $("status"); s.className = "status " + cls; s.innerHTML = msg; }
+
+/* ============================== random ============================== */
+function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function hashStr(s) { let h = 2166136261; for (const ch of s) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+const mkRng = (seed, key) => mulberry32((seed ^ hashStr(key)) >>> 0);
+function randn(r) { let u = 0; while (!u) u = r(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * r()); }
+const rint = (r, a, b) => a + Math.floor(r() * (b - a + 1));
+function split(n, weights) {
+  const tot = weights.reduce((a, b) => a + b, 0) || 1;
+  const raw = weights.map(w => n * w / tot), out = raw.map(Math.floor);
+  let rest = n - out.reduce((a, b) => a + b, 0);
+  const order = raw.map((v, i) => [v - Math.floor(v), i]).sort((a, b) => b[0] - a[0]);
+  for (let k = 0; rest > 0; k++, rest--) out[order[k % order.length][1]]++;
+  return out;
+}
+
+/* ============================== stemmen ============================== */
+const emptyCounts = () => ({ kg: 0, counted: 0, blanco: 0, ongeldig: 0, sp: 0, vm: 0, kp: 0, adm: 0, more: 0, fewer: 0, aff: new Map() });
+function addCounts(t, c) {
+  for (const k of ["kg", "counted", "blanco", "ongeldig", "sp", "vm", "kp", "adm", "more", "fewer"]) t[k] += c[k];
+  for (const [id, a] of c.aff) {
+    if (!t.aff.has(id)) t.aff.set(id, { name: a.name, total: 0, cands: new Map() });
+    const x = t.aff.get(id); x.total += a.total;
+    for (const [cid, v] of a.cands) x.cands.set(cid, (x.cands.get(cid) || 0) + v);
+  }
+}
+function generate(model, o) {
+  const local = LOCAL.includes(model.election?.category);
+  const partyBase = new Map(), rp = mkRng(o.seed, "partijen");
+  for (const c of model.contests) for (const a of c.affiliations) if (!partyBase.has(a.id)) partyBase.set(a.id, Math.exp(randn(rp) * 0.9) * (a.name ? 1 : 0.2));
+  const candW = new Map();
+  for (const c of model.contests) for (const a of c.affiliations) {
+    const r = mkRng(o.seed, "kand" + c.id + "|" + a.id);
+    candW.set(c.id + "|" + a.id, a.candidates.map((_, i) => (i === 0 ? 4 : i === 1 ? 1.4 : 1) / Math.pow(i + 1, 1.25) * Math.exp(randn(r) * 0.5)));
+  }
+  const [kgMin, kgMax] = o.kgRange.split("-").map(Number);
+  for (const g of model.gemeenten) {
+    const rg = mkRng(o.seed, "gem" + g.code);
+    const gemW = new Map([...partyBase].map(([id, w]) => [id, w * Math.exp(randn(rg) * o.spread)]));
+    const gemTurn = o.tMin + rg() * (o.tMax - o.tMin);
+    g.total = emptyCounts();
+    for (const sb of g.stations) {
+      const r = mkRng(o.seed, "sb" + g.code + "|" + sb.nr), c = emptyCounts();
+      const kg = sb.voters || rint(r, kgMin, kgMax);
+      const turn = Math.min(o.tMax, Math.max(o.tMin, gemTurn + randn(r) * 3)) / 100;
+      const adm = Math.max(1, Math.round(kg * turn));
+      const vm = Math.round(adm * (0.04 + r() * 0.06)), kp = local ? 0 : Math.round(adm * (0.005 + r() * 0.02));
+      Object.assign(c, { kg, adm, vm, kp, sp: adm - vm - kp });
+      let cast = adm;
+      if (r() * 100 < o.diffPct) {
+        const d = rint(r, 1, 3) * (r() < 0.5 ? -1 : 1);
+        cast = Math.max(0, adm + d);
+        if (cast > adm) c.more = cast - adm; else c.fewer = adm - cast;
+      }
+      const ong = Math.min(cast, Math.max(0, Math.round(cast * o.invalid / 100 * (0.5 + r()))));
+      const bl = Math.min(cast - ong, Math.max(0, Math.round(cast * o.blank / 100 * (0.5 + r()))));
+      c.ongeldig = ong; c.blanco = bl; c.counted = cast - ong - bl;
+      const affs = g.contest.affiliations;
+      const pv = split(c.counted, affs.map(a => (a.candidates.length ? 1 : 0) * (gemW.get(a.id) || 1) * Math.exp(randn(r) * 0.15)));
+      affs.forEach((a, i) => {
+        const cv = a.candidates.length ? split(pv[i], candW.get(g.contest.id + "|" + a.id).map(w => w * Math.exp(randn(r) * 0.2))) : [];
+        c.aff.set(a.id, { name: a.name, total: pv[i], cands: new Map(a.candidates.map((cd, j) => [cd.id, cv[j]])) });
+      });
+      sb.counts = c; addCounts(g.total, c);
+    }
+  }
+  for (const h of model.hsbs) { h.total = emptyCounts(); for (const g of h.gemeenten) addCounts(h.total, g.total); }
+  model.total = emptyCounts(); for (const h of model.hsbs) addCounts(model.total, h.total);
+}
+
+/* ============================== EML 510 ============================== */
+const fmt = (t, v) => t.replace(/\{(\w+)\}/g, (_, k) => v[k] ?? "");
+function votesXml(c, affOrder, p, local) {
+  const L = [];
+  for (const a of affOrder) {
+    const x = c.aff.get(a.id); if (!x) continue;
+    L.push(`${p}<Selection>`, `${p}  <AffiliationIdentifier Id="${esc(a.id)}">`, `${p}    <RegisteredName>${esc(x.name || a.name)}</RegisteredName>`, `${p}  </AffiliationIdentifier>`, `${p}  <ValidVotes>${x.total}</ValidVotes>`, `${p}</Selection>`);
+    for (const cid of a.cands) if (x.cands.has(cid))
+      L.push(`${p}<Selection>`, `${p}  <Candidate>`, `${p}    <CandidateIdentifier Id="${esc(cid)}"/>`, `${p}  </Candidate>`, `${p}  <ValidVotes>${x.cands.get(cid)}</ValidVotes>`, `${p}</Selection>`);
+  }
+  L.push(`${p}<Cast>${c.kg}</Cast>`, `${p}<TotalCounted>${c.counted}</TotalCounted>`,
+    `${p}<RejectedVotes ReasonCode="ongeldig">${c.ongeldig}</RejectedVotes>`, `${p}<RejectedVotes ReasonCode="blanco">${c.blanco}</RejectedVotes>`,
+    `${p}<UncountedVotes ReasonCode="geldige stempassen">${c.sp}</UncountedVotes>`,
+    `${p}<UncountedVotes ReasonCode="geldige volmachtbewijzen">${c.vm}</UncountedVotes>`);
+  if (!local) L.push(`${p}<UncountedVotes ReasonCode="geldige kiezerspassen">${c.kp}</UncountedVotes>`);
+  L.push(`${p}<UncountedVotes ReasonCode="toegelaten kiezers">${c.adm}</UncountedVotes>`,
+    `${p}<UncountedVotes ReasonCode="meer getelde stembiljetten">${c.more}</UncountedVotes>`,
+    `${p}<UncountedVotes ReasonCode="minder getelde stembiljetten">${c.fewer}</UncountedVotes>`);
+  return L.join("\n");
+}
+function affOrderFrom(contests) {
+  const order = [];
+  for (const ct of contests) for (const a of ct.affiliations) {
+    let o = order.find(x => x.id === a.id);
+    if (!o) { o = { id: a.id, name: a.name, cands: [] }; order.push(o); }
+    for (const cd of a.candidates) if (!o.cands.includes(cd.id)) o.cands.push(cd.id);
+  }
+  return order;
+}
+function emlDoc({ id, auth, e, contestId, total, units, affOrder, now, method, withRuDetails }) {
+  const local = LOCAL.includes(e.category);
+  const ru = units.map(u => [
+    `          <ReportingUnitVotes>`,
+    `            <ReportingUnitIdentifier Id="${esc(u.id)}">${esc(u.name)}</ReportingUnitIdentifier>`,
+    withRuDetails ? `            <kr:ReportingUnitType>${esc(u.ruType || "FixedLocation")}</kr:ReportingUnitType>` : null,
+    votesXml(u.counts, affOrder, "            ", local),
+    withRuDetails ? [`            <kr:ReportingUnitInvestigations>`,
+      `              <kr:Investigation ReasonCode="toegelaten kiezers opnieuw vastgesteld">false</kr:Investigation>`,
+      `              <kr:Investigation ReasonCode="onderzocht vanwege andere reden">false</kr:Investigation>`,
+      `              <kr:Investigation ReasonCode="stembiljetten deels herteld">false</kr:Investigation>`,
+      `            </kr:ReportingUnitInvestigations>`].join("\n") : null,
+    `          </ReportingUnitVotes>`].filter(Boolean).join("\n")).join("\n");
+  const eid = [`      <ElectionIdentifier Id="${esc(e.id)}">`, `        <ElectionName>${esc(e.name)}</ElectionName>`, `        <ElectionCategory>${esc(e.category)}</ElectionCategory>`];
+  if (e.subcategory) eid.push(`        <kr:ElectionSubcategory>${esc(e.subcategory)}</kr:ElectionSubcategory>`);
+  if (e.domain) eid.push(`        <kr:ElectionDomain${e.domain.id ? ` Id="${esc(e.domain.id)}"` : ""}>${esc(e.domain.name)}</kr:ElectionDomain>`);
+  if (e.date) eid.push(`        <kr:ElectionDate>${esc(e.date)}</kr:ElectionDate>`);
+  eid.push(`      </ElectionIdentifier>`);
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<EML xmlns="urn:oasis:names:tc:evs:schema:eml" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:kr="http://www.kiesraad.nl/extensions" xmlns:xal="urn:oasis:names:tc:ciq:xsdschema:xAL:2.0" xmlns:xnl="urn:oasis:names:tc:ciq:xsdschema:xNL:2.0" Id="${id}" SchemaVersion="5">
+  <TransactionId>1</TransactionId>
+  <ManagingAuthority>
+    <AuthorityIdentifier Id="${esc(auth.id)}">${esc(auth.name)}</AuthorityIdentifier>
+    <AuthorityAddress/>
+  </ManagingAuthority>
+  <kr:Schema Version="1.3.1"/>
+  <kr:CreationDateTime>${now}</kr:CreationDateTime>
+  <ds:CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments"/>
+  <Count>
+    <kr:CountingMethod MethodCode="${esc(method)}"/>
+    <EventIdentifier/>
+    <kr:Phase PhaseCode="eerste zitting"/>
+    <Election>
+${eid.join("\n")}
+      <Contests>
+        <Contest>
+          <ContestIdentifier Id="${esc(contestId)}"/>
+          <TotalVotes>
+${votesXml(total, affOrder, "            ", local)}
+          </TotalVotes>
+${ru}
+        </Contest>
+      </Contests>
+    </Election>
+  </Count>
+</EML>
+`;
+}
+const safe = s => String(s).replace(/[\\/:*?"<>|]+/g, "_").replace(/\s+/g, "_");
+
+function buildOutputs(model, o) {
+  const e = model.election || { id: "ONBEKEND", name: "Onbekende verkiezing", category: "" };
+  const now = new Date().toISOString().replace("Z", "").slice(0, 23);
+  const out = [];
+  if (o.lGSB) for (const g of model.gemeenten) {
+    const units = g.stations.map(sb => ({ id: fmt(o.fmtSb, { gemeente: g.code, nr: sb.nr, hsb: g.hsb }), name: sb.name, counts: sb.counts, ruType: sb.ruType }));
+    out.push({ level: "GSB", eml: "510b", signer: signerFor("GSB", g, o, e), file: `Telling_${safe(e.id)}_gemeente_${safe(g.name)}.eml.xml`, total: g.total,
+      xml: emlDoc({ id: "510b", auth: { id: g.code, name: g.name }, e, contestId: g.contest.id, total: g.total, units, affOrder: affOrderFrom([g.contest]), now, method: o.method, withRuDetails: true }) });
+  }
+  if (o.lHSB) for (const h of model.hsbs) {
+    const units = h.gemeenten.map(g => ({ id: fmt(o.fmtGem, { gemeente: g.code, hsb: h.nr }), name: g.name, counts: g.total }));
+    const cts = [...new Set(h.gemeenten.map(g => g.contest))];
+    out.push({ level: "HSB", eml: "510c", signer: signerFor("HSB", h, o, e), file: `Telling_${safe(e.id)}_kieskring_${safe(h.name)}.eml.xml`, total: h.total,
+      xml: emlDoc({ id: "510c", auth: { id: fmt(o.fmtAuthHsb, { hsb: h.nr }), name: h.name }, e, contestId: cts.length === 1 ? cts[0].id : o.fmtCsbContest, total: h.total, units, affOrder: affOrderFrom(cts), now, method: o.method }) });
+  }
+  if (o.lCSB) {
+    const units = model.hsbs.map(h => ({ id: fmt(o.fmtHsb, { hsb: h.nr }), name: h.name, counts: h.total }));
+    const cts = [...new Set(model.gemeenten.map(g => g.contest))];
+    out.push({ level: "CSB", eml: "510d", signer: signerFor("CSB", null, o, e), file: `Totaaltelling_${safe(e.id)}.eml.xml`, total: model.total,
+      xml: emlDoc({ id: "510d", auth: { id: o.fmtAuthCsb, name: e.domain?.name || "Centraal stembureau" }, e, contestId: cts.length === 1 ? cts[0].id : o.fmtCsbContest, total: model.total, units, affOrder: affOrderFrom(cts), now, method: o.method }) });
+  }
+  return out;
+}
+
+/* ============================== DER / X.509 / CMS ============================== */
+function cat(parts) { const n = parts.reduce((a, p) => a + p.length, 0), out = new Uint8Array(n); let o = 0; for (const p of parts) { out.set(p, o); o += p.length; } return out; }
+const D = {
+  len(n) { if (n < 128) return [n]; const a = []; while (n) { a.unshift(n & 255); n = Math.floor(n / 256); } return [0x80 | a.length, ...a]; },
+  tlv(tag, ...parts) { const body = cat(parts); return cat([new Uint8Array([tag, ...D.len(body.length)]), body]); },
+  seq: (...p) => D.tlv(0x30, ...p), set: (...p) => D.tlv(0x31, ...p),
+  int(b) { if (typeof b === "number") b = new Uint8Array([b]); if (b[0] & 0x80) b = cat([new Uint8Array([0]), b]); return D.tlv(0x02, b); },
+  oid(s) {
+    const a = s.split(".").map(Number), out = [40 * a[0] + a[1]];
+    for (const v of a.slice(2)) { const t = []; let x = v; do { t.unshift(x & 127); x = Math.floor(x / 128); } while (x); for (let i = 0; i < t.length - 1; i++) t[i] |= 128; out.push(...t); }
+    return D.tlv(0x06, new Uint8Array(out));
+  },
+  nul: () => new Uint8Array([5, 0]),
+  utf8: s => D.tlv(0x0c, enc.encode(s)), printable: s => D.tlv(0x13, enc.encode(s)), utc: s => D.tlv(0x17, enc.encode(s)), gen: s => D.tlv(0x18, enc.encode(s)),
+  octet: b => D.tlv(0x04, b), bits: b => D.tlv(0x03, new Uint8Array([0]), b), ctx: (n, ...p) => D.tlv(0xa0 + n, ...p),
+};
+const OID = { C: "2.5.4.6", L: "2.5.4.7", O: "2.5.4.10", OU: "2.5.4.11", CN: "2.5.4.3", UID: "0.9.2342.19200300.100.1.1", sha256rsa: "1.2.840.113549.1.1.11", rsa: "1.2.840.113549.1.1.1", sha256: "2.16.840.1.101.3.4.2.1", data: "1.2.840.113549.1.7.1", signedData: "1.2.840.113549.1.7.2" };
+const algId = oid => D.seq(D.oid(oid), D.nul());
+function x509Time(d) {
+  const p = n => String(n).padStart(2, "0");
+  const s = `${p(d.getUTCMonth() + 1)}${p(d.getUTCDate())}${p(d.getUTCHours())}${p(d.getUTCMinutes())}${p(d.getUTCSeconds())}Z`;
+  const y = d.getUTCFullYear();
+  return y >= 1950 && y < 2050 ? D.utc(p(y % 100) + s) : D.gen(y + s);
+}
+function dn(sub) {
+  const rdn = (oid, val) => D.set(D.seq(D.oid(oid), val));
+  return D.seq(rdn(OID.C, D.printable("NL")), rdn(OID.L, D.utf8(sub.L)), rdn(OID.O, D.utf8(sub.O)), rdn(OID.OU, D.utf8(sub.OU)), rdn(OID.CN, D.utf8(sub.CN)), rdn(OID.UID, D.utf8(sub.UID)));
+}
+const b64 = u8 => { let s = ""; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s); };
+const unb64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+const pem = (label, der) => `-----BEGIN ${label}-----\n${b64(der).match(/.{1,64}/g).join("\n")}\n-----END ${label}-----\n`;
+const unpem = p => unb64(p.replace(/-----[^-]+-----/g, "").replace(/\s+/g, ""));
+const hex = u8 => [...u8].map(x => x.toString(16).padStart(2, "0")).join("");
+const ALG = { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" };
+
+/* Certificaat-subject per orgaan. GSB volgt Abacus (UID=PSB<code>); HSB en CSB volgen de
+   afzender-ID's van Abacus (HSB<n>, CSB) en zijn instelbaar, omdat Abacus die nog niet vastlegt. */
+function signerFor(kind, x, o, e) {
+  const OU = "Uitslagen-generator (test)";
+  if (kind === "GSB") {
+    const ob = ["Bonaire", "Saba", "Sint Eustatius"].includes(x.name);
+    return { kind, label: x.name, L: x.name, O: e.id, OU, CN: (ob ? "Openbaar lichaam " : "Gemeente ") + x.name, UID: fmt(o.uidGsb, { gemeente: x.code }) };
+  }
+  if (kind === "HSB") return { kind, label: x.name, L: x.name, O: e.id, OU, CN: "Hoofdstembureau " + x.name, UID: fmt(o.uidHsb, { hsb: x.nr }) };
+  const name = e.domain?.name || "Nederland";
+  return { kind, label: "Centraal stembureau", L: name, O: e.id, OU, CN: "Centraal stembureau " + name, UID: fmt(o.uidCsb, {}) };
+}
+function addMonths(d, m) { const r = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + m, d.getUTCDate())); return r; }
+async function createKey(sub, election) {
+  const kp = await crypto.subtle.generateKey({ ...ALG, modulusLength: 4096, publicExponent: new Uint8Array([1, 0, 1]) }, true, ["sign", "verify"]);
+  const spki = new Uint8Array(await crypto.subtle.exportKey("spki", kp.publicKey));
+  const pkcs8 = new Uint8Array(await crypto.subtle.exportKey("pkcs8", kp.privateKey));
+  const today = new Date(); const nb = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
+  const ed = /^\d{4}-\d{2}-\d{2}$/.test(election.date || "") ? new Date(election.date + "T00:00:00Z") : nb;
+  const na = addMonths(ed > nb ? ed : nb, 3);
+  const serial = crypto.getRandomValues(new Uint8Array(20)); serial[0] = (serial[0] & 0x7f) | 0x10;
+  const name = dn(sub);
+  const tbs = D.seq(D.ctx(0, D.int(2)), D.int(serial), algId(OID.sha256rsa), name, D.seq(x509Time(nb), x509Time(na)), name, spki);
+  const sig = new Uint8Array(await crypto.subtle.sign(ALG, kp.privateKey, tbs));
+  const cert = D.seq(tbs, algId(OID.sha256rsa), D.bits(sig));
+  const fp = hex(new Uint8Array(await crypto.subtle.digest("SHA-256", spki)));
+  return { uid: sub.UID, kind: sub.kind, name: sub.label, sub: { L: sub.L, O: sub.O, OU: sub.OU, CN: sub.CN, UID: sub.UID }, election: election.id, pkcs8: b64(pkcs8), cert: pem("CERTIFICATE", cert), serial: b64(serial), fp, notAfter: na.toISOString().slice(0, 10), created: new Date().toISOString() };
+}
+async function signEml(key, emlBytes) {
+  const priv = await crypto.subtle.importKey("pkcs8", unb64(key.pkcs8), ALG, false, ["sign"]);
+  const sig = new Uint8Array(await crypto.subtle.sign(ALG, priv, emlBytes));
+  const cert = unpem(key.cert);
+  const sub = key.sub;
+  const signerInfo = D.seq(D.int(1), D.seq(dn(sub), D.int(unb64(key.serial))), algId(OID.sha256), algId(OID.rsa), D.octet(sig));
+  const signedData = D.seq(D.int(1), D.set(algId(OID.sha256)), D.seq(D.oid(OID.data), D.ctx(0, D.octet(new Uint8Array(0)))), D.tlv(0xa0, cert), D.set(signerInfo));
+  return D.seq(D.oid(OID.signedData), D.ctx(0, signedData));
+}
+
+/* ============================== sleutels bewaren ============================== */
+const KEY_STORE = "uitslagen-generator.keys.v1";
+try { S.keys = JSON.parse(localStorage.getItem(KEY_STORE) || "{}") || {}; for (const k in S.keys) if (!S.keys[k].sub) delete S.keys[k]; } catch { S.keys = {}; }
+function saveKeys() { try { localStorage.setItem(KEY_STORE, JSON.stringify(S.keys)); } catch {} renderKeys(); }
+const keyId = (electionId, uid) => electionId + "|" + uid;
+function keysForElection() { const id = S.model?.election?.id; return Object.values(S.keys).filter(k => !id || k.election === id); }
+function signersOf(m, o) {
+  const e = m.election, list = [];
+  if (o.lGSB) for (const g of m.gemeenten) list.push(signerFor("GSB", g, o, e));
+  if (o.lHSB) for (const h of m.hsbs) list.push(signerFor("HSB", h, o, e));
+  if (o.lCSB) list.push(signerFor("CSB", null, o, e));
+  return list;
+}
+function renderKeys() {
+  const m = S.model, box = $("keys");
+  if (!m || !m.election) { box.innerHTML = '<div class="key"><span class="hint">Laad eerst de EML-bestanden.</span></div>'; return; }
+  const list = signersOf(m, readOpts());
+  if (!list.length) { box.innerHTML = '<div class="key"><span class="hint">Kies bij vraag 2 minstens één soort uitslag.</span></div>'; return; }
+  box.innerHTML = list.map(s => {
+    const k = S.keys[keyId(m.election.id, s.UID)];
+    return `<div class="key"><div><span class="lvl">${s.kind}</span><b>${esc(s.label)}</b> <span class="hint">UID=${esc(s.UID)}</span>${k ? `<div class="fp">sleutel ${k.fp.slice(0, 16).match(/.{4}/g).join(" ")}… · geldig t/m ${k.notAfter}</div>` : '<div class="fp">nog geen sleutel; wordt gemaakt bij genereren</div>'}</div>
+      ${k ? `<button type="button" class="small" data-crt="${esc(keyId(m.election.id, k.uid))}">Kopieer .crt</button>` : '<span class="st opt">–</span>'}</div>`;
+  }).join("");
+  box.querySelectorAll("[data-crt]").forEach(b => b.onclick = () => copy(S.keys[b.dataset.crt].cert, "Certificaat gekopieerd"));
+}
+
+/* ============================== hash & zip ============================== */
+async function sha256hex(bytes) { try { return hex(new Uint8Array(await crypto.subtle.digest("SHA-256", bytes))); } catch { return ""; } }
+const groupHash = h => h ? h.match(/.{4}/g).join(" ") : "niet beschikbaar";
+const CRC = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+function crc32(u8) { let c = 0xFFFFFFFF; for (let i = 0; i < u8.length; i++) c = CRC[(c ^ u8[i]) & 0xFF] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+function zipBytes(entries) {
+  const parts = [], central = []; let off = 0;
+  const d = new Date(), time = (d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1), date = ((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate();
+  for (const e of entries) {
+    const name = enc.encode(e.name), data = typeof e.data === "string" ? enc.encode(e.data) : e.data, crc = crc32(data);
+    const h = new DataView(new ArrayBuffer(30));
+    h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true); h.setUint16(10, time, true); h.setUint16(12, date, true);
+    h.setUint32(14, crc, true); h.setUint32(18, data.length, true); h.setUint32(22, data.length, true); h.setUint16(26, name.length, true);
+    parts.push(new Uint8Array(h.buffer), name, data);
+    const c = new DataView(new ArrayBuffer(46));
+    c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true); c.setUint16(12, time, true); c.setUint16(14, date, true);
+    c.setUint32(16, crc, true); c.setUint32(20, data.length, true); c.setUint32(24, data.length, true); c.setUint16(28, name.length, true); c.setUint32(42, off, true);
+    central.push(new Uint8Array(c.buffer), name);
+    off += 30 + name.length + data.length;
+  }
+  const cs = central.reduce((a, b) => a + b.length, 0), end = new DataView(new ArrayBuffer(22));
+  end.setUint32(0, 0x06054b50, true); end.setUint16(8, entries.length, true); end.setUint16(10, entries.length, true); end.setUint32(12, cs, true); end.setUint32(16, off, true);
+  return cat([...parts, ...central, new Uint8Array(end.buffer)]);
+}
+
+let downloads = null;
+(async () => { try { if (window.claude?.use) downloads = await window.claude.use("downloads"); } catch {} })();
+async function save(filename, data) {
+  const blob = new Blob([data]);
+  if (downloads) {
+    try { await downloads.save({ filename, data: blob }); toast(filename + " opgeslagen"); }
+    catch (e) { if (e?.code !== "declined") toast("Opslaan lukte niet (" + (e?.code || e?.message || e) + ")"); }
+    return;
+  }
+  try { const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = filename; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }
+  catch { toast("Downloaden is hier niet beschikbaar"); }
+}
+async function copy(text, msg) { try { await navigator.clipboard.writeText(text); toast(msg || "Gekopieerd"); } catch { toast("Kopiëren lukte niet"); } }
+
+/* ============================== genereren ============================== */
+function readOpts() {
+  const v = id => $(id).value, n = id => parseFloat($(id).value) || 0;
+  let tMin = n("tMin"), tMax = n("tMax"); if (tMax < tMin) [tMin, tMax] = [tMax, tMin];
+  return { seed: Math.floor(n("seed")), tMin, tMax, blank: n("blank"), invalid: n("invalid"), diffPct: n("diffPct"), kgRange: v("kgRange"),
+    gemMode: v("gemMode"), fakeSb: Math.max(1, Math.floor(n("fakeSb"))), spread: n("spread"), method: v("method"),
+    lGSB: $("lGSB").checked, lHSB: $("lHSB").checked, lCSB: $("lCSB").checked, sign: $("sign").checked,
+    uidGsb: v("uidGsb"), uidHsb: v("uidHsb"), uidCsb: v("uidCsb"),
+    fmtSb: v("fmtSb"), fmtGem: v("fmtGem"), fmtHsb: v("fmtHsb"), fmtAuthHsb: v("fmtAuthHsb"), fmtAuthCsb: v("fmtAuthCsb"), fmtCsbContest: v("fmtCsbContest") };
+}
+async function runGenerate() {
+  const o = readOpts(), btn = $("genBtn");
+  const model = buildModel(o); S.model = model;
+  if (!model.contests.length) return;
+  btn.disabled = true; $("zipBtn").disabled = true;
+  try {
+    generate(model, o);
+    const outs = buildOutputs(model, o);
+    const e = model.election || { id: "ONBEKEND" };
+    for (const f of outs) { f.bytes = enc.encode(f.xml); f.hash = await sha256hex(f.bytes); }
+    if (o.sign && outs.length) {
+      if (!crypto?.subtle) throw new Error("ondertekenen kan niet: deze browser heeft geen Web Crypto");
+      const uids = outs.map(f => f.signer.UID);
+      if (new Set(uids).size !== uids.length) throw new Error("twee organen krijgen dezelfde UID; controleer de UID-formaten");
+      const missing = outs.filter(f => !S.keys[keyId(e.id, f.signer.UID)]);
+      for (let i = 0; i < missing.length; i++) {
+        setStatus("idle", `<span class="busy"></span>Sleutel ${i + 1} van ${missing.length} maken (${esc(missing[i].signer.kind + " " + missing[i].signer.label)})…`);
+        const k = await createKey(missing[i].signer, e);
+        S.keys[keyId(e.id, k.uid)] = k;
+      }
+      if (missing.length) saveKeys();
+      for (let i = 0; i < outs.length; i++) {
+        setStatus("idle", `<span class="busy"></span>Ondertekenen ${i + 1} van ${outs.length}…`);
+        const f = outs[i], k = S.keys[keyId(e.id, f.signer.UID)];
+        f.key = k; f.signature = await signEml(k, f.bytes);
+        f.importZip = zipBytes([{ name: f.file, data: f.bytes }, { name: f.file + ".signature", data: f.signature }]);
+      }
+    }
+    S.outputs = outs;
+    renderOutputs(o);
+    summary();
+    const nSig = outs.filter(f => f.signature).length;
+    setStatus("ok", `${outs.length} uitslagbestanden gegenereerd${nSig ? `, waarvan ${nSig} ondertekend voor Abacus` : ""}.`);
+    $("zipBtn").disabled = false;
+  } catch (err) {
+    setStatus("bad", "Er ging iets mis: " + esc(err.message || err));
+  } finally { btn.disabled = false; }
+}
+function renderOutputs(o) {
+  const box = $("files");
+  const rows = S.outputs.map((f, i) => {
+    const t = f.total, opk = t.kg ? (100 * t.adm / t.kg).toFixed(1).replace(".", ",") + "%" : "–";
+    return `<div class="file"><div class="top"><div class="nm"><span class="lvl">${f.level} · ${f.eml}</span>${f.signature ? '<span class="lvl sig">ondertekend</span>' : ""}${esc(f.file)}</div></div>
+      <div class="nums">geldig ${nl(t.counted)} · blanco ${nl(t.blanco)} · ongeldig ${nl(t.ongeldig)} · opkomst ${opk}</div>
+      <div class="hash">SHA-256 ${groupHash(f.hash)}</div>
+      <div class="btns"><button type="button" class="small" data-pv="${i}">Bekijk</button><button type="button" class="small" data-cp="${i}">Kopieer XML</button>
+      ${f.importZip ? `<button type="button" class="small primary" data-imp="${i}">Abacus-importzip</button>` : `<button type="button" class="small" data-dl="${i}">.zip</button>`}</div></div>`;
+  }).join("");
+  box.innerHTML = `<h3>Gegenereerde bestanden</h3>${rows}`;
+  box.hidden = false;
+  box.querySelectorAll("[data-pv]").forEach(b => b.onclick = () => preview(+b.dataset.pv));
+  box.querySelectorAll("[data-cp]").forEach(b => b.onclick = () => copy(S.outputs[+b.dataset.cp].xml, "XML gekopieerd"));
+  box.querySelectorAll("[data-imp]").forEach(b => b.onclick = () => { const f = S.outputs[+b.dataset.imp]; save(f.file.replace(/\.eml\.xml$/, ".zip"), f.importZip); });
+  box.querySelectorAll("[data-dl]").forEach(b => b.onclick = () => { const f = S.outputs[+b.dataset.dl]; save(f.file.replace(/\.eml\.xml$/, ".zip"), zipBytes([{ name: f.file, data: f.bytes }])); });
+  $("preview").hidden = true;
+}
+function preview(i) {
+  const f = S.outputs[i];
+  $("pvName").textContent = f.file;
+  $("pvHash").textContent = "SHA-256 " + groupHash(f.hash) + (f.key ? `  ·  ondertekend met ${f.key.uid}` : "");
+  $("pvBody").textContent = f.xml.length > 400000 ? f.xml.slice(0, 400000) + "\n… (ingekort; het bestand zelf is volledig)" : f.xml;
+  $("preview").hidden = false;
+  $("preview").scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+function crtEntries(keys, folder) { return keys.map(k => ({ name: `${folder}${k.uid}_${safe(k.name)}.crt`, data: k.cert })); }
+function readme(o, e) {
+  return `Uitslagen-generator – ${e.id}
+Gemaakt: ${new Date().toLocaleString("nl-NL")} · seed ${o.seed}
+
+GSB/   510b-bestanden per gemeente${o.sign ? " (met .signature)" : ""}
+HSB/   510c-bestanden per hoofdstembureau
+CSB/   510d-totaaltelling
+${o.sign ? `Abacus-import/GSB|HSB|CSB/  één zip per uitslag: <naam>.eml.xml + <naam>.eml.xml.signature
+Publieke sleutels/  het .crt-certificaat per orgaan
+                    GSB: UID=${o.uidGsb}   HSB: UID=${o.uidHsb}   CSB: UID=${o.uidCsb}
+
+In Abacus (bij het ontvangende orgaan):
+1. Lees het .crt-bestand van het afzendende orgaan in als publieke sleutel
+   (GSB-sleutels bij het HSB/CSB, HSB-sleutels bij het CSB).
+2. Importeer daarna de zip uit "Abacus-import".
+   Abacus vraagt om een deel van de SHA-256 van het .eml.xml; die staat in hashes.txt.
+
+Let op: Abacus legt het certificaat-formaat voor HSB en CSB nog niet vast.
+Wijkt het straks af, pas dan de UID-formaten in de app aan en genereer opnieuw.
+` : ""}
+Alleen voor testomgevingen.
+`;
+}
+async function downloadAll() {
+  if (!S.outputs.length) return;
+  const o = readOpts(), e = S.model.election || { id: "verkiezing" }, entries = [], hashes = [];
+  for (const f of S.outputs) {
+    entries.push({ name: `${f.level}/${f.file}`, data: f.bytes });
+    if (f.signature) { entries.push({ name: `${f.level}/${f.file}.signature`, data: f.signature }); entries.push({ name: `Abacus-import/${f.level}/${f.file.replace(/\.eml\.xml$/, ".zip")}`, data: f.importZip }); }
+    hashes.push(`${groupHash(f.hash)}  ${f.level}/${f.file}`);
+  }
+  const used = [...new Map(S.outputs.filter(f => f.key).map(f => [f.key.uid, f.key])).values()];
+  entries.push(...crtEntries(used, "Publieke sleutels/"));
+  entries.push({ name: "hashes.txt", data: hashes.join("\n") + "\n" }, { name: "LEESMIJ.txt", data: readme(o, e) });
+  save(`Uitslagen_${safe(e.id)}_seed${o.seed}.zip`, zipBytes(entries));
+}
+
+/* ============================== voorbeeld ============================== */
+const NS = 'xmlns="urn:oasis:names:tc:evs:schema:eml" xmlns:kr="http://www.kiesraad.nl/extensions" xmlns:xal="urn:oasis:names:tc:ciq:xsdschema:xAL:2.0" xmlns:xnl="urn:oasis:names:tc:ciq:xsdschema:xNL:2.0"';
+const DEMO_EID = `<ElectionIdentifier Id="GR2026_Juinen"><ElectionName>Gemeenteraad Juinen 2026</ElectionName><ElectionCategory>GR</ElectionCategory><kr:ElectionSubcategory>GR1</kr:ElectionSubcategory><kr:ElectionDomain Id="9999">Juinen</kr:ElectionDomain><kr:ElectionDate>2026-03-18</kr:ElectionDate></ElectionIdentifier>`;
+function demoFiles() {
+  const a = `<?xml version="1.0" encoding="UTF-8"?><EML ${NS} Id="110a" SchemaVersion="5"><ElectionEvent><EventIdentifier/><Election>${DEMO_EID}<Contest><ContestIdentifier Id="geen"/><VotingMethod>SPV</VotingMethod><MaxVotes>1</MaxVotes></Contest><kr:NumberOfSeats>29</kr:NumberOfSeats><kr:Region RegionNumber="9999" RegionCategory="GEMEENTE"><kr:RegionName>Juinen</kr:RegionName><kr:Committee CommitteeCategory="CSB" CommitteeName="Centraal stembureau Juinen"/></kr:Region></Election></ElectionEvent></EML>`;
+  const parties = [["Partij voor de Juinen", ["A. de Vries", "B. Jansen", "C. Bakker", "D. Visser", "E. Smit", "F. Meijer"]], ["Juinens Belang", ["G. de Boer", "H. Mulder", "I. de Groot", "J. Bos"]], ["Groen Juinen", ["K. Vos", "L. Peters", "M. Hendriks", "N. van Leeuwen", "O. Dekker"]], ["", ["P. Brouwer", "Q. de Wit", "R. Dijkstra"]]];
+  const affs = parties.map((p, i) => `<Affiliation><AffiliationIdentifier Id="${i + 1}"><RegisteredName>${p[0]}</RegisteredName></AffiliationIdentifier><Type>lijstengroep</Type>${p[1].map((n, j) => { const [ini, ...ln] = n.split(" "); return `<Candidate><CandidateIdentifier Id="${j + 1}"/><CandidateFullName><xnl:PersonName><xnl:NameLine NameType="Initials">${ini}</xnl:NameLine><xnl:LastName>${ln.join(" ")}</xnl:LastName></xnl:PersonName></CandidateFullName></Candidate>`; }).join("")}</Affiliation>`).join("");
+  const b = `<?xml version="1.0" encoding="UTF-8"?><EML ${NS} Id="230b" SchemaVersion="5"><CandidateList><Election>${DEMO_EID}<Contest><ContestIdentifier Id="geen"/>${affs}</Contest></Election></CandidateList></EML>`;
+  const sbs = [["1", "Stadhuis", "1234 AB", 2100], ["2", "Sporthal De Linde", "1235 CD", 1850], ["3", "Basisschool Het Anker", "1236 EF", 2400], ["4", "Wijkcentrum Oost", "1237 GH", 1600]];
+  const c = `<?xml version="1.0" encoding="UTF-8"?><EML ${NS} Id="110b" SchemaVersion="5"><ManagingAuthority><AuthorityIdentifier Id="9999">Juinen</AuthorityIdentifier></ManagingAuthority><ElectionEvent><EventIdentifier/><Election>${DEMO_EID}<Contest><ContestIdentifier Id="geen"/>${sbs.map(s => `<PollingPlace Channel="polling"><PhysicalLocation><Address><Locality><xal:LocalityName>${s[1]}</xal:LocalityName><xal:PostalCode><xal:PostalCodeNumber>${s[2]}</xal:PostalCodeNumber></xal:PostalCode></Locality></Address><PollingStation Id="${s[0]}">${s[3]}</PollingStation></PhysicalLocation></PollingPlace>`).join("")}</Contest></Election></ElectionEvent></EML>`;
+  return [["Verkiezingsdefinitie_GR2026_Juinen.eml.xml", a], ["Kandidatenlijsten_GR2026_Juinen.eml.xml", b], ["Stembureaus_GR2026_Juinen.eml.xml", c]];
+}
+
+/* ============================== koppelingen ============================== */
+const drop = $("drop"), fileIn = $("openFile");
+$("openBtn").onclick = $("dropBtn").onclick = () => fileIn.click();
+fileIn.onchange = () => { addFiles(fileIn.files); fileIn.value = ""; };
+drop.ondragover = e => { e.preventDefault(); drop.classList.add("over"); };
+drop.ondragleave = () => drop.classList.remove("over");
+drop.ondrop = e => { e.preventDefault(); drop.classList.remove("over"); addFiles(e.dataTransfer.files); };
+$("demoBtn").onclick = () => { for (const [n, t] of demoFiles()) addText(n, t); refresh(); };
+$("resetBtn").onclick = () => { S.files = []; S.outputs = []; S.model = null; $("files").hidden = true; $("preview").hidden = true; $("zipBtn").disabled = true; refresh(); };
+$("genBtn").onclick = runGenerate;
+$("zipBtn").onclick = downloadAll;
+$("pvClose").onclick = () => $("preview").hidden = true;
+["gemMode", "fakeSb", "lGSB", "lHSB", "lCSB", "uidGsb", "uidHsb", "uidCsb"].forEach(id => $(id).addEventListener("change", summary));
+$("keysExport").onclick = () => { const k = keysForElection(); if (!k.length) return toast("Er zijn nog geen sleutels"); save(`Sleutels_${safe(S.model?.election?.id || "alle")}.json`, JSON.stringify({ format: "uitslagen-generator-keys/1", keys: k }, null, 1)); };
+$("keysImport").onclick = () => $("keysFile").click();
+$("keysFile").onchange = async () => {
+  const f = $("keysFile").files[0]; $("keysFile").value = ""; if (!f) return;
+  try { const j = JSON.parse(await f.text()); let n = 0; for (const k of j.keys || []) if (k.uid && k.pkcs8 && k.cert && k.election) { S.keys[keyId(k.election, k.uid)] = k; n++; } saveKeys(); toast(`${n} sleutel(s) geladen`); }
+  catch { toast("Dit is geen sleutelbestand van deze app"); }
+};
+$("keysCrt").onclick = () => { const k = keysForElection(); if (!k.length) return toast("Er zijn nog geen sleutels"); save(`Publieke_sleutels_${safe(S.model?.election?.id || "alle")}.zip`, zipBytes(crtEntries(k, ""))); };
+$("keysForget").onclick = () => { const id = S.model?.election?.id; for (const k of Object.keys(S.keys)) if (!id || S.keys[k].election === id) delete S.keys[k]; saveKeys(); toast("Sleutels verwijderd"); };
+refresh();
+</script>
+</body>
+</html>

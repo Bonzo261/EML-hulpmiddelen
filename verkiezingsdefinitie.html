@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verkiezingsdefinitie-maker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: vragen links (numbered), live EML 110a + controles rechts, sticky. Rood potlood als accent. */
+:root{
+  --ink:#17202b;
+  --muted:#5b6673;
+  --paper:#f5f6f4;
+  --panel:#ffffff;
+  --line:#d9ddd8;
+  --accent:#c4122f;
+  --accent-soft:#fbe7ea;
+  --code-bg:#1b2430;
+  --code-ink:#dfe6ee;
+  --ok:#1f7a4a; --warn:#a15c00; --bad:#b3122a;
+  --ok-soft:#e3f3ea; --warn-soft:#fdf0dc; --bad-soft:#fbe4e8;
+  --font-display:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;
+  --font-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ink:#e6e9ec; --muted:#9aa4ae; --paper:#12161b; --panel:#1a2027; --line:#2e3640;
+    --accent:#ff5468; --accent-soft:#3a1d23; --code-bg:#0c1015; --code-ink:#d6dde5;
+    --ok:#5fd398; --warn:#f0b357; --bad:#ff7a8a; --ok-soft:#163026; --warn-soft:#33260f; --bad-soft:#3a1a20;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#e6e9ec; --muted:#9aa4ae; --paper:#12161b; --panel:#1a2027; --line:#2e3640;
+  --accent:#ff5468; --accent-soft:#3a1d23; --code-bg:#0c1015; --code-ink:#d6dde5;
+  --ok:#5fd398; --warn:#f0b357; --bad:#ff7a8a; --ok-soft:#163026; --warn-soft:#33260f; --bad-soft:#3a1a20;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font:15px/1.5 var(--font-body)}
+header.top{padding:22px 24px 14px;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px 24px;align-items:end;justify-content:space-between}
+header.top h1{font:600 26px/1.1 var(--font-display);margin:0;letter-spacing:.2px;text-wrap:balance}
+header.top h1 .tag{font:500 12px/1 var(--font-mono);color:var(--accent);border:1px solid var(--accent);border-radius:3px;padding:3px 6px;margin-left:8px;vertical-align:4px}
+header.top p{margin:4px 0 0;color:var(--muted);max-width:62ch}
+.import{display:flex;gap:8px;align-items:center}
+main{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:24px;padding:20px 24px 40px;align-items:start}
+@media (max-width:980px){main{grid-template-columns:1fr}}
+.q{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:16px 18px;display:grid;gap:12px}
+.questions{display:grid;gap:14px}
+.q h2{margin:0;font:600 17px/1.25 var(--font-display);display:flex;gap:10px;align-items:baseline}
+.q h2 .n{font:500 13px/1 var(--font-mono);color:#fff;background:var(--accent);border-radius:3px;padding:3px 6px;min-width:22px;text-align:center}
+.q .hint{color:var(--muted);font-size:13.5px;margin:0}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:end}
+.field{display:grid;gap:4px;flex:1 1 180px;min-width:0}
+.field.narrow{flex:0 1 130px}
+label{font-size:13px;font-weight:600;color:var(--muted)}
+input[type=text],input[type=number],input[type=date],textarea,select{
+  font:inherit;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:7px 9px;width:100%}
+textarea{font-family:var(--font-mono);font-size:13px;min-height:110px;resize:vertical}
+input:focus,textarea:focus,select:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.auto{font:500 12px/1 var(--font-mono);color:var(--ok);margin-left:6px}
+.types{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.types label{display:block;cursor:pointer;border:1px solid var(--line);border-radius:5px;padding:9px 10px;color:var(--ink);font-weight:500;background:var(--paper)}
+.types input{position:absolute;opacity:0;pointer-events:none}
+.types label b{display:block;font:600 13px/1 var(--font-mono);color:var(--accent);margin-bottom:4px}
+.types label span{font-size:13.5px}
+.types input:checked+label{border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 3px 0 0 var(--accent)}
+.types input:focus-visible+label{outline:2px solid var(--accent)}
+button{font:500 14px/1 var(--font-body);border-radius:4px;padding:9px 13px;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+button:hover{border-color:var(--ink)}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button.primary:hover{filter:brightness(1.08)}
+button.small{padding:5px 8px;font-size:12.5px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:500 12px/1 var(--font-mono);border-radius:999px;padding:5px 9px;background:var(--paper);border:1px solid var(--line)}
+.chip.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.tree-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:4px}
+table.tree{border-collapse:collapse;width:100%;font-size:13px;min-width:720px}
+table.tree th{font-weight:600;color:var(--muted);text-align:left;padding:6px 7px;background:var(--paper);border-bottom:1px solid var(--line);white-space:nowrap}
+table.tree td{padding:4px 5px;border-bottom:1px solid var(--line);vertical-align:middle}
+table.tree tr:last-child td{border-bottom:0}
+table.tree input[type=text],table.tree select{padding:4px 6px;font-size:13px}
+table.tree td.cm{white-space:nowrap}
+table.tree td.cm label{font-weight:500;color:var(--ink);font-size:12px;margin-right:6px}
+.tree-actions{display:flex;flex-wrap:wrap;gap:8px}
+details{border-top:1px dashed var(--line);padding-top:10px}
+summary{cursor:pointer;font-weight:600;font-size:14px}
+.out{position:sticky;top:16px;display:grid;gap:12px}
+.summary{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:14px 16px;display:grid;gap:10px}
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:520px){.facts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.fact small{display:block;color:var(--muted);font-size:12px}
+.fact strong{font:600 18px/1.2 var(--font-display);font-variant-numeric:tabular-nums;word-break:break-word}
+.status{display:flex;gap:8px;align-items:center;font-weight:600;font-size:14px;padding:8px 10px;border-radius:4px}
+.status.ok{background:var(--ok-soft);color:var(--ok)}
+.status.warn{background:var(--warn-soft);color:var(--warn)}
+.status.bad{background:var(--bad-soft);color:var(--bad)}
+ul.checks{margin:0;padding:0;list-style:none;display:grid;gap:4px;font-size:13.5px}
+ul.checks li{padding-left:16px;position:relative}
+ul.checks li::before{content:"";position:absolute;left:2px;top:.55em;width:7px;height:7px;border-radius:50%}
+ul.checks li.bad::before{background:var(--bad)}
+ul.checks li.warn::before{background:var(--warn)}
+ul.checks li.info::before{background:var(--muted)}
+.actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.fname{font:500 12.5px/1.3 var(--font-mono);color:var(--muted);word-break:break-all}
+pre.xml{margin:0;background:var(--code-bg);color:var(--code-ink);font:12.5px/1.55 var(--font-mono);padding:14px 16px;border-radius:6px;overflow:auto;max-height:62vh;tab-size:4}
+pre.xml .t{color:#7cc4ff}.xml .a{color:#ffc46b}.xml .v{color:#9be59b}.xml .p{color:#8a96a3}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:9px 14px;border-radius:4px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.show{opacity:1}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+footer{padding:0 24px 30px;color:var(--muted);font-size:12.5px;max-width:110ch}
+.sr{position:absolute;left:-9999px}
+header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace);color:var(--accent,#c8102e);text-decoration:none;margin-bottom:10px}header.top .back:hover{text-decoration:underline}header.top .nk{font:400 12px/1 var(--font-mono,monospace);color:var(--muted,#666)}
+</style>
+</head>
+<body>
+<header class="top">
+  <div>
+    <a class="back" href="index.html">← Alle hulpmiddelen</a><span class="nk"> · Onafhankelijk hulpmiddel, niet van de Kiesraad</span>
+    <h1>Verkiezingsdefinitie-maker <span class="tag">EML_NL 110a</span></h1>
+    <p>Beantwoord de vragen hieronder. Rechts verschijnt direct het verkiezingsdefinitiebestand (EML 110a) dat je in de uitslagsoftware kunt inlezen.</p>
+  </div>
+  <div class="import">
+    <label for="importFile" class="sr">Bestaand 110a-bestand openen</label>
+    <input type="file" id="importFile" accept=".xml,.eml,text/xml" hidden>
+    <button type="button" id="importBtn">Bestaand 110a-bestand openen</button>
+    <button type="button" id="resetBtn">Opnieuw beginnen</button>
+  </div>
+</header>
+
+<main>
+<section class="questions" aria-label="Vragen">
+
+  <div class="q">
+    <h2><span class="n">1</span>Welke verkiezing wil je definiëren?</h2>
+    <div class="types" id="types" role="radiogroup" aria-label="Soort verkiezing"></div>
+  </div>
+
+  <div class="q" id="qDomain">
+    <h2><span class="n">2</span><span id="domainTitle">Voor welke gemeente?</span></h2>
+    <div class="field" id="pickWrap"><label for="domainPick" id="domainPickLbl">Kies de gemeente</label><select id="domainPick"></select></div>
+    <div class="field" id="bodyWrap"><label for="bodyName" id="bodyLbl">Naam van de raad of commissie</label><input type="text" id="bodyName" list="bodyList"><datalist id="bodyList"></datalist></div>
+    <div class="row" id="manualWrap">
+      <div class="field"><label for="domainName" id="domainNameLbl">Naam gemeente</label><input type="text" id="domainName"></div>
+      <div class="field narrow"><label for="domainCode" id="domainCodeLbl">CBS-gemeentecode</label><input type="text" id="domainCode" inputmode="numeric" placeholder="0106"></div>
+    </div>
+    <div class="chips" id="pickFacts"></div>
+    <p class="hint" id="domainHint">De gemeentecode is de 4-cijferige CBS-code, met voorloopnullen (Assen = 0106).</p>
+  </div>
+
+  <div class="q">
+    <h2><span class="n" id="nDate">3</span>Wanneer is de stemming?</h2>
+    <div class="row">
+      <div class="field"><label for="electionDate">Dag van stemming</label><input type="date" id="electionDate"></div>
+      <div class="field"><label for="nominationDate">Dag van kandidaatstelling <span class="auto" id="nomAuto">automatisch</span></label><input type="date" id="nominationDate"></div>
+    </div>
+    <p class="hint">De dag van kandidaatstelling is standaard de 44e dag vóór de stemming. Pas hem aan als er voor deze verkiezing iets anders geldt.</p>
+  </div>
+
+  <div class="q">
+    <h2><span class="n">4</span>Hoeveel zetels worden er verdeeld?</h2>
+    <div class="row">
+      <div class="field narrow"><label for="seats">Aantal zetels</label><input type="number" id="seats" min="1" max="500"></div>
+      <div class="field narrow"><label for="threshold">Voorkeurdrempel (% kiesdeler) <span class="auto" id="thrAuto">automatisch</span></label><input type="number" id="threshold" min="0" max="100"></div>
+      <div class="field narrow"><label for="subcat">Subcategorie <span class="auto" id="subAuto">automatisch</span></label><select id="subcat"></select></div>
+    </div>
+    <p class="hint" id="seatHint"></p>
+  </div>
+
+  <div class="q">
+    <h2><span class="n">5</span><span id="partyTitle">Welke aanduidingen zijn geregistreerd bij het CSB?</span></h2>
+    <p class="hint" id="partyHint">Neem de aanduidingen over uit het register van het centraal stembureau (Kieswet hoofdstuk G), letterlijk zoals ze daar staan, één per regel. Aanduidingen uit het landelijk register van de Kiesraad werken door naar deze verkiezing; die voeg je toe met de knop. Lees de rest in uit een bestand van het CSB of typ of plak ze hieronder.</p>
+    <div class="tree-actions">
+      <input type="file" id="partyFile" accept=".xml,.eml,.txt,.csv,text/xml,text/plain,text/csv" multiple hidden>
+      <button type="button" class="small" id="partyImport">Inlezen uit bestand van het CSB</button>
+      <button type="button" class="small" id="partyNational">Landelijk register toevoegen (37)</button>
+      <label style="display:flex;gap:6px;align-items:center;color:var(--ink);font-weight:500"><input type="checkbox" id="partyAppend"> Aanvullen in plaats van vervangen</label>
+      <button type="button" class="small" id="partyClear">Lijst leegmaken</button>
+    </div>
+    <p class="hint" style="font-size:12.5px">Werkt met een verkiezingsdefinitie (EML 110a, de geregistreerde aanduidingen), een kandidatenlijstenbestand (EML 230b, de aanduidingen boven de lijsten) of een txt- of csv-bestand met één aanduiding per regel (bij csv de eerste kolom).</p>
+    <label for="parties" class="sr">Geregistreerde aanduidingen</label>
+    <textarea id="parties" spellcheck="false" placeholder="Bijvoorbeeld:&#10;Partij van de Arbeid (PvdA) / GROENLINKS&#10;VVD&#10;Lokaal Betrokken"></textarea>
+    <div class="chips" id="partyFacts"></div>
+  </div>
+
+  <div class="q">
+    <h2><span class="n">6</span>Hoe ziet de indeling eruit?</h2>
+    <p class="hint" id="treeHint">De verkiezingsboom: welke gebieden er zijn en waar het centraal stembureau (CSB) en de hoofdstembureaus (HSB) zitten.</p>
+    <div class="tree-wrap">
+      <table class="tree" id="treeTable">
+        <thead><tr><th>Categorie</th><th>Nummer</th><th>Naam</th><th>Valt onder</th><th>Stembureaus</th><th>Opties</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="tree-actions">
+      <label id="hsbWrap" style="display:flex;gap:6px;align-items:center;color:var(--ink);font-weight:500" title="De Kieswet kent alleen een hoofdstembureau bij de Tweede Kamer, het Europees Parlement en Provinciale Staten met meerdere kieskringen. De bestanden van de Kiesraad nemen bij het CSB toch een HSB op."><input type="checkbox" id="hsbCompat"> HSB opnemen bij het CSB, zoals de Kiesraad-bestanden doen</label>
+      <label id="fictWrap" style="display:flex;gap:6px;align-items:center;color:var(--ink);font-weight:500"><input type="checkbox" id="fictTree"> Fictieve testindeling (Juinen e.a.)</label>
+      <label id="incGemWrap" style="display:flex;gap:6px;align-items:center;color:var(--ink);font-weight:500"><input type="checkbox" id="includeGem"> Gemeenten opnemen in de indeling</label>
+      <button type="button" class="small" id="addRegion">Gebied toevoegen</button>
+      <button type="button" class="small" id="resetTree">Standaardindeling herstellen</button>
+    </div>
+    <details>
+      <summary>Gemeenten in één keer toevoegen</summary>
+      <p class="hint">Plak regels als <code>code;naam;kieskringnummer</code>, bijvoorbeeld <code>0106;Assen;3</code>. Zonder kieskringnummer komt de gemeente onder het hoogste gebied.</p>
+      <label for="bulk" class="sr">Gemeenten plakken</label>
+      <textarea id="bulk" spellcheck="false" placeholder="0106;Assen;3&#10;0109;Coevorden;3"></textarea>
+      <div class="tree-actions" style="margin-top:8px"><button type="button" class="small" id="bulkAdd">Gemeenten toevoegen</button></div>
+    </details>
+  </div>
+
+  <div class="q">
+    <h2><span class="n">7</span>Naam en kenmerken van het bestand</h2>
+    <div class="row">
+      <div class="field narrow"><label for="emlVersion">EML_NL-versie</label><select id="emlVersion"><option value="1.3.1">1.3.1 (huidige versie)</option><option value="1.3">1.3</option><option value="1.2.2">1.2.2 (herindelingsverkiezingen 18-11-2026)</option></select></div>
+      <div class="field"><label for="electionName">Naam verkiezing <span class="auto" id="nameAuto">automatisch</span></label><input type="text" id="electionName"></div>
+      <div class="field"><label for="electionId">Verkiezings-Id <span class="auto" id="idAuto">automatisch</span></label><input type="text" id="electionId"></div>
+    </div>
+    <details>
+      <summary>Geavanceerd</summary>
+      <div class="row" style="margin-top:10px">
+        <div class="field narrow"><label for="transactionId">TransactionId</label><input type="text" id="transactionId"></div>
+        <div class="field narrow"><label for="issueDate">IssueDate</label><input type="date" id="issueDate"></div>
+        <div class="field narrow"><label for="authorityId">ManagingAuthority Id</label><input type="text" id="authorityId" placeholder="leeg = weglaten"></div>
+        <div class="field narrow"><label for="maxVotes">MaxVotes</label><input type="number" id="maxVotes" min="1"></div>
+        <div class="field narrow"><label for="contestId">ContestIdentifier <span class="auto" id="contestAuto">automatisch</span></label><input type="text" id="contestId"></div>
+      </div>
+    </details>
+  </div>
+</section>
+
+<section class="out" aria-label="Resultaat">
+  <div class="summary">
+    <div class="facts">
+      <div class="fact"><small>Categorie</small><strong id="fCat">GR</strong></div>
+      <div class="fact"><small>Subcategorie</small><strong id="fSub">GR2</strong></div>
+      <div class="fact"><small>Zetels</small><strong id="fSeats">31</strong></div>
+      <div class="fact"><small>Gebieden</small><strong id="fRegions">1</strong></div>
+    </div>
+    <div class="status ok" id="status">Klaar om te downloaden</div>
+    <ul class="checks" id="checks"></ul>
+    <div class="actions">
+      <button type="button" class="primary" id="dlBtn">Download .eml.xml + hashcode</button>
+      <button type="button" id="copyBtn">Kopieer XML</button>
+    </div>
+    <div class="fname" id="fname"></div>
+    <div class="fname" id="hash" aria-live="polite"></div>
+  </div>
+  <pre class="xml" id="xml" aria-label="Voorbeeld van het EML-bestand"></pre>
+</section>
+</main>
+
+<footer>
+  Gebaseerd op EML_NL 1.3.1 (github.com/kiesraad/EML_NL) en de voorbeeldbestanden van de Kiesraad (EML-schema versie 5, namespace <code>http://www.kiesraad.nl/extensions</code>). De app controleert de opbouw, maar valideert niet tegen de XSD. Lees het bestand altijd eerst proef in de uitslagsoftware in. Voorkeurdrempels volgen de Kieswet: 25% van de kiesdeler, 50% bij minder dan 19 zetels en voor de Eerste Kamer, 10% voor het Europees Parlement.<br>
+  Bronnen van de keuzelijsten: raadszetels en gemeentecodes uit het Kiesraad-bestand <em>Aantal raadzetels GR2026</em> (data.overheid.nl), aangevuld met Hilversum (39 zetels, na samenvoeging met Wijdemeren per 1-1-2027); statenzetels uit het Kiesraad-overzicht van 2023; kieskringen en hoofdstembureaus uit <em>Kieskringen provinciale statenverkiezingen 2023</em> (Kiesraad). Het landelijk register van aanduidingen (37 namen) komt van kiesraad.nl (Tweede Kamer, partijnamen en logo's, register; pagina gewijzigd 27 augustus 2026). Fictieve testgebieden (Heemdamseburg, Juinen, Middelgein, 's-Gravenveen, Oost-Holland, Zuid-Brabant, Rivier en Polder) en de testpartijen komen uit de testbestanden van de Kiesraad in github.com/kiesraad/abacus; de zetelaantallen van de fictieve gemeenten zijn zelf gekozen. Provincienummers lopen van 1 (Groningen) t/m 12 (Limburg); een ElectionDomain-Id mag volgens EML_NL alleen 4 cijfers of een getal van 0 t/m 29 zijn.
+</footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+"use strict";
+const $ = id => document.getElementById(id);
+const PROVINCIES=[{"name": "Groningen", "nr": "1", "seats": 43, "csb": "Groningen", "kk": [{"nr": 1, "hsb": null, "tk": 1}]}, {"name": "Fryslân", "nr": "2", "seats": 43, "csb": "Leeuwarden", "kk": [{"nr": 1, "hsb": null, "tk": 2}]}, {"name": "Drenthe", "nr": "3", "seats": 43, "csb": "Assen", "kk": [{"nr": 1, "hsb": null, "tk": 3}]}, {"name": "Overijssel", "nr": "4", "seats": 47, "csb": "Zwolle", "kk": [{"nr": 1, "hsb": null, "tk": 4}]}, {"name": "Flevoland", "nr": "5", "seats": 41, "csb": "Lelystad", "kk": [{"nr": 1, "hsb": null, "tk": 5}]}, {"name": "Gelderland", "nr": "6", "seats": 55, "csb": "Arnhem", "kk": [{"nr": 1, "hsb": "Nijmegen", "tk": 6}, {"nr": 2, "hsb": "Arnhem", "tk": 7}]}, {"name": "Utrecht", "nr": "7", "seats": 49, "csb": "Utrecht", "kk": [{"nr": 1, "hsb": null, "tk": 8}]}, {"name": "Noord-Holland", "nr": "8", "seats": 55, "csb": "Haarlem", "kk": [{"nr": 1, "hsb": "Amsterdam", "tk": 9}, {"nr": 2, "hsb": "Haarlem", "tk": 10}, {"nr": 3, "hsb": "Den Helder", "tk": 11}]}, {"name": "Zuid-Holland", "nr": "9", "seats": 55, "csb": "'s-Gravenhage", "kk": [{"nr": 1, "hsb": "'s-Gravenhage", "tk": 12}, {"nr": 2, "hsb": "Rotterdam", "tk": 13}, {"nr": 3, "hsb": "Dordrecht", "tk": 14}, {"nr": 4, "hsb": "Leiden", "tk": 15}]}, {"name": "Zeeland", "nr": "10", "seats": 39, "csb": "Middelburg", "kk": [{"nr": 1, "hsb": null, "tk": 16}]}, {"name": "Noord-Brabant", "nr": "11", "seats": 55, "csb": "'s-Hertogenbosch", "kk": [{"nr": 1, "hsb": "Tilburg", "tk": 17}, {"nr": 2, "hsb": "'s-Hertogenbosch", "tk": 18}]}, {"name": "Limburg", "nr": "12", "seats": 47, "csb": "Maastricht", "kk": [{"nr": 1, "hsb": "Maastricht", "tk": 19}, {"nr": 2, "hsb": "Venlo", "tk": 19}]}];
+const GEMEENTEN=[["1680","Aa en Hunze",21,"Drenthe",1],["0358","Aalsmeer",23,"Noord-Holland",2],["0197","Aalten",21,"Gelderland",2],["0059","Achtkarspelen",21,"Fryslân",1],["0482","Alblasserdam",19,"Zuid-Holland",3],["0613","Albrandswaard",21,"Zuid-Holland",3],["0361","Alkmaar",39,"Noord-Holland",3],["0141","Almelo",35,"Overijssel",1],["0034","Almere",45,"Flevoland",1],["0484","Alphen aan den Rijn",39,"Zuid-Holland",4],["1723","Alphen-Chaam",15,"Noord-Brabant",1],["1959","Altena",31,"Noord-Brabant",1],["0060","Ameland",11,"Fryslân",1],["0307","Amersfoort",39,"Utrecht",1],["0362","Amstelveen",37,"Noord-Holland",2],["0363","Amsterdam",45,"Noord-Holland",1],["0200","Apeldoorn",39,"Gelderland",2],["0202","Arnhem",39,"Gelderland",2],["0106","Assen",35,"Drenthe",1],["0743","Asten",17,"Noord-Brabant",2],["0744","Baarle-Nassau",13,"Noord-Brabant",1],["0308","Baarn",21,"Utrecht",1],["0489","Barendrecht",29,"Zuid-Holland",3],["0203","Barneveld",33,"Gelderland",2],["0888","Beek",17,"Limburg",1],["1954","Beekdaelen",25,"Limburg",1],["0889","Beesel",15,"Limburg",2],["1945","Berg en Dal",25,"Gelderland",1],["1724","Bergeijk",17,"Noord-Brabant",2],["0893","Bergen (L)",15,"Limburg",2],["0373","Bergen (NH)",21,"Noord-Holland",3],["0748","Bergen op Zoom",35,"Noord-Brabant",1],["1859","Berkelland",27,"Gelderland",2],["1721","Bernheze",23,"Noord-Brabant",2],["0753","Best",23,"Noord-Brabant",2],["0209","Beuningen",21,"Gelderland",1],["0375","Beverwijk",27,"Noord-Holland",2],["1728","Bladel",19,"Noord-Brabant",2],["0376","Blaricum",15,"Noord-Holland",2],["0377","Bloemendaal",19,"Noord-Holland",2],["1901","Bodegraven-Reeuwijk",25,"Zuid-Holland",4],["0755","Boekel",15,"Noord-Brabant",2],["1681","Borger-Odoorn",21,"Drenthe",1],["0147","Borne",19,"Overijssel",1],["0654","Borsele",19,"Zeeland",1],["0757","Boxtel",23,"Noord-Brabant",2],["0758","Breda",39,"Noord-Brabant",1],["1876","Bronckhorst",25,"Gelderland",2],["0213","Brummen",19,"Gelderland",2],["0899","Brunssum",21,"Limburg",1],["0312","Bunnik",17,"Utrecht",1],["0313","Bunschoten",19,"Utrecht",1],["0214","Buren",21,"Gelderland",1],["0502","Capelle aan den IJssel",33,"Zuid-Holland",4],["0383","Castricum",25,"Noord-Holland",3],["0441","Schagen",29,"Noord-Holland",3],["0279","Scherpenzeel",15,"Gelderland",2],["0606","Schiedam",37,"Zuid-Holland",3],["0088","Schiermonnikoog",9,"Fryslân",1],["1676","Schouwen-Duiveland",23,"Zeeland",1],["0109","Coevorden",25,"Drenthe",1],["1706","Cranendonck",19,"Noord-Brabant",2],["0216","Culemborg",23,"Gelderland",1],["0148","Dalfsen",23,"Overijssel",1],["1891","Dantumadiel",17,"Fryslân",1],["0310","De Bilt",27,"Utrecht",1],["1940","De Fryske Marren",31,"Fryslân",1],["0736","De Ronde Venen",29,"Utrecht",1],["1690","De Wolden",19,"Drenthe",1],["0503","Delft",39,"Zuid-Holland",3],["0400","Den Helder",31,"Noord-Holland",3],["0762","Deurne",23,"Noord-Brabant",2],["0150","Deventer",39,"Overijssel",1],["0384","Diemen",23,"Noord-Holland",2],["1980","Dijk en Waard",37,"Noord-Holland",3],["1774","Dinkelland",21,"Overijssel",1],["0221","Doesburg",15,"Gelderland",2],["0222","Doetinchem",33,"Gelderland",2],["0766","Dongen",21,"Noord-Brabant",1],["0505","Dordrecht",39,"Zuid-Holland",3],["0498","Drechterland",19,"Noord-Holland",3],["1719","Drimmelen",21,"Noord-Brabant",1],["0303","Dronten",29,"Flevoland",1],["0225","Druten",17,"Gelderland",1],["0226","Duiven",19,"Gelderland",2],["1711","Echt-Susteren",23,"Limburg",2],["0385","Edam-Volendam",25,"Noord-Holland",3],["0228","Ede",39,"Gelderland",2],["0317","Eemnes",15,"Utrecht",1],["1979","Eemsdelta",27,"Groningen",1],["0770","Eersel",19,"Noord-Brabant",2],["1903","Eijsden-Margraten",21,"Limburg",1],["0772","Eindhoven",45,"Noord-Brabant",2],["0230","Elburg",19,"Gelderland",2],["0114","Emmen",39,"Drenthe",1],["0388","Enkhuizen",17,"Noord-Holland",3],["0153","Enschede",39,"Overijssel",1],["0232","Epe",23,"Gelderland",2],["0233","Ermelo",21,"Gelderland",2],["0777","Etten-Leur",29,"Noord-Brabant",1],["0779","Geertruidenberg",19,"Noord-Brabant",1],["1771","Geldrop-Mierlo",27,"Noord-Brabant",2],["1652","Gemert-Bakel",23,"Noord-Brabant",2],["0907","Gennep",17,"Limburg",2],["0784","Gilze en Rijen",21,"Noord-Brabant",1],["1924","Goeree-Overflakkee",31,"Zuid-Holland",3],["0664","Goes",27,"Zeeland",1],["0785","Goirle",19,"Noord-Brabant",1],["1942","Gooise Meren",33,"Noord-Holland",2],["0512","Gorinchem",25,"Zuid-Holland",3],["0513","Gouda",35,"Zuid-Holland",4],["0518","'s-Gravenhage",45,"Zuid-Holland",1],["0014","Groningen",45,"Groningen",1],["1729","Gulpen-Wittem",15,"Limburg",1],["0158","Haaksbergen",19,"Overijssel",1],["0392","Haarlem",39,"Noord-Holland",2],["0394","Haarlemmermeer",39,"Noord-Holland",2],["1655","Halderberge",23,"Noord-Brabant",1],["0160","Hardenberg",33,"Overijssel",1],["0243","Harderwijk",31,"Gelderland",2],["0523","Hardinxveld-Giessendam",17,"Zuid-Holland",3],["0072","Harlingen",17,"Fryslân",1],["0244","Hattem",15,"Gelderland",2],["0396","Heemskerk",25,"Noord-Holland",2],["0397","Heemstede",21,"Noord-Holland",2],["0246","Heerde",17,"Gelderland",2],["0074","Heerenveen",31,"Fryslân",1],["0917","Heerlen",37,"Limburg",1],["1658","Heeze-Leende",17,"Noord-Brabant",2],["0399","Heiloo",19,"Noord-Holland",3],["0163","Hellendoorn",25,"Overijssel",1],["0794","Helmond",37,"Noord-Brabant",2],["0531","Hendrik-Ido-Ambacht",23,"Zuid-Holland",3],["0164","Hengelo (O)",37,"Overijssel",1],["0796","'s-Hertogenbosch",39,"Noord-Brabant",2],["1966","Het Hogeland",29,"Groningen",1],["0252","Heumen",17,"Gelderland",1],["0797","Heusden",29,"Noord-Brabant",2],["0534","Hillegom",19,"Zuid-Holland",4],["0798","Hilvarenbeek",17,"Noord-Brabant",1],["0402","Hilversum",39,"Noord-Holland",2],["1963","Hoeksche Waard",37,"Zuid-Holland",3],["1735","Hof van Twente",25,"Overijssel",1],["1911","Hollands Kroon",29,"Noord-Holland",3],["0118","Hoogeveen",31,"Drenthe",1],["0405","Hoorn",35,"Noord-Holland",3],["1507","Horst aan de Maas",27,"Limburg",2],["0321","Houten",31,"Utrecht",1],["0406","Huizen",27,"Noord-Holland",2],["0677","Hulst",21,"Zeeland",1],["0353","IJsselstein",23,"Utrecht",1],["0965","Simpelveld",15,"Limburg",1],["0845","Sint-Michielsgestel",23,"Noord-Brabant",2],["1883","Sittard-Geleen",37,"Limburg",1],["1884","Kaag en Braassem",21,"Zuid-Holland",4],["0166","Kampen",31,"Overijssel",1],["0678","Kapelle",15,"Zeeland",1],["0537","Katwijk",33,"Zuid-Holland",4],["0928","Kerkrade",29,"Limburg",1],["1598","Koggenland",19,"Noord-Holland",3],["0542","Krimpen aan den IJssel",21,"Zuid-Holland",4],["1931","Krimpenerwaard",31,"Zuid-Holland",4],["1659","Laarbeek",19,"Noord-Brabant",2],["1982","Land van Cuijk",37,"Noord-Brabant",2],["0882","Landgraaf",25,"Limburg",1],["0415","Landsmeer",15,"Noord-Holland",3],["1621","Lansingerland",33,"Zuid-Holland",4],["0417","Laren",15,"Noord-Holland",2],["0080","Leeuwarden",39,"Fryslân",1],["0546","Leiden",39,"Zuid-Holland",4],["0547","Leiderdorp",21,"Zuid-Holland",4],["1916","Leidschendam-Voorburg",35,"Zuid-Holland",4],["0995","Lelystad",37,"Flevoland",1],["1640","Leudal",25,"Limburg",2],["0327","Leusden",23,"Utrecht",1],["0610","Sliedrecht",21,"Zuid-Holland",3],["1705","Lingewaard",29,"Gelderland",2],["0553","Lisse",19,"Zuid-Holland",4],["0262","Lochem",23,"Gelderland",2],["0809","Loon op Zand",19,"Noord-Brabant",1],["0331","Lopik",15,"Utrecht",1],["0168","Losser",19,"Overijssel",1],["1714","Sluis",19,"Zeeland",1],["0263","Maasdriel",21,"Gelderland",1],["1641","Maasgouw",19,"Limburg",2],["1991","Maashorst",33,"Noord-Brabant",2],["0556","Maassluis",25,"Zuid-Holland",3],["0935","Maastricht",39,"Limburg",1],["0090","Smallingerland",31,"Fryslân",1],["0420","Medemblik",29,"Noord-Holland",3],["0938","Meerssen",17,"Limburg",1],["1948","Meierijstad",37,"Noord-Brabant",2],["0119","Meppel",25,"Drenthe",1],["0687","Middelburg",31,"Zeeland",1],["1842","Midden-Delfland",17,"Zuid-Holland",3],["1731","Midden-Drenthe",23,"Drenthe",1],["1952","Midden-Groningen",33,"Groningen",1],["1709","Moerdijk",25,"Noord-Brabant",1],["1978","Molenlanden",29,"Zuid-Holland",3],["1955","Montferland",25,"Gelderland",2],["0335","Montfoort",15,"Utrecht",1],["0944","Mook en Middelaar",13,"Limburg",2],["1740","Neder-Betuwe",21,"Gelderland",1],["0946","Nederweert",17,"Limburg",2],["0356","Nieuwegein",33,"Utrecht",1],["0569","Nieuwkoop",21,"Zuid-Holland",4],["0267","Nijkerk",29,"Gelderland",2],["0268","Nijmegen",39,"Gelderland",1],["1930","Nissewaard",37,"Zuid-Holland",3],["1970","Noardeast-Fryslân",29,"Fryslân",1],["1695","Noord-Beveland",13,"Zeeland",1],["1699","Noordenveld",23,"Drenthe",1],["0171","Noordoostpolder",31,"Flevoland",1],["0575","Noordwijk",29,"Zuid-Holland",4],["0820","Nuenen, Gerwen en Nederwetten",19,"Noord-Brabant",2],["0302","Nunspeet",21,"Gelderland",2],["0579","Oegstgeest",21,"Zuid-Holland",4],["0342","Soest",29,"Utrecht",1],["0823","Oirschot",17,"Noord-Brabant",2],["0824","Oisterwijk",23,"Noord-Brabant",1],["1895","Oldambt",25,"Groningen",1],["0269","Oldebroek",19,"Gelderland",2],["0173","Oldenzaal",23,"Overijssel",1],["1773","Olst-Wijhe",17,"Overijssel",1],["0847","Someren",19,"Noord-Brabant",2],["0175","Ommen",17,"Overijssel",1],["0848","Son en Breugel",17,"Noord-Brabant",2],["1586","Oost Gelre",23,"Gelderland",2],["0826","Oosterhout",31,"Noord-Brabant",1],["0085","Ooststellingwerf",21,"Fryslân",1],["0431","Oostzaan",13,"Noord-Holland",3],["0432","Opmeer",15,"Noord-Holland",3],["0086","Opsterland",23,"Fryslân",1],["0828","Oss",37,"Noord-Brabant",2],["1509","Oude IJsselstreek",25,"Gelderland",2],["0437","Ouder-Amstel",15,"Noord-Holland",2],["0589","Oudewater",15,"Utrecht",1],["1734","Overbetuwe",29,"Gelderland",2],["0590","Papendrecht",23,"Zuid-Holland",3],["1894","Peel en Maas",29,"Limburg",2],["0765","Pekela",15,"Groningen",1],["1926","Pijnacker-Nootdorp",31,"Zuid-Holland",4],["0439","Purmerend",37,"Noord-Holland",3],["0273","Putten",21,"Gelderland",2],["0177","Raalte",25,"Overijssel",1],["0703","Reimerswaal",19,"Zeeland",1],["0274","Renkum",23,"Gelderland",2],["0339","Renswoude",11,"Utrecht",1],["1667","Reusel-De Mierden",15,"Noord-Brabant",2],["0275","Rheden",27,"Gelderland",2],["0340","Rhenen",19,"Utrecht",1],["0597","Ridderkerk",29,"Zuid-Holland",3],["1742","Rijssen-Holten",25,"Overijssel",1],["0603","Rijswijk",33,"Zuid-Holland",3],["1669","Roerdalen",19,"Limburg",2],["0957","Roermond",33,"Limburg",2],["1674","Roosendaal",35,"Noord-Brabant",1],["0599","Rotterdam",45,"Zuid-Holland",2],["0277","Rozendaal",9,"Gelderland",2],["0840","Rucphen",19,"Noord-Brabant",1],["0037","Stadskanaal",23,"Groningen",1],["0180","Staphorst",17,"Overijssel",1],["0532","Stede Broec",19,"Noord-Holland",3],["0851","Steenbergen",19,"Noord-Brabant",1],["1708","Steenwijkerland",29,"Overijssel",1],["0971","Stein",19,"Limburg",1],["0715","Terneuzen",31,"Zeeland",1],["0093","Terschelling",11,"Fryslân",1],["0448","Texel",15,"Noord-Holland",3],["1525","Teylingen",25,"Zuid-Holland",4],["0716","Tholen",21,"Zeeland",1],["1904","Stichtse Vecht",33,"Utrecht",1],["0281","Tiel",27,"Gelderland",1],["0855","Tilburg",45,"Noord-Brabant",1],["0183","Tubbergen",19,"Overijssel",1],["1700","Twenterand",23,"Overijssel",1],["1730","Tynaarlo",25,"Drenthe",1],["0737","Tytsjerksteradiel",23,"Fryslân",1],["0450","Uitgeest",15,"Noord-Holland",3],["0451","Uithoorn",23,"Noord-Holland",2],["0184","Urk",19,"Flevoland",1],["0344","Utrecht",45,"Utrecht",1],["1581","Utrechtse Heuvelrug",31,"Utrecht",1],["0981","Vaals",15,"Limburg",1],["0994","Valkenburg aan de Geul",17,"Limburg",1],["0858","Valkenswaard",23,"Noord-Brabant",2],["0047","Veendam",21,"Groningen",1],["0345","Veenendaal",35,"Utrecht",1],["0717","Veere",19,"Zeeland",1],["0861","Veldhoven",29,"Noord-Brabant",2],["0453","Velsen",35,"Noord-Holland",2],["0983","Venlo",39,"Limburg",2],["0984","Venray",29,"Limburg",2],["1961","Vijfheerenlanden",33,"Utrecht",1],["0622","Vlaardingen",35,"Zuid-Holland",3],["0096","Vlieland",9,"Fryslân",1],["0718","Vlissingen",29,"Zeeland",1],["0986","Voerendaal",15,"Limburg",1],["1992","Voorne aan Zee",35,"Zuid-Holland",3],["0626","Voorschoten",21,"Zuid-Holland",4],["0285","Voorst",21,"Gelderland",2],["0865","Vught",23,"Noord-Brabant",2],["1949","Waadhoeke",29,"Fryslân",1],["0866","Waalre",17,"Noord-Brabant",2],["0867","Waalwijk",31,"Noord-Brabant",1],["0627","Waddinxveen",25,"Zuid-Holland",4],["0289","Wageningen",27,"Gelderland",2],["0629","Wassenaar",21,"Zuid-Holland",4],["0852","Waterland",17,"Noord-Holland",3],["0988","Weert",31,"Limburg",2],["1960","West Betuwe",31,"Gelderland",1],["0668","West Maas en Waal",19,"Gelderland",1],["1969","Westerkwartier",33,"Groningen",1],["1701","Westerveld",17,"Drenthe",1],["0293","Westervoort",17,"Gelderland",2],["1950","Westerwolde",21,"Groningen",1],["1783","Westland",39,"Zuid-Holland",3],["0098","Weststellingwerf",21,"Fryslân",1],["0189","Wierden",21,"Overijssel",1],["0296","Wijchen",27,"Gelderland",1],["0352","Wijk bij Duurstede",19,"Utrecht",1],["0294","Winterswijk",21,"Gelderland",2],["0873","Woensdrecht",19,"Noord-Brabant",1],["0632","Woerden",31,"Utrecht",1],["0880","Wormerland",17,"Noord-Holland",3],["0351","Woudenberg",17,"Utrecht",1],["0479","Zaanstad",39,"Noord-Holland",3],["0297","Zaltbommel",23,"Gelderland",1],["0473","Zandvoort",17,"Noord-Holland",2],["0050","Zeewolde",19,"Flevoland",1],["0355","Zeist",33,"Utrecht",1],["0299","Zevenaar",29,"Gelderland",2],["0637","Zoetermeer",39,"Zuid-Holland",4],["0638","Zoeterwoude",15,"Zuid-Holland",4],["1892","Zuidplas",29,"Zuid-Holland",4],["0879","Zundert",19,"Noord-Brabant",1],["0301","Zutphen",29,"Gelderland",2],["1896","Zwartewaterland",19,"Overijssel",1],["0642","Zwijndrecht",27,"Zuid-Holland",3],["0193","Zwolle",39,"Overijssel",1],["1900","Súdwest-Fryslân",37,"Fryslân",1]];
+
+const KIESKRINGEN = ["Groningen","Leeuwarden","Assen","Zwolle","Lelystad","Nijmegen","Arnhem","Utrecht","Amsterdam","Haarlem","Den Helder","'s-Gravenhage","Rotterdam","Dordrecht","Leiden","Middelburg","Tilburg","'s-Hertogenbosch","Maastricht","Bonaire"];
+
+const TYPES = {
+  GR:{label:"Gemeenteraad", domain:"GEMEENTE", domainTitle:"Voor welke gemeente?", nameLbl:"Naam gemeente", codeLbl:"CBS-gemeentecode",
+      hint:"De gemeentecode is de 4-cijferige CBS-code, met voorloopnullen (Assen = 0106).", seats:31, subs:["GR1","GR2"], prefix:"Gemeenteraad"},
+  PS:{label:"Provinciale Staten", domain:"PROVINCIE", domainTitle:"Voor welke provincie?", nameLbl:"Naam provincie", codeLbl:"Provincienummer",
+      hint:"Het provincienummer loopt van 1 (Groningen) t/m 12 (Limburg), in de volgorde van de Kieswet. Met één kieskring wordt het PS1, met meer kieskringen PS2.", seats:55, subs:["PS1","PS2"], prefix:"Provinciale Staten"},
+  AB:{label:"Waterschap", domain:"WATERSCHAP", domainTitle:"Voor welk waterschap?", nameLbl:"Naam waterschap", codeLbl:"Waterschapsnummer",
+      hint:"Gebruik het nummer van het waterschap zoals de Kiesraad het hanteert.", seats:23, subs:["AB1","AB2"], prefix:"Waterschap"},
+  TK:{label:"Tweede Kamer", domain:null, seats:150, subs:["TK"], prefix:"Tweede Kamer der Staten-Generaal"},
+  EP:{label:"Europees Parlement", domain:null, seats:31, subs:["EP"], prefix:"Europees Parlement"},
+  EK:{label:"Eerste Kamer", domain:null, seats:75, subs:["EK"], prefix:"Eerste Kamer der Staten-Generaal"},
+  KC:{label:"Kiescollege", domain:null, seats:"", subs:["KCCN","KCNI"], prefix:"Kiescollege", minVersion:"1.3"},
+  BC:{label:"Stadsdeelcommissie", cat:"BC", local:true, defGem:"0363", domain:"GEMEENTE", domainTitle:"Voor welke stadsdeelcommissie of bestuurscommissie?", nameLbl:"Naam gemeente", codeLbl:"CBS-gemeentecode",
+      hint:"Kies de gemeente en de commissie. In EML_NL valt dit onder categorie BC (bestuurscommissie). Elke commissie heeft een eigen centraal stembureau en dus een eigen definitiebestand.", seats:"", subs:["BC"]},
+  GC:{label:"Wijkraad / gebiedscommissie", cat:"GC", local:true, defGem:"0599", domain:"GEMEENTE", domainTitle:"Voor welke wijkraad of gebiedscommissie?", nameLbl:"Naam gemeente", codeLbl:"CBS-gemeentecode",
+      hint:"Kies de gemeente en vul de naam van de wijkraad, dorpsraad of gebiedscommissie in. In EML_NL valt dit onder categorie GC (gebiedscommissie).", seats:"", subs:["GC"]},
+  BR:{label:"Bestuursraad", cat:"BC", local:true, defGem:"0796", domain:"GEMEENTE", domainTitle:"Voor welke bestuursraad?", nameLbl:"Naam gemeente", codeLbl:"CBS-gemeentecode",
+      hint:"Kies de gemeente en de bestuursraad. EML_NL kent geen aparte categorie voor bestuursraden; het bestand gebruikt categorie BC (bestuurscommissie), net als een stadsdeelcommissie.", seats:"", subs:["BC"]}
+};
+const COMMITTEES = ["CSB","HSB","PROV_SB"];
+const REGION_CATS = ["STAAT","WATERSCHAP","PROVINCIE","KIESCOLLEGE","KIESKRING","GEMEENTE"];
+
+let S;           // state
+let edited = {}; // which auto-fields the user overrode
+let uid = 0;
+
+function iso(d){ const z=n=>String(n).padStart(2,"0"); return d.getFullYear()+"-"+z(d.getMonth()+1)+"-"+z(d.getDate()); }
+function addDays(s,n){ const [y,m,d]=s.split("-").map(Number); const dt=new Date(y,m-1,d); dt.setDate(dt.getDate()+n); return iso(dt); }
+function nowStamp(){
+  const d=new Date(), z=n=>String(n).padStart(2,"0");
+  const off=-d.getTimezoneOffset(), sg=off>=0?"+":"-", a=Math.abs(off);
+  return iso(d)+"T"+z(d.getHours())+":"+z(d.getMinutes())+":"+z(d.getSeconds())+"."+String(d.getMilliseconds()).padStart(3,"0");
+}
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function slug(s){ return String(s).normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/'/g,"").replace(/[^A-Za-z0-9]+/g,"_").replace(/^_+|_+$/g,""); }
+
+function region(cat,num,name,sup,committees){ return {id:++uid,cat,num:num||"",name:name||"",sup:sup||null,committees:committees||[],roman:false,frys:false,csbName:"",central:false}; }
+
+const BODIES={
+  "0363":["Stadsdeelcommissie Centrum","Stadsdeelcommissie Nieuw-West","Stadsdeelcommissie Noord","Stadsdeelcommissie Oost","Stadsdeelcommissie West","Stadsdeelcommissie Zuid","Stadsdeelcommissie Zuidoost","Bestuurscommissie Weesp"],
+  "0796":["Bestuursraad Empel en Meerwijk","Bestuursraad Engelen en Bokhoven","Commissie van ingezetenen Orthen"],
+  "0599":[]
+};
+function catOf(t){ return (TYPES[t]&&TYPES[t].cat)||t; }
+const PROV_BY_NAME=Object.fromEntries(PROVINCIES.map(p=>[p.name,p]));
+const GEM_BY_CODE=Object.fromEntries(GEMEENTEN.map(g=>[g[0],g]));
+
+/* fictieve testgebieden, zoals in de testbestanden van de Kiesraad (github.com/kiesraad/abacus) */
+const FICT_GEM=[["0123","Heemdamseburg",29,"Fictief",1],["0124","Juinen",29,"Fictief",1],["0125","Middelgein",17,"Fictief",2],["0126","'s-Gravenveen",29,"Fictief",2]];
+FICT_GEM.forEach(g=>{ GEM_BY_CODE[g[0]]=g; });
+const FICT_PROV=[
+  {name:"Oost-Holland",nr:"13",seats:43,fict:true,csb:"Heemdamseburg",roman:false,kk:[{nr:1,hsb:"Heemdamseburg",gem:["0123","0124","0125","0126"]}]},
+  {name:"Zuid-Brabant",nr:"14",seats:47,fict:true,csb:"Heemdamseburg",roman:true,kk:[{nr:1,hsb:"Heemdamseburg",gem:["0123","0124"]},{nr:2,hsb:"'s-Gravenveen",gem:["0125","0126"]}]}
+];
+const FICT_WS={name:"Rivier en Polder",nr:"10",seats:26,gem:["0123","0124","0125","0126"]};
+const FICT_PARTIES=["Partijdige Partij","Partij voor de Stemmer","Stemmmers 22","STEM","De Stemunie","Stemalliantie","Lijst De Partij","Het Stembiljet","Partij voor de Opkomst","Kiezers nu!","Verkiespartij","WET","Partij van de Wet","Stem van de partij","Kiesregelingsunie","De Lijst","Groep De Partij","Stemmersgroep","Algemene Partij","Stem voor de Partij","Partij van de Keuze","KEUS","Keuzepartij","Voorkeurskeuzepartij","De Kandidatenlijst"].join("\n");
+const SAMPLE_PARTIES="";
+/* landelijk register van aanduidingen (Kiesraad, Tweede Kamer); werkt door naar EK, PS, AB en GR. Stand: pagina gewijzigd 27-08-2026 */
+const NATIONAL_PARTIES=["VVD", "CDA", "D66", "Staatkundig Gereformeerde Partij (SGP)", "SP (Socialistische Partij)", "ChristenUnie", "Partij voor de Dieren", "PVV (Partij voor de Vrijheid)", "Piratenpartij", "50PLUS", "LP (Libertaire Partij)", "DENK", "Forum voor Democratie", "BIJ1", "BBB", "Volt", "JA21", "Belang Van Nederland (BVNL)", "Nieuw Sociaal Contract (NSC)", "NL PLAN", "ELLECT", "Vrij Verbond", "DE LINIE", "Vrede voor Dieren", "Partij voor de Rechtsstaat", "FNP", "LEF - Voor de Nieuwe Generatie", "Liberale Partij", "1 WERELD 1 TOEKOMST (1W1T)", "Hart voor Vrijheid", "ORDA / ORP", "PDIB (Partij voor Democratie in Balans)", "RESOLUUT", "De Nederlandse Alliantie (DNA)", "Mijn Stem Telt! Het Burgerinitiatief (MST)", "Herstel Nederland", "Progressief Nederland (PRO)"];
+function provByNr(nr){ return PROVINCIES.find(p=>p.nr===nr)||FICT_PROV.find(p=>p.nr===nr); }
+function isFict(){ const g=GEM_BY_CODE[S.pick], P=S.type==="PS"&&provByNr(S.pick);
+  return (S.type==="PS"? !!(P&&P.fict) : S.type==="AB"? S.pick===FICT_WS.nr : (S.type==="TK"||S.type==="EP")? !!S.fict : !!(g&&g[3]==="Fictief")); }
+/* RegionNumber van een gemeente is de CBS-code zonder voorloopnullen (0037 -> 37) */
+function rn(code){ return /^\d+$/.test(code)? String(parseInt(code,10)) : code; }
+
+/* Kieswet E 10 en E 11: alleen TK (en via Y 2 het EP) en PS met meerdere kieskringen hebben een hoofdstembureau */
+function lawHasHSB(){
+  if(S.type==="TK"||S.type==="EP") return true;
+  if(S.type==="PS"){ const P=provByNr(S.pick); return P? P.kk.length>1 : S.tree.filter(r=>r.cat==="KIESKRING").length>1; }
+  return false;
+}
+function defaultTree(){
+  const tree=buildTree();
+  if(!S.hsbCompat && !lawHasHSB()) tree.forEach(r=>{ r.committees=r.committees.filter(c=>c!=="HSB"); r.central=false; });
+  return tree;
+}
+function buildTree(){
+  const t=S.type;
+  if(t==="GR"||TYPES[t].local) return [Object.assign(region("GEMEENTE",rn(S.domainCode),S.domainName,null,["CSB","HSB"]),{bound:true})];
+  if(t==="PS"){
+    const p=Object.assign(region("PROVINCIE",S.domainCode,S.domainName,null,[]),{bound:true});
+    const P=provByNr(S.pick);
+    if(!P) return [p, region("KIESKRING","1",S.domainName,p.id,["CSB","HSB"])];
+    const multi=P.kk.length>1, out=[p], kkReg={};
+    /* de kieskring waar het centraal stembureau zit krijgt nummer 1 (zoals PS2023 Gelderland: 1 Arnhem, 2 Nijmegen) */
+    const kks=P.kk.slice().sort((a,b)=>((b.hsb||P.csb)===P.csb)-((a.hsb||P.csb)===P.csb) || a.nr-b.nr);
+    kks.forEach((k,i)=>{
+      const r=region("KIESKRING",String(i+1),k.hsb||P.csb,p.id,i===0?["CSB","HSB"]:["HSB"]);
+      r.roman=!!P.roman || P.name==="Limburg"; if(i===0&&multi) r.central=true;
+      kkReg[k.nr]=r; out.push(r);
+    });
+    if(S.includeGem){
+      if(P.fict) P.kk.forEach(k=>k.gem.forEach(c=>{ const g=GEM_BY_CODE[c]; out.push(region("GEMEENTE",rn(c),g[1],kkReg[k.nr].id,[])); }));
+      else GEMEENTEN.filter(g=>g[3]===P.name).sort((x,y)=>kkReg[x[4]].num-kkReg[y[4]].num || x[0].localeCompare(y[0])).forEach(g=>out.push(region("GEMEENTE",rn(g[0]),g[1],kkReg[g[4]].id,[])));
+    }
+    return out;
+  }
+  if(t==="AB"){
+    const w=Object.assign(region("WATERSCHAP",S.domainCode,S.domainName,null,[]),{bound:true});
+    const k=region("KIESKRING","1",S.domainName,w.id,["CSB","HSB"]);
+    const out=[w,k];
+    if(S.pick===FICT_WS.nr && S.includeGem) FICT_WS.gem.forEach(c=>out.push(region("GEMEENTE",rn(c),GEM_BY_CODE[c][1],k.id,[])));
+    return out;
+  }
+  if(t==="KC") return [region("KIESCOLLEGE","1",S.subcat==="KCNI"?"Kiescollege niet-ingezetenen":"Kiescollege Caribisch Nederland",null,["CSB"])];
+  if(t==="EK"){ const st=region("STAAT","","Nederland",null,["CSB"]); st.csbName="De Kiesraad"; return [st]; }
+  /* TK en EP: geen stembureau op STAAT; het CSB (De Kiesraad) staat bij kieskring 1, zoals in het TK-testbestand van de Kiesraad */
+  const st=region("STAAT","","Nederland",null,[]);
+  const names=S.fict? ["Heemdamseburg","'s-Gravenveen"] : KIESKRINGEN;
+  const kks=names.map((n,i)=>region("KIESKRING",String(i+1),n,st.id,i===0?["CSB","HSB"]:["HSB"]));
+  kks[0].csbName="De Kiesraad"; kks[0].central=true;
+  const out=[st].concat(kks);
+  if(S.fict){
+    FICT_GEM.forEach(g=>out.push(region("GEMEENTE",rn(g[0]),g[1],kks[g[4]-1].id,[])));
+    out.push(region("GEMEENTE","9010","NBSB",kks[0].id,[]));
+  } else if(S.includeGem) GEMEENTEN.map(g=>[g,PROV_BY_NAME[g[3]].kk[g[4]-1].tk]).sort((x,y)=>x[1]-y[1] || x[0][0].localeCompare(y[0][0])).forEach(([g,tk])=>out.push(region("GEMEENTE",rn(g[0]),g[1],kks[tk-1].id,[])));
+  return out;
+}
+
+/* keuzelijst vraag 2 */
+const FICT_LABEL="Fictief: testgebieden van de Kiesraad";
+function pickOptions(){
+  if(S.type==="GR"||TYPES[S.type].local){
+    let h='<option value="">Andere gemeente (handmatig invullen)</option>';
+    h+='<optgroup label="'+FICT_LABEL+'">'+FICT_GEM.map(g=>'<option value="'+g[0]+'">'+esc(g[1])+' (fictief, '+g[0]+')</option>').join("")+'</optgroup>';
+    PROVINCIES.forEach(P=>{
+      h+='<optgroup label="'+esc(P.name)+'">'+GEMEENTEN.filter(g=>g[3]===P.name).map(g=>'<option value="'+g[0]+'">'+esc(g[1])+' ('+g[0]+')</option>').join("")+'</optgroup>';
+    });
+    return h;
+  }
+  if(S.type==="PS") return '<option value="">Andere indeling (handmatig invullen)</option>'+
+    '<optgroup label="'+FICT_LABEL+'">'+FICT_PROV.map(P=>'<option value="'+P.nr+'">'+esc(P.name)+' (fictief, '+P.nr+', '+(P.kk.length>1?P.kk.length+' kieskringen':'1 kieskring')+')</option>').join("")+'</optgroup>'+
+    '<optgroup label="Provincies">'+PROVINCIES.map(P=>'<option value="'+P.nr+'">'+esc(P.name)+' ('+P.nr+')</option>').join("")+'</optgroup>';
+  if(S.type==="AB") return '<option value="">Waterschap handmatig invullen</option><optgroup label="'+FICT_LABEL+'"><option value="'+FICT_WS.nr+'">'+esc(FICT_WS.name)+' (fictief, '+FICT_WS.nr+')</option></optgroup>';
+  return "";
+}
+function setTestParties(on){
+  if(on) S.partySource="";
+  if(on && S.parties!==FICT_PARTIES) S.parties=FICT_PARTIES;
+  if(!on && S.parties===FICT_PARTIES) S.parties=SAMPLE_PARTIES;
+}
+function applyPick(){
+  edited={};
+  if(TYPES[S.type].local){
+    const g=GEM_BY_CODE[S.pick]; if(!g) return;
+    S.domainName=g[1]; S.domainCode=g[0];
+    const list=BODIES[g[0]]||[]; S.body=list[0]||(g[3]==="Fictief"?"Bestuursraad "+g[1]:"");
+  } else if(S.type==="GR"){
+    const g=GEM_BY_CODE[S.pick]; if(!g) return;
+    S.domainName=g[1]; S.domainCode=g[0]; S.seats=g[2];
+  } else if(S.type==="PS"){
+    const P=provByNr(S.pick); if(!P) return;
+    S.domainName=P.name; S.domainCode=P.nr; S.seats=P.seats;
+  } else if(S.type==="AB"){
+    if(S.pick!==FICT_WS.nr) return;
+    S.domainName=FICT_WS.name; S.domainCode=FICT_WS.nr; S.seats=FICT_WS.seats;
+  }
+  setTestParties(isFict());
+}
+
+function freshState(){
+  S={type:"GR",pick:"0106",body:"",includeGem:true,fict:false,hsbCompat:true,domainName:"Assen",domainCode:"0106",electionDate:"2030-03-20",nominationDate:"",seats:35,threshold:25,subcat:"GR2",
+     parties:SAMPLE_PARTIES,
+     electionName:"",electionId:"",transactionId:"1",emlVersion:"1.3.1",contestId:"",issueDate:iso(new Date()),authorityId:"",maxVotes:"",tree:[]};
+  edited={};
+  S.tree=defaultTree();
+}
+
+/* ---------- auto values ---------- */
+function autoSubcat(){
+  const t=S.type, n=+S.seats||0;
+  if(TYPES[t].local) return TYPES[t].cat;
+  if(t==="KC") return S.subcat==="KCNI"?"KCNI":"KCCN";
+  if(t==="GR") return n<19?"GR1":"GR2";
+  if(t==="AB") return n<19?"AB1":"AB2";
+  if(t==="PS") return S.tree.filter(r=>r.cat==="KIESKRING").length>1?"PS2":"PS1";
+  return t;
+}
+function autoThreshold(){
+  const t=S.type, n=+S.seats||0;
+  if(t==="EP") return 10;
+  if(t==="EK") return 50;
+  return n<19?50:25;
+}
+function autoContest(){ return (S.type==="TK"||S.type==="EP"||(S.type==="PS"&&S.tree.filter(r=>r.cat==="KIESKRING").length>1))?"alle":"geen"; }
+function year(){ return (S.electionDate||"").slice(0,4)||"JJJJ"; }
+function autoName(){ const T=TYPES[S.type]; if(S.type==="KC") return (S.subcat==="KCNI"?"Kiescollege niet-ingezetenen":"Kiescollege Caribisch Nederland")+" "+year(); if(T.local) return (S.body||T.label)+" "+year(); return T.domain? T.prefix+" "+S.domainName+" "+year() : T.prefix+" "+year(); }
+function autoId(){ const T=TYPES[S.type]; if(S.type==="KC") return S.subcat+year(); if(T.local) return T.cat+year()+"_"+slug(S.domainName)+"_"+slug(String(S.body||"").replace(/^(Stadsdeelcommissie|Bestuurscommissie|Bestuursraad|Commissie van ingezetenen|Wijkraad|Dorpsraad|Gebiedscommissie)\s+/i,"")); return T.domain? S.type+year()+"_"+slug(S.domainName) : S.type+year(); }
+
+function applyAuto(){
+  if(!edited.nominationDate && S.electionDate) S.nominationDate=addDays(S.electionDate,-44);
+  if(!edited.subcat) S.subcat=autoSubcat();
+  if(!edited.threshold) S.threshold=autoThreshold();
+  if(!edited.electionName) S.electionName=autoName();
+  if(!edited.electionId) S.electionId=autoId();
+  if(!edited.contestId) S.contestId=autoContest();
+  S.tree.forEach(r=>{ if(r.bound){ r.num=r.cat==="GEMEENTE"?rn(S.domainCode):S.domainCode; r.name=S.domainName; } });
+}
+
+/* ---------- XML ---------- */
+function buildXml(){
+  const T=TYPES[S.type], I="    ";
+  const L=[];
+  const p=(d,s)=>L.push(I.repeat(d)+s);
+  L.push('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>');
+  L.push('<EML xmlns="urn:oasis:names:tc:evs:schema:eml" xmlns:kr="http://www.kiesraad.nl/extensions" xmlns:xal="urn:oasis:names:tc:ciq:xsdschema:xAL:2.0" xmlns:xnl="urn:oasis:names:tc:ciq:xsdschema:xNL:2.0" Id="110a" SchemaVersion="5">');
+  p(1,"<TransactionId>"+esc(S.transactionId||"1")+"</TransactionId>");
+  if(S.authorityId.trim()){ p(1,"<ManagingAuthority>"); p(2,'<AuthorityIdentifier Id="'+esc(S.authorityId.trim())+'"/>'); p(2,"<AuthorityAddress/>"); p(1,"</ManagingAuthority>"); }
+  if(S.issueDate) p(1,"<IssueDate>"+esc(S.issueDate)+"</IssueDate>");
+  if(S.emlVersion!=="1.2.2") p(1,'<kr:Schema Version="'+esc(S.emlVersion)+'"/>');
+  p(1,"<kr:CreationDateTime>"+nowStamp()+"</kr:CreationDateTime>");
+  p(1,"<ElectionEvent>");
+  p(2,"<EventIdentifier/>");
+  p(2,"<Election>");
+  p(3,'<ElectionIdentifier Id="'+esc(S.electionId)+'">');
+  p(4,"<ElectionName>"+esc(S.electionName)+"</ElectionName>");
+  p(4,"<ElectionCategory>"+catOf(S.type)+"</ElectionCategory>");
+  p(4,"<kr:ElectionSubcategory>"+esc(S.subcat)+"</kr:ElectionSubcategory>");
+  if(S.type==="PS") p(4,"<kr:ElectionDomain>"+esc(S.domainName)+"</kr:ElectionDomain>");
+  else if(T.domain) p(4,'<kr:ElectionDomain Id="'+esc(S.domainCode)+'">'+esc(T.local&&S.body?S.body:S.domainName)+"</kr:ElectionDomain>");
+  p(4,"<kr:ElectionDate>"+esc(S.electionDate)+"</kr:ElectionDate>");
+  p(4,"<kr:NominationDate>"+esc(S.nominationDate)+"</kr:NominationDate>");
+  p(3,"</ElectionIdentifier>");
+  p(3,"<Contest>");
+  p(4,'<ContestIdentifier Id="'+esc(S.contestId||autoContest())+'"/>');
+  p(4,"<VotingMethod>SPV</VotingMethod>");
+  const mv=String(S.maxVotes||"").trim();
+  p(4, (mv===""||mv==="1") ? "<MaxVotes></MaxVotes>" : "<MaxVotes>"+esc(mv)+"</MaxVotes>");
+  p(3,"</Contest>");
+  p(3,"<kr:NumberOfSeats>"+esc(S.seats)+"</kr:NumberOfSeats>");
+  p(3,"<kr:PreferenceThreshold>"+esc(S.threshold)+"</kr:PreferenceThreshold>");
+  p(3,"<kr:ElectionTree>");
+  const byId=Object.fromEntries(S.tree.map(r=>[r.id,r]));
+  S.tree.forEach(r=>{
+    let a="";
+    if(r.num!=="" && r.cat!=="STAAT") a+=' RegionNumber="'+esc(r.num)+'"';
+    a+=' RegionCategory="'+r.cat+'"';
+    const sp=r.sup&&byId[r.sup];
+    if(sp){ if(sp.num!=="" && sp.cat!=="STAAT") a+=' SuperiorRegionNumber="'+esc(sp.num)+'"'; a+=' SuperiorRegionCategory="'+sp.cat+'"'; }
+    if(r.roman) a+=' RomanNumerals="true"';
+    if(r.frys) a+=' FrysianExportAllowed="true"';
+    p(4,"<kr:Region"+a+">");
+    p(5,"<kr:RegionName>"+esc(r.name)+"</kr:RegionName>");
+    r.committees.forEach(c=>{
+      let ca=' CommitteeCategory="'+c+'"';
+      if(c==="CSB" && r.csbName.trim()) ca+=' CommitteeName="'+esc(r.csbName.trim())+'"';
+      if(c==="HSB" && r.central) ca+=' AcceptCentralSubmissions="true"';
+      p(5,'<kr:Committee'+ca+'/>');
+    });
+    p(4,"</kr:Region>");
+  });
+  p(3,"</kr:ElectionTree>");
+  const parties=S.parties.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+  if(parties.length){
+    p(3,"<kr:RegisteredParties>");
+    parties.forEach(n=>{ p(4,"<kr:RegisteredParty>"); p(5,"<kr:RegisteredAppellation>"+esc(n)+"</kr:RegisteredAppellation>"); p(4,"</kr:RegisteredParty>"); });
+    p(3,"</kr:RegisteredParties>");
+  } else p(3,"<kr:RegisteredParties/>");
+  p(2,"</Election>");
+  p(1,"</ElectionEvent>");
+  L.push("</EML>");
+  return L.join("\n")+"\n";
+}
+
+function highlight(x){
+  return esc(x)
+    .replace(/(&lt;\?xml[\s\S]*?\?&gt;)/,'<span class="p">$1</span>')
+    .replace(/(&lt;\/?)([\w:]+)/g,'$1<span class="t">$2</span>')
+    .replace(/ ([\w:]+)=(&quot;.*?&quot;)/g,' <span class="a">$1</span>=<span class="v">$2</span>');
+}
+
+/* ---------- checks ---------- */
+function validate(){
+  const out=[]; const T=TYPES[S.type];
+  const bad=m=>out.push(["bad",m]), warn=m=>out.push(["warn",m]), info=m=>out.push(["info",m]);
+  if(T.domain){
+    if(!S.domainName.trim()) bad("Vul bij vraag 2 de naam van het gebied in.");
+    if(!S.domainCode.trim()) bad("Vul bij vraag 2 de code van het gebied in.");
+    else if((S.type==="GR"||T.local) && !/^\d{4}$/.test(S.domainCode)) warn("Een CBS-gemeentecode heeft 4 cijfers, met voorloopnullen (bijv. 0106).");
+  }
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(S.electionDate)) bad("Kies bij vraag 3 de dag van stemming.");
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(S.nominationDate)) bad("Kies bij vraag 3 de dag van kandidaatstelling.");
+  else if(S.electionDate && S.nominationDate>=S.electionDate) bad("De kandidaatstelling moet vóór de dag van stemming liggen.");
+  const n=+S.seats;
+  if(!Number.isInteger(n)||n<1) bad("Vul bij vraag 4 een geheel aantal zetels in.");
+  if(T.domain && S.type!=="PS" && S.domainCode && !/^(\d{4}|([12]?[0-9]))$/.test(S.domainCode)) bad("Het ElectionDomain-Id moet 4 cijfers zijn of een getal van 0 t/m 29.");
+  if(T.local && !String(S.body||"").trim()) bad("Vul bij vraag 2 de naam van de raad of commissie in.");
+  if(T.local && n>=1 && n%2===0) warn("Een even aantal zetels is ongebruikelijk; controleer de verordening.");
+  if(S.type==="GR" && n>=1 && (n<9||n>45||n%2===0)) warn("Een gemeenteraad heeft een oneven aantal zetels tussen 9 en 45.");
+  if(S.subcat!==autoSubcat()) warn("Subcategorie "+S.subcat+" past niet bij de antwoorden; verwacht is "+autoSubcat()+".");
+  if(+S.threshold!==autoThreshold()) warn("De voorkeurdrempel wijkt af van de Kieswet-standaard ("+autoThreshold()+"%).");
+  if(!S.electionId.trim()) bad("Het verkiezings-Id is leeg.");
+  else if(/\s/.test(S.electionId)) bad("Het verkiezings-Id mag geen spaties bevatten.");
+  if(!S.tree.length) bad("De indeling moet minstens één gebied hebben.");
+  const keys=new Set(); let csb=0; let roots=0;
+  S.tree.forEach(r=>{
+    const k=r.cat+"|"+r.num; if(keys.has(k)) bad("Gebied "+r.cat+" "+(r.num||"")+" staat er dubbel in."); keys.add(k);
+    if(!r.name.trim()) warn("Een gebied ("+r.cat+" "+r.num+") heeft geen naam.");
+    if(r.cat!=="STAAT" && r.num==="") warn("Gebied "+(r.name||r.cat)+" heeft geen nummer.");
+    if(r.committees.includes("CSB")) csb++;
+    if(!r.sup) roots++;
+  });
+  if(S.tree.length && csb!==1) bad("Er moet precies één centraal stembureau (CSB) in de indeling staan; nu "+csb+".");
+  if(roots>1) bad("Er zijn "+roots+" gebieden zonder bovenliggend gebied; er mag er maar één de top zijn.");
+  const parties=S.parties.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+  if(!parties.length) info("Er staan nog geen geregistreerde aanduidingen in (vraag 5). Neem ze over uit het register van het CSB; zonder aanduidingen krijgt het bestand een lege lijst.");
+  const dup=parties.filter((p,i)=>parties.indexOf(p)!==i);
+  if(dup.length) warn("Dubbele aanduiding: "+[...new Set(dup)].join(", ")+".");
+  if(S.type==="PS"){
+    const kk=S.tree.filter(r=>r.cat==="KIESKRING");
+    if(kk.length>1 && kk.some(r=>!r.committees.includes("HSB"))) warn("Bij meerdere kieskringen hoort elke kieskring een hoofdstembureau (HSB) te hebben.");
+    if(provByNr(S.pick) && !provByNr(S.pick).fict && +S.seats===provByNr(S.pick).seats) info("Het aantal statenzetels komt uit het Kiesraad-overzicht van 2023. Controleer of het voor deze verkiezing gelijk blijft.");
+  }
+  if(S.type==="GR" && GEM_BY_CODE[S.pick] && GEM_BY_CODE[S.pick][3]!=="Fictief" && +S.seats===GEM_BY_CODE[S.pick][2]) info("Het aantal raadszetels komt uit de Kiesraad-gegevens van GR2026. Controleer het bij een latere verkiezing.");
+  if(T.local) info("EML_NL kent geen gebiedscategorie voor stadsdelen of wijken: de indeling gebruikt de gemeente, en de naam van de raad staat in ElectionDomain en ElectionName. Lees het bestand proef in.");
+  if(S.type!=="GR" && !T.local && !isFict() && !(S.type==="PS" && provByNr(S.pick))) info("Controleer de indeling bij "+T.label+" extra goed: de standaardindeling is een uitgangspunt.");
+  if(!lawHasHSB()){
+    const hasHSB=S.tree.some(r=>r.committees.includes("HSB"));
+    if(hasHSB) info("Volgens de Kieswet (art. E 10 en E 11) is er bij deze verkiezing geen hoofdstembureau. Het bestand bevat toch een HSB bij het CSB, net als de verkiezingsdefinities van de Kiesraad. Zet dit uit bij vraag 6 als je software dat niet verwacht.");
+  }
+  if(isFict()) info("Fictief testgebied, zoals in de testbestanden van de Kiesraad. Alleen gebruiken om software te testen, niet voor een echte verkiezing.");
+  if(S.type==="KC" && S.emlVersion==="1.2.2") bad("Kiescolleges (KC) bestaan pas vanaf EML_NL 1.3. Kies bij vraag 7 versie 1.3 of hoger.");
+  if(S.type==="KC") info("Het aantal leden van het kiescollege en de indeling zijn niet automatisch ingevuld. Controleer ze.");
+  if(S.emlVersion==="1.2.2") info("EML_NL 1.2.2: het bestand krijgt geen kr:Schema-element. Gebruik deze versie alleen voor de herindelingsverkiezingen van 18 november 2026.");
+  if(S.type==="EK") info("Bij de Eerste Kamer werkt de uitslag met stemwaarden; die horen niet in dit bestand.");
+  return out;
+}
+
+/* ---------- rendering ---------- */
+function renderTypes(){
+  $("types").innerHTML=Object.entries(TYPES).map(([k,t])=>
+    '<input type="radio" name="type" id="t_'+k+'" value="'+k+'"'+(S.type===k?" checked":"")+'><label for="t_'+k+'"><b>'+k+'</b><span>'+t.label+'</span></label>').join("");
+}
+function renderForm(){
+  const T=TYPES[S.type];
+  $("qDomain").hidden=!T.domain;
+  if(T.domain){ $("domainTitle").textContent=T.domainTitle; $("domainNameLbl").textContent=T.nameLbl; $("domainCodeLbl").textContent=T.codeLbl; $("domainHint").textContent=T.hint; }
+  const hasPick=(S.type==="GR"||S.type==="PS"||S.type==="AB"||!!T.local);
+  $("bodyWrap").hidden=!T.local;
+  if(T.local){
+    $("bodyList").innerHTML=(BODIES[S.domainCode]||[]).map(b=>'<option value="'+esc(b)+'"></option>').join("");
+    if(document.activeElement!==$("bodyName")) $("bodyName").value=S.body||"";
+    $("bodyName").placeholder=S.type==="GC"?"bijv. Wijkraad Kralingen":S.type==="BR"?"bijv. Bestuursraad Engelen en Bokhoven":"bijv. Stadsdeelcommissie Centrum";
+  }
+  $("pickWrap").hidden=!hasPick;
+  $("manualWrap").hidden=hasPick && !!S.pick;
+  if(hasPick){
+    $("domainPickLbl").textContent=S.type==="PS"?"Kies de provincie":S.type==="AB"?"Kies het waterschap":"Kies de gemeente";
+    if($("domainPick").dataset.type!==(T.local?"GR":S.type)){ $("domainPick").innerHTML=pickOptions(); $("domainPick").dataset.type=(T.local?"GR":S.type); }
+    $("domainPick").value=S.pick||"";
+  }
+  let facts=[];
+  const g=S.type==="GR"&&GEM_BY_CODE[S.pick], P=S.type==="PS"&&provByNr(S.pick);
+  if(g) facts=g[3]==="Fictief"?["Fictieve testgemeente","Gemeentecode "+g[0],"RegionNumber "+rn(g[0])]:["Gemeentecode "+g[0],"Provincie "+g[3],g[2]+" raadszetels (GR2026)"];
+  if(S.type==="AB"&&S.pick===FICT_WS.nr) facts=["Fictief testwaterschap","Waterschapsnummer "+FICT_WS.nr,"4 testgemeenten"];
+  const gl=T.local&&GEM_BY_CODE[S.pick];
+  if(gl) facts=["Gemeentecode "+gl[0],"Provincie "+gl[3],"Categorie "+T.cat];
+  if(P&&P.fict) facts=["Fictieve testprovincie","Provincienummer "+P.nr,P.kk.length+(P.kk.length>1?" kieskringen":" kieskring")+": "+P.kk.map(k=>k.hsb).join(", ")];
+  else if(P) facts=["Provincienummer "+P.nr,P.seats+" statenzetels (2023)","Centraal stembureau "+P.csb,P.kk.length+(P.kk.length>1?" kieskringen: "+P.kk.map(k=>k.nr+" "+k.hsb).join(", "):" kieskring")];
+  { const pl=dedupe(S.parties.split(/\r?\n/)); const f=[pl.length+(pl.length===1?" aanduiding":" aanduidingen")];
+    if(S.partySource) f.push("bron: "+S.partySource); else if(S.parties===FICT_PARTIES) f.push("bron: testpartijen Kiesraad");
+    $("partyFacts").innerHTML=f.map(x=>'<span class="chip'+(pl.length?' on':'')+'">'+esc(x)+'</span>').join(""); }
+  $("partyTitle").textContent=(S.type==="TK"||S.type==="EP"||S.type==="EK")?"Welke aanduidingen staan in het landelijk register?":"Welke aanduidingen zijn geregistreerd bij het CSB?";
+  $("partyHint").textContent=(S.type==="TK"||S.type==="EP"||S.type==="EK")
+    ? "Bij deze verkiezing gelden de aanduidingen uit het landelijk register van de Kiesraad. Die zijn al ingevuld; controleer of het register sindsdien is gewijzigd."
+    : "Neem de aanduidingen over uit het register van het centraal stembureau (Kieswet hoofdstuk G), letterlijk zoals ze daar staan, één per regel. Aanduidingen uit het landelijk register van de Kiesraad werken door naar deze verkiezing; die voeg je toe met de knop. Lees de rest in uit een bestand van het CSB of typ of plak ze hieronder.";
+  $("pickFacts").innerHTML=facts.map(f=>'<span class="chip on">'+esc(f)+'</span>').join("");
+  $("pickFacts").hidden=!facts.length;
+  $("hsbWrap").hidden=lawHasHSB();
+  $("hsbCompat").checked=!!S.hsbCompat;
+  $("fictWrap").hidden=!(S.type==="TK"||S.type==="EP");
+  $("fictTree").checked=!!S.fict;
+  $("incGemWrap").hidden=!((S.type==="PS"||S.type==="TK"||S.type==="EP"||(S.type==="AB"&&S.pick===FICT_WS.nr)) && !S.fict);
+  $("includeGem").checked=!!S.includeGem;
+  ["domainName","domainCode","electionDate","nominationDate","seats","threshold","parties","electionName","electionId","transactionId","issueDate","authorityId","maxVotes","contestId"].forEach(k=>{ const el=$(k); if(document.activeElement!==el) el.value=S[k]; });
+  $("subcat").innerHTML=T.subs.map(s=>'<option'+(s===S.subcat?" selected":"")+'>'+s+'</option>').join("");
+  $("emlVersion").value=S.emlVersion;
+  [["contestAuto","contestId"],["nomAuto","nominationDate"],["thrAuto","threshold"],["subAuto","subcat"],["nameAuto","electionName"],["idAuto","electionId"]].forEach(([b,k])=>{$(b).textContent=edited[k]?"aangepast":"automatisch"; $(b).style.color=edited[k]?"var(--warn)":"var(--ok)";});
+  const n=+S.seats;
+  let h="";
+  if(S.type==="GR"||S.type==="AB") h=n<19?"Minder dan 19 zetels: subcategorie "+S.type+"1 en een voorkeurdrempel van 50%.":"19 zetels of meer: subcategorie "+S.type+"2 en een voorkeurdrempel van 25%.";
+  if(S.type==="PS") h="De subcategorie volgt uit het aantal kieskringen bij vraag 6.";
+  if(S.type==="TK") h="De Tweede Kamer heeft 150 zetels.";
+  if(S.type==="EK") h="De Eerste Kamer heeft 75 zetels; de voorkeurdrempel is 50% van de kiesdeler.";
+  if(S.type==="EP") h="Controleer het aantal Nederlandse zetels voor deze zittingsperiode; in 2024 waren dat er 31.";
+  if(T.local) h="Het aantal zetels staat in de verordening van de gemeente. Bij minder dan 19 zetels geldt een voorkeurdrempel van 50%, anders 25% (Kieswet van overeenkomstige toepassing).";
+  $("seatHint").textContent=h;
+}
+function renderTree(){
+  const rows=S.tree.map(r=>{
+    const supOpts=['<option value="">(top)</option>'].concat(S.tree.filter(o=>o.id!==r.id && (o.cat!=="GEMEENTE" || o.id===r.sup)).map(o=>'<option value="'+o.id+'"'+(r.sup===o.id?" selected":"")+'>'+esc(o.cat+" "+(o.num||"")+" "+o.name)+'</option>')).join("");
+    const lock=r.bound?' disabled title="Volgt vraag 2"':"";
+    return '<tr data-id="'+r.id+'">'+
+      '<td><select data-f="cat" aria-label="Categorie"'+lock+'>'+REGION_CATS.map(c=>'<option'+(c===r.cat?" selected":"")+'>'+c+'</option>').join("")+'</select></td>'+
+      '<td><input type="text" data-f="num" aria-label="Nummer" value="'+esc(r.num)+'" style="width:70px"'+lock+(r.cat==="STAAT"?' placeholder="—"':'')+'></td>'+
+      '<td><input type="text" data-f="name" aria-label="Naam" value="'+esc(r.name)+'"'+lock+'></td>'+
+      '<td><select data-f="sup" aria-label="Valt onder">'+supOpts+'</select></td>'+
+      '<td class="cm">'+COMMITTEES.map(c=>'<label><input type="checkbox" data-c="'+c+'"'+(r.committees.includes(c)?" checked":"")+'> '+c+'</label>').join("")+
+        (r.committees.includes("CSB")?'<div><input type="text" data-f="csbName" aria-label="Naam centraal stembureau" placeholder="naam CSB (optioneel)" value="'+esc(r.csbName)+'" style="margin-top:4px;width:170px"></div>':'')+'</td>'+
+      '<td class="cm"><label title="Romeinse cijfers"><input type="checkbox" data-f="roman"'+(r.roman?" checked":"")+'> Romeins</label><label title="Fries toegestaan"><input type="checkbox" data-f="frys"'+(r.frys?" checked":"")+'> Fries</label>'+(r.committees.includes("HSB")?'<label title="AcceptCentralSubmissions: dit hoofdstembureau accepteert centraal ingeleverde lijsten"><input type="checkbox" data-f="central"'+(r.central?" checked":"")+'> Centraal inleveren</label>':'')+'</td>'+
+      '<td><button type="button" class="small" data-del aria-label="Verwijder gebied">×</button></td></tr>';
+  }).join("");
+  document.querySelector("#treeTable tbody").innerHTML=rows;
+  $("treeHint").textContent = (S.type==="GR"||TYPES[S.type].local)
+    ? "Bij een gemeenteraadsverkiezing is de gemeente zowel centraal stembureau als hoofdstembureau. Meestal hoef je hier niets te wijzigen."
+    : "De verkiezingsboom: welke gebieden er zijn en waar het centraal stembureau (CSB) en de hoofdstembureaus (HSB) zitten. Voeg zo nodig gemeenten toe.";
+}
+
+let currentXml="";
+function renderOut(){
+  currentXml=buildXml();
+  $("xml").innerHTML=highlight(currentXml);
+  $("fCat").textContent=catOf(S.type); $("fSub").textContent=S.subcat; $("fSeats").textContent=S.seats||"–"; $("fRegions").textContent=S.tree.length;
+  const res=validate();
+  const nb=res.filter(r=>r[0]==="bad").length, nw=res.filter(r=>r[0]==="warn").length;
+  const st=$("status");
+  st.className="status "+(nb?"bad":nw?"warn":"ok");
+  st.textContent= nb? nb+(nb===1?" fout":" fouten")+" om op te lossen" : nw? "Bruikbaar, met "+nw+(nw===1?" aandachtspunt":" aandachtspunten") : "Klaar om te downloaden";
+  $("checks").innerHTML=res.map(([k,m])=>'<li class="'+k+'">'+esc(m)+'</li>').join("");
+  $("fname").textContent=fileName();
+  showHash();
+}
+function fileName(){ return "Verkiezingsdefinitie_"+(slug(S.electionId)||"verkiezing")+".eml.xml"; }
+
+function update(full){ applyAuto(); renderForm(); if(full) renderTree(); renderOut(); }
+
+/* ---------- events ---------- */
+$("types").addEventListener("change",e=>{
+  S.type=e.target.value; const T=TYPES[S.type];
+  S.seats=T.seats; edited={};
+  S.pick=""; S.domainName=""; S.domainCode=""; S.fict=false; setTestParties(false);
+  if(S.type==="GR"){ S.pick="0106"; applyPick(); }
+  if(T.local){ S.pick=T.defGem; applyPick(); S.seats=""; S.electionDate="2030-03-20"; }
+  if(S.type==="PS"){ S.pick="1"; applyPick(); }
+  if(S.type==="PS"||S.type==="AB"||S.type==="KC") S.electionDate="2027-03-17";
+  if((S.type==="TK"||S.type==="EP"||S.type==="EK") && !S.parties.trim()){ S.parties=NATIONAL_PARTIES.join("\n"); S.partySource="landelijk register"; }
+  S.subcat=T.subs[0];
+  S.tree=defaultTree(); update(true);
+});
+$("domainPick").addEventListener("change",e=>{
+  S.pick=e.target.value;
+  if(S.pick) applyPick(); else { S.domainName=""; S.domainCode=""; }
+  S.tree=defaultTree(); update(true);
+  if(!S.pick) $("domainName").focus();
+});
+$("hsbCompat").addEventListener("change",e=>{ S.hsbCompat=e.target.checked; S.tree=defaultTree(); update(true); });
+$("fictTree").addEventListener("change",e=>{ S.fict=e.target.checked; setTestParties(S.fict); S.tree=defaultTree(); update(true); });
+$("includeGem").addEventListener("change",e=>{ S.includeGem=e.target.checked; S.tree=defaultTree(); update(true); });
+/* ---------- geregistreerde aanduidingen inlezen ---------- */
+function partiesFromText(name,text){
+  const t=text.replace(/^﻿/,"");
+  if(/^\s*</.test(t)){
+    const doc=new DOMParser().parseFromString(t,"application/xml");
+    if(doc.getElementsByTagName("parsererror").length) throw new Error(name+": geen geldige XML.");
+    const id=doc.documentElement.getAttribute("Id")||"";
+    const KR="http://www.kiesraad.nl/extensions", EMLNS="urn:oasis:names:tc:evs:schema:eml";
+    if(id==="110a") return {kind:"110a",list:[...doc.getElementsByTagNameNS(KR,"RegisteredAppellation")].map(x=>x.textContent.trim())};
+    if(/^230/.test(id)) return {kind:id,list:[...doc.getElementsByTagNameNS(EMLNS,"RegisteredName")].map(x=>x.textContent.trim())};
+    throw new Error(name+": EML "+(id||"onbekend")+" bevat geen aanduidingen. Gebruik een 110a- of 230b-bestand.");
+  }
+  const lines=t.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+  const isCsv=/\.csv$/i.test(name);
+  let list=lines.map(l=>{
+    if(!isCsv) return l;
+    const m=l.match(/^"((?:[^"]|"")*)"/); if(m) return m[1].replace(/""/g,'"');
+    return l.split(/[;,\t]/)[0].trim();
+  });
+  if(isCsv && list.length && /^(aanduiding|partij|naam|partijnaam|registeredappellation|name)$/i.test(list[0])) list=list.slice(1);
+  return {kind:isCsv?"csv":"txt",list};
+}
+function dedupe(list){ const seen=new Set(), out=[]; list.forEach(x=>{ const k=x.trim(); if(k && !seen.has(k)){ seen.add(k); out.push(k); } }); return out; }
+$("partyImport").addEventListener("click",()=>$("partyFile").click());
+$("partyFile").addEventListener("change",async e=>{
+  const files=[...e.target.files]; if(!files.length) return;
+  try{
+    let all=[], kinds=[];
+    for(const f of files){ const r=partiesFromText(f.name,await f.text()); all=all.concat(r.list); kinds.push(r.kind); }
+    const base=$("partyAppend").checked? S.parties.split(/\r?\n/) : [];
+    const before=dedupe(base).length;
+    S.parties=dedupe(base.concat(all)).join("\n");
+    const added=dedupe(S.parties.split("\n")).length-before;
+    S.partySource=files.map(f=>f.name).join(", ");
+    update(false);
+    toast(added+" aanduiding(en) ingelezen uit "+[...new Set(kinds)].join(" + "));
+  }catch(err){ toast(err.message||"Inlezen mislukt."); }
+  e.target.value="";
+});
+$("partyNational").addEventListener("click",()=>{
+  const cur=S.parties===FICT_PARTIES?[]:S.parties.split(/\r?\n/);
+  const before=dedupe(cur).length;
+  S.parties=dedupe(cur.concat(NATIONAL_PARTIES)).join("\n");
+  S.partySource=(S.partySource&&S.partySource!=="landelijk register"?S.partySource+" + ":"")+"landelijk register";
+  update(false);
+  toast((dedupe(S.parties.split("\n")).length-before)+" landelijk geregistreerde aanduiding(en) toegevoegd");
+});
+$("partyClear").addEventListener("click",()=>{ S.parties=""; S.partySource=""; update(false); });
+$("emlVersion").addEventListener("change",e=>{ S.emlVersion=e.target.value; update(false); });
+$("contestId").addEventListener("input",e=>{ S.contestId=e.target.value; edited.contestId=e.target.value!==""; update(false); });
+$("bodyName").addEventListener("input",e=>{ S.body=e.target.value; update(false); });
+$("parties").addEventListener("input",()=>{ S.partySource=""; });
+["domainName","domainCode","electionDate","seats","parties","transactionId","issueDate","authorityId","maxVotes"].forEach(k=>{
+  $(k).addEventListener("input",e=>{ S[k]=e.target.value; const bind=(k==="domainName"||k==="domainCode"); update(bind); });
+});
+[["nominationDate"],["threshold"],["electionName"],["electionId"]].forEach(([k])=>{
+  $(k).addEventListener("input",e=>{ S[k]=e.target.value; edited[k]=e.target.value!==""; update(false); });
+});
+$("subcat").addEventListener("change",e=>{ S.subcat=e.target.value; edited.subcat=S.subcat!==autoSubcat(); if(S.type==="KC"){ edited.subcat=false; S.tree=defaultTree(); update(true); } else update(false); });
+
+const tbody=document.querySelector("#treeTable tbody");
+tbody.addEventListener("input",e=>{
+  const tr=e.target.closest("tr"); if(!tr) return; const r=S.tree.find(x=>x.id===+tr.dataset.id);
+  const f=e.target.dataset.f, c=e.target.dataset.c;
+  if(c){ r.committees = COMMITTEES.filter(x=> x===c ? e.target.checked : r.committees.includes(x)); }
+  else if(f==="roman"||f==="frys"||f==="central") r[f]=e.target.checked;
+  else if(f==="sup") r.sup=e.target.value?+e.target.value:null;
+  else if(f) r[f]=e.target.value;
+  const structural = f==="cat"||f==="sup"||f==="num"||f==="name";
+  if(c){ update(false); renderTree(); return; }
+  update(false); if(structural && e.type==="change") renderTree();
+});
+tbody.addEventListener("change",e=>{ const f=e.target.dataset.f; if(f==="cat"||f==="sup"||f==="num"||f==="name") renderTree(); });
+tbody.addEventListener("click",e=>{
+  if(!e.target.matches("[data-del]")) return;
+  const id=+e.target.closest("tr").dataset.id;
+  S.tree=S.tree.filter(r=>r.id!==id); S.tree.forEach(r=>{ if(r.sup===id) r.sup=null; });
+  update(true);
+});
+$("addRegion").addEventListener("click",()=>{
+  const top=S.tree.find(r=>!r.sup);
+  S.tree.push(region("GEMEENTE","","",top?top.id:null,[])); update(true);
+  const last=tbody.querySelector("tr:last-child input[data-f=num]"); if(last) last.focus();
+});
+$("resetTree").addEventListener("click",()=>{ S.tree=defaultTree(); update(true); toast("Standaardindeling hersteld"); });
+$("bulkAdd").addEventListener("click",()=>{
+  const top=S.tree.find(r=>!r.sup); let added=0, skipped=0;
+  $("bulk").value.split(/\r?\n/).forEach(line=>{
+    const parts=line.split(/[;\t,]/).map(s=>s.trim()); if(!parts[0]) return;
+    const [code,name,kk]=parts;
+    let sup=top?top.id:null;
+    if(kk){ const k=S.tree.find(r=>r.cat==="KIESKRING"&&r.num===kk); if(k) sup=k.id; }
+    if(S.tree.some(r=>r.cat==="GEMEENTE"&&r.num===code)){ skipped++; return; }
+    S.tree.push(region("GEMEENTE",code,name||"",sup,[])); added++;
+  });
+  $("bulk").value=""; update(true);
+  toast(added+" gemeente(n) toegevoegd"+(skipped?", "+skipped+" al aanwezig":""));
+});
+
+/* ---------- import ---------- */
+$("importBtn").addEventListener("click",()=>$("importFile").click());
+$("importFile").addEventListener("change",async e=>{
+  const f=e.target.files[0]; if(!f) return;
+  try{
+    const doc=new DOMParser().parseFromString(await f.text(),"application/xml");
+    if(doc.getElementsByTagName("parsererror").length) throw new Error("Het bestand is geen geldige XML.");
+    const EML="urn:oasis:names:tc:evs:schema:eml", KR="http://www.kiesraad.nl/extensions";
+    const one=(ns,n,ctx)=> (ctx||doc).getElementsByTagNameNS(ns,n)[0];
+    const txt=(ns,n,ctx)=>{ const el=one(ns,n,ctx); return el?el.textContent.trim():""; };
+    const root=doc.documentElement;
+    if(root.getAttribute("Id")!=="110a") throw new Error("Dit is geen EML 110a-bestand (Id="+(root.getAttribute("Id")||"?")+").");
+    const cat=txt(EML,"ElectionCategory");
+    let typeKey=cat;
+    const nm=txt(EML,"ElectionName");
+    if(cat==="BC" && /bestuursraad|commissie van ingezetenen/i.test(nm)) typeKey="BR";
+    if(!TYPES[typeKey]) throw new Error("Categorie "+cat+" wordt door deze app niet ondersteund.");
+    S.type=typeKey; S.pick=""; edited={electionName:true,electionId:true,nominationDate:true,threshold:true,subcat:true};
+    const ei=one(EML,"ElectionIdentifier");
+    S.electionId=ei?ei.getAttribute("Id")||"":"";
+    S.electionName=txt(EML,"ElectionName");
+    S.subcat=txt(KR,"ElectionSubcategory")||TYPES[cat].subs[0];
+    const dom=one(KR,"ElectionDomain"); S.domainName=dom?dom.textContent.trim():""; S.domainCode=dom?dom.getAttribute("Id")||"":"";
+    S.electionDate=txt(KR,"ElectionDate"); S.nominationDate=txt(KR,"NominationDate");
+    S.seats=txt(KR,"NumberOfSeats"); S.threshold=txt(KR,"PreferenceThreshold");
+    S.transactionId=txt(EML,"TransactionId")||"1"; S.issueDate=txt(EML,"IssueDate");
+    const ai=one(EML,"AuthorityIdentifier"); S.authorityId=ai?ai.getAttribute("Id")||"":"";
+    S.maxVotes=txt(EML,"MaxVotes");
+    const sch=one(KR,"Schema"); S.emlVersion=sch?(sch.getAttribute("Version")||"1.3.1"):"1.2.2";
+    if(!["1.3.1","1.3","1.2.2"].includes(S.emlVersion)) S.emlVersion="1.3.1";
+    const ci=one(EML,"ContestIdentifier"); S.contestId=ci?ci.getAttribute("Id")||"":""; edited.contestId=true;
+    S.parties=[...doc.getElementsByTagNameNS(KR,"RegisteredAppellation")].map(x=>x.textContent.trim()).join("\n");
+    const regs=[...doc.getElementsByTagNameNS(KR,"Region")];
+    const tmp=regs.map(el=>({r:region(el.getAttribute("RegionCategory")||"GEMEENTE",el.getAttribute("RegionNumber")||"",txt(KR,"RegionName",el),null,
+        [...el.getElementsByTagNameNS(KR,"Committee")].map(c=>c.getAttribute("CommitteeCategory")).filter(c=>COMMITTEES.includes(c))),
+        csbName:([...el.getElementsByTagNameNS(KR,"Committee")].find(c=>c.getAttribute("CommitteeCategory")==="CSB")||{getAttribute:()=>""}).getAttribute("CommitteeName")||"",
+        central:[...el.getElementsByTagNameNS(KR,"Committee")].some(c=>c.getAttribute("AcceptCentralSubmissions")==="true"),
+        sc:el.getAttribute("SuperiorRegionCategory"), sn:el.getAttribute("SuperiorRegionNumber")||"",
+        roman:el.getAttribute("RomanNumerals")==="true", frys:el.getAttribute("FrysianExportAllowed")==="true"}));
+    tmp.forEach(t=>{ t.r.roman=t.roman; t.r.frys=t.frys; t.r.csbName=t.csbName; t.r.central=t.central;
+      if(t.sc){ const s=tmp.find(o=>o.r.cat===t.sc && (o.r.num===t.sn || (t.sc==="STAAT"))); if(s) t.r.sup=s.r.id; } });
+    S.tree=tmp.map(t=>t.r);
+    const rootR=S.tree.find(r=>!r.sup);
+    if(cat==="PS" && rootR && rootR.cat==="PROVINCIE"){ S.domainCode=rootR.num; S.domainName=rootR.name; }
+    if((cat==="GR"||TYPES[typeKey].local) && GEM_BY_CODE[S.domainCode]) S.pick=S.domainCode;
+    if(TYPES[typeKey].local){ const dom2=one(KR,"ElectionDomain"); S.body=dom2?dom2.textContent.trim():nm; const g2=GEM_BY_CODE[S.domainCode]; if(g2) S.domainName=g2[1]; }
+    if(cat==="PS" && provByNr(S.domainCode)) S.pick=S.domainCode;
+    if(cat==="PS" && rootR && rootR.cat==="PROVINCIE" && rootR.num===S.domainCode) rootR.bound=true;
+    if(cat==="AB" && S.domainCode===FICT_WS.nr) S.pick=FICT_WS.nr;
+    if((cat==="TK"||cat==="EP") && S.tree.some(r=>r.name==="Juinen")) S.fict=true;
+    if(rootR && TYPES[typeKey].domain && rootR.cat===TYPES[typeKey].domain && rn(rootR.num)===rn(S.domainCode)) rootR.bound=true;
+    renderTypes(); update(true); toast("Bestand ingelezen: "+S.electionName);
+  }catch(err){ toast(err.message||"Inlezen mislukt."); }
+  e.target.value="";
+});
+$("resetBtn").addEventListener("click",()=>{ freshState(); renderTypes(); update(true); toast("Opnieuw begonnen"); });
+
+/* ---------- copy / download ---------- */
+function toast(m){ const t=$("toast"); t.textContent=m; t.classList.add("show"); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("show"),2600); }
+$("copyBtn").addEventListener("click",async()=>{
+  try{ await navigator.clipboard.writeText(currentXml); toast("XML gekopieerd"); }
+  catch(e){ const r=document.createRange(); r.selectNodeContents($("xml")); const s=getSelection(); s.removeAllRanges(); s.addRange(r); toast("Kopiëren lukt hier niet; de XML is geselecteerd, druk op Ctrl/Cmd+C"); }
+});
+
+const CRC=(()=>{ const t=new Uint32Array(256); for(let n=0;n<256;n++){ let c=n; for(let k=0;k<8;k++) c=c&1?0xEDB88320^(c>>>1):c>>>1; t[n]=c>>>0; } return t; })();
+function crc32(b){ let c=0xFFFFFFFF; for(let i=0;i<b.length;i++) c=CRC[(c^b[i])&255]^(c>>>8); return (c^0xFFFFFFFF)>>>0; }
+/* zip zonder compressie (store) met een of meer bestanden */
+function zipFiles(files){
+  const enc=new TextEncoder(), d=new Date();
+  const time=(d.getHours()<<11)|(d.getMinutes()<<5)|(d.getSeconds()>>1);
+  const date=((d.getFullYear()-1980)<<9)|((d.getMonth()+1)<<5)|d.getDate();
+  const parts=[], central=[]; let off=0;
+  files.forEach(f=>{
+    const nb=enc.encode(f.name), data=f.data, crc=crc32(data), sz=data.length;
+    const lh=new DataView(new ArrayBuffer(30));
+    lh.setUint32(0,0x04034b50,true); lh.setUint16(4,20,true); lh.setUint16(6,0x0800,true); lh.setUint16(8,0,true);
+    lh.setUint16(10,time,true); lh.setUint16(12,date,true); lh.setUint32(14,crc,true); lh.setUint32(18,sz,true); lh.setUint32(22,sz,true);
+    lh.setUint16(26,nb.length,true); lh.setUint16(28,0,true);
+    const cd=new DataView(new ArrayBuffer(46));
+    cd.setUint32(0,0x02014b50,true); cd.setUint16(4,20,true); cd.setUint16(6,20,true); cd.setUint16(8,0x0800,true); cd.setUint16(10,0,true);
+    cd.setUint16(12,time,true); cd.setUint16(14,date,true); cd.setUint32(16,crc,true); cd.setUint32(20,sz,true); cd.setUint32(24,sz,true);
+    cd.setUint16(28,nb.length,true); cd.setUint16(30,0,true); cd.setUint16(32,0,true); cd.setUint16(34,0,true); cd.setUint16(36,0,true);
+    cd.setUint32(38,0,true); cd.setUint32(42,off,true);
+    parts.push(lh,nb,data); central.push(cd,nb);
+    off+=30+nb.length+sz;
+  });
+  const cdSize=central.reduce((s,p)=>s+p.byteLength,0);
+  const end=new DataView(new ArrayBuffer(22));
+  end.setUint32(0,0x06054b50,true); end.setUint16(8,files.length,true); end.setUint16(10,files.length,true); end.setUint32(12,cdSize,true); end.setUint32(16,off,true);
+  return new Blob(parts.concat(central,[end]),{type:"application/zip"});
+}
+
+/* SHA-256: Web Crypto waar beschikbaar, anders een eigen implementatie */
+const K256=new Uint32Array([0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2]);
+function sha256js(msg){
+  const l=msg.length, withPad=((l+9+63)>>6)<<6, buf=new Uint8Array(withPad);
+  buf.set(msg); buf[l]=0x80;
+  const dv=new DataView(buf.buffer); dv.setUint32(withPad-4,(l*8)>>>0); dv.setUint32(withPad-8,Math.floor(l/0x20000000));
+  const H=new Uint32Array([0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19]), W=new Uint32Array(64);
+  const r=(x,n)=>(x>>>n)|(x<<(32-n));
+  for(let o=0;o<withPad;o+=64){
+    for(let i=0;i<16;i++) W[i]=dv.getUint32(o+i*4);
+    for(let i=16;i<64;i++){ const s0=r(W[i-15],7)^r(W[i-15],18)^(W[i-15]>>>3), s1=r(W[i-2],17)^r(W[i-2],19)^(W[i-2]>>>10); W[i]=(W[i-16]+s0+W[i-7]+s1)>>>0; }
+    let [a,b,c,d,e,f,g,h]=H;
+    for(let i=0;i<64;i++){
+      const t1=(h+(r(e,6)^r(e,11)^r(e,25))+((e&f)^(~e&g))+K256[i]+W[i])>>>0;
+      const t2=((r(a,2)^r(a,13)^r(a,22))+((a&b)^(a&c)^(b&c)))>>>0;
+      h=g; g=f; f=e; e=(d+t1)>>>0; d=c; c=b; b=a; a=(t1+t2)>>>0;
+    }
+    H[0]+=a;H[1]+=b;H[2]+=c;H[3]+=d;H[4]+=e;H[5]+=f;H[6]+=g;H[7]+=h;
+  }
+  return Array.from(H,x=>x.toString(16).padStart(8,"0")).join("");
+}
+async function sha256hex(bytes){
+  try{
+    if(window.crypto && crypto.subtle){
+      const d=await crypto.subtle.digest("SHA-256",bytes);
+      return Array.from(new Uint8Array(d),b=>b.toString(16).padStart(2,"0")).join("");
+    }
+  }catch(e){}
+  return sha256js(bytes);
+}
+function groupHash(h){ return h.match(/.{4}/g).join(" "); }
+function hashFileName(name){ return name.replace(/\.eml\.xml$/,"")+"_hashcode.txt"; }
+function hashText(name,hex){
+  const d=new Date(), z=n=>String(n).padStart(2,"0");
+  const stamp=z(d.getDate())+"-"+z(d.getMonth()+1)+"-"+d.getFullYear()+" "+z(d.getHours())+":"+z(d.getMinutes());
+  return [
+    "Hashcode verkiezingsdefinitie (EML 110a)",
+    "",
+    "Bestand:      "+name,
+    "Verkiezing:   "+S.electionName+" ("+S.electionId+")",
+    "Gemaakt op:   "+stamp,
+    "Algoritme:    SHA-256",
+    "",
+    "Hashcode:",
+    hex,
+    "",
+    "In groepen van 4:",
+    groupHash(hex),
+    "",
+    "Eerste acht karakters: "+hex.slice(0,8).toUpperCase(),
+    "",
+    "Controleren:",
+    "  Windows:  certutil -hashfile \""+name+"\" SHA256",
+    "  Linux:    sha256sum \""+name+"\"",
+    "  macOS:    shasum -a 256 \""+name+"\"",
+    "",
+    "De uitkomst moet gelijk zijn aan de hashcode hierboven (hoofd- of kleine letters maakt niet uit).",
+    ""
+  ].join("\r\n");
+}
+
+/* toon de hash van het huidige bestand */
+let hashSeq=0;
+async function showHash(){
+  const seq=++hashSeq, hex=await sha256hex(new TextEncoder().encode(currentXml));
+  if(seq!==hashSeq) return;
+  $("hash").innerHTML='SHA-256 <b>'+groupHash(hex)+'</b>';
+}
+
+let downloads=null;
+if(window.claude && typeof window.claude.use==="function"){
+  window.claude.use("downloads").then(d=>{ downloads=d; if(d) $("dlBtn").textContent="Download .zip (eml + hashcode)"; }).catch(()=>{});
+}
+function saveLocal(name,data,type){
+  const url=URL.createObjectURL(new Blob([data],{type}));
+  const a=document.createElement("a"); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),4000);
+}
+$("dlBtn").addEventListener("click",async()=>{
+  const name=fileName(), xml=currentXml, enc=new TextEncoder();
+  const bytes=enc.encode(xml), hex=await sha256hex(bytes);
+  const txtName=hashFileName(name), txt=enc.encode(hashText(name,hex));
+  if(downloads){
+    try{
+      await downloads.save({filename:name.replace(/\.eml\.xml$/,"")+".zip", data:zipFiles([{name,data:bytes},{name:txtName,data:txt}])});
+      toast("Download gestart: de zip bevat het .eml.xml-bestand en de hashcode");
+    }catch(e){ if(e&&e.code==="declined") toast("Download geannuleerd"); else toast("Downloaden lukt hier niet; gebruik Kopieer XML"); }
+    return;
+  }
+  saveLocal(name,bytes,"application/xml");
+  setTimeout(()=>saveLocal(txtName,txt,"text/plain"),400);
+  toast("Gedownload: "+name+" en "+txtName);
+});
+
+/* ---------- start ---------- */
+freshState(); renderTypes(); update(true);
+})();
+</script>
+</body>
+</html>
