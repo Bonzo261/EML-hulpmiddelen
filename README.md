@@ -40,7 +40,7 @@ Sommige apps bewaren hun werk in `localStorage` van je browser. De Uitslagen-gen
 
 - De opbouw, teksten en opmaak van de processen-verbaal komen uit de Typst-sjablonen van [kiesraad/abacus](https://github.com/kiesraad/abacus) (`backend/templates`, EUPL-1.2).
 - Het formaat van de 510-bestanden en de ondertekening volgen de testbestanden en de code van Abacus.
-- De rekenkern van de Controle zetelverdeling is een port van de zetelverdeling in Abacus (`backend/apportionment`) en is getest met alle eind-tot-eindtests daarvan.
+- De Controle zetelverdeling rekent volgens de tekst van de Kieswet en toetst de uitkomst aan een port van de zetelverdeling in Abacus (`backend/apportionment`), getest met alle eind-tot-eindtests daarvan.
 - Het Controleprotocol volgt de controleprotocollen GR26 van de Kiesraad (november 2025).
 - PDF-lettertypen in `pv-fonts.js`: DM Sans (aangepast door de Kiesraad) en Geist Mono, beide onder de SIL Open Font License 1.1, uit `kiesraad/abacus`.
 

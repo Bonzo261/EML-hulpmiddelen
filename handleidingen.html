@@ -169,7 +169,7 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
     <div class="card">
       <span class="lvl">CSB · P 5–P 10</span>
       <h2>Controle zetelverdeling</h2>
-      <p>Bereken de zetelverdeling zelf volgens de Kieswet, stap voor stap en met loting, P 9 en P 10, en vergelijk de uitkomst met de programmatuur. Voor het Verslag controleprotocol CSB, onderdeel B.</p>
+      <p>Bereken de zetelverdeling zelf, rechtstreeks volgens de tekst van de Kieswet (P 5–P 10), met loting, P 9 en P 10. De app toetst de uitkomst aan de werkwijze van Abacus en vergelijkt met de programmatuur. Voor het Verslag controleprotocol CSB, onderdeel B.</p>
       <div class="btns">
         <a class="btn primary" href="#zetelverdeling-controle">Handleiding lezen</a>
         <a class="btn" href="zetelverdeling.html">App openen</a>
@@ -813,14 +813,17 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
     <b>Inhoud</b>
     <ol>
       <li><a href="#zv-doel">Waarvoor is de app?</a></li>
+      <li><a href="#zv-hoe">Hoe rekent de app?</a></li>
       <li><a href="#zv-nodig">Wat heb je nodig?</a></li>
       <li><a href="#zv-scherm">Het scherm</a></li>
       <li><a href="#zv-s1">Stap 1 · Gegevens</a></li>
       <li><a href="#zv-s2">Stap 2 · Berekening</a></li>
       <li><a href="#zv-lot">Loting</a></li>
+      <li><a href="#zv-toets">Toetsing van de berekening</a></li>
+      <li><a href="#zv-uitleg">Onduidelijke artikelen</a></li>
       <li><a href="#zv-s3">Stap 3 · Vergelijken</a></li>
       <li><a href="#zv-verslag">Verslag</a></li>
-      <li><a href="#zv-regels">De rekenregels</a></li>
+      <li><a href="#zv-regels">De rekenregels in het kort</a></li>
       <li><a href="#zv-faq">Vragen en problemen</a></li>
       <li><a href="#zv-beperk">Bekende beperkingen</a></li>
     </ol>
@@ -828,14 +831,22 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
   </aside>
   <article>
     <h2>Controle zetelverdeling</h2>
-    <p class="lead">Handleiding voor het centraal stembureau: de zetelverdeling zelf berekenen en vergelijken met de programmatuur (Verslag controleprotocol CSB, onderdeel B).</p>
+    <p class="lead">Handleiding voor het centraal stembureau: de zetelverdeling zelf berekenen volgens de Kieswet en vergelijken met de programmatuur (Verslag controleprotocol CSB, onderdeel B).</p>
 
     <h3 id="zv-doel">1. Waarvoor is de app?</h3>
     <p>Het controleprotocol vraagt het centraal stembureau de zetelverdeling zelf te berekenen, volgens de artikelen P 5 tot en met P 10 van de Kieswet, en de uitkomst te vergelijken met die van de programmatuur. Dat doe je na de rest van het protocol en vóór de vaststelling in de openbare zitting.</p>
-    <p>Deze app doet die berekening stap voor stap, laat elke stap zien, en maakt het verslag. Anders dan de spreadsheet van de Kiesraad kan de app ook omgaan met de meerderheidsregel (P 9), lijstuitputting (P 10) en loting.</p>
+    <p>Deze app doet die berekening stap voor stap, laat bij elke stap zien wat er gebeurt, en maakt het verslag. Anders dan de spreadsheet van de Kiesraad kan de app ook omgaan met de meerderheidsregel (P 9), lijstuitputting (P 10) en loting.</p>
     <div class="note"><b>Geen formele berekening</b>Deze controle is een hulpmiddel. De vaststelling gebeurt in de openbare zitting van het centraal stembureau.</div>
 
-    <h3 id="zv-nodig">2. Wat heb je nodig?</h3>
+    <h3 id="zv-hoe">2. Hoe rekent de app?</h3>
+    <p>Een controle heeft alleen zin als ze los staat van de programmatuur. Daarom rekent de app op twee manieren:</p>
+    <ul>
+      <li><b>De berekening</b> volgt rechtstreeks de tekst van de Kieswet (artikel P 5 tot en met P 10, geldende tekst per 1 oktober 2026). Deze is los van de programmatuur geschreven. Dit is de uitkomst die je in stap 2 ziet en die in het verslag komt.</li>
+      <li><b>De toetsing</b> rekent dezelfde gegevens nog eens na volgens de werkwijze van de programmatuur Abacus, en volgens de andere uitleg van onduidelijke artikelen. Verschillen meldt de app in stap 2, onderdeel 6.</li>
+    </ul>
+    <p>Beide rekenen met exacte breuken, zodat afronding nooit een verschil veroorzaakt.</p>
+
+    <h3 id="zv-nodig">3. Wat heb je nodig?</h3>
     <div class="tablewrap"><table>
       <thead><tr><th>Bestand</th><th>Waarvoor</th></tr></thead>
       <tbody>
@@ -847,17 +858,18 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
     </table></div>
     <p>Zonder bestanden kan het ook: je vult de stemcijfers en het aantal zetels zelf in, of plakt ze uit de spreadsheet van de Kiesraad. De uitkomst van de programmatuur kun je overtikken van het proces-verbaal.</p>
 
-    <h3 id="zv-scherm">3. Het scherm</h3>
+    <h3 id="zv-scherm">4. Het scherm</h3>
     <ul>
       <li><b>Bovenaan</b> staan <span class="ui">Sessie opslaan</span>, <span class="ui">Sessie laden</span>, de keuzelijst <span class="ui">Voorbeeld…</span> en <span class="ui">Opnieuw beginnen</span>.</li>
       <li><b>Daaronder</b> drie stappen als tabbladen: <em>Gegevens</em>, <em>Berekening</em> en <em>Vergelijking en verslag</em>, elk met een badge voor de status.</li>
     </ul>
-    <div class="tip"><b>Eerst oefenen?</b>Kies een voorbeeld: 's-Hertogenbosch GR26 (39 zetels), een kleine gemeente (13 zetels), minder dan 19 zetels met P 8 lid 3, lijstuitputting (P 10), gelijke stand (loting) of de meerderheidsregel (P 9).</div>
+    <div class="tip"><b>Eerst oefenen?</b>Kies een voorbeeld:
+      's-Hertogenbosch GR26 (39 zetels), een kleine gemeente (13 zetels), minder dan 19 zetels met P 8 lid 3, lijstuitputting (P 10), gelijke stand (loting), de meerderheidsregel (P 9), of <em>Loting en lijstuitputting</em>, waarin de app en Abacus anders werken (zie <a href="#zv-toets">Toetsing</a>).</div>
 
-    <h3 id="zv-s1">4. Stap 1 · Gegevens</h3>
+    <h3 id="zv-s1">5. Stap 1 · Gegevens</h3>
     <div class="step"><span class="n">1</span><div><p><b>Laad de EML-bestanden.</b> Sleep ze naar het vak of klik op <span class="ui">Kies bestanden</span>. De app herkent zelf welk bestand wat is.</p></div></div>
     <div class="step"><span class="n">2</span><div>
-      <p><b>Controleer de verkiezing.</b> Je ziet de verkiezing, het totaal van de stemcijfers, het aantal lijsten en het <em>stelsel voor restzetels</em>. Controleer het <b>aantal zetels</b> en de <b>soort verkiezing</b>; die komen uit de 110a en de 510.</p>
+      <p><b>Controleer de verkiezing.</b> Je ziet de verkiezing, het totaal van de stemcijfers, het aantal lijsten en het <em>stelsel voor restzetels</em> (grootste gemiddelden bij 19 zetels of meer, grootste overschotten bij minder). Controleer het <b>aantal zetels</b> en de <b>soort verkiezing</b>; die komen uit de 110a en de 510.</p>
       <p>Het vinkje <span class="ui">Restzetels alleen voor lijsten met een stemcijfer van ten minste de kiesdeler (P 7 lid 2)</span> staat standaard aan bij de Tweede Kamer en het Europees Parlement, en uit bij de andere verkiezingen.</p>
     </div></div>
     <div class="step"><span class="n">3</span><div>
@@ -866,69 +878,114 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
         <li><span class="ui">Lijst toevoegen</span> en <span class="ui">Lijsten wissen</span>.</li>
         <li><span class="ui">Plakken uit Excel</span>: één lijst per regel, met lijstnummer, naam en stemcijfer gescheiden door tabs. Zo plak je kolom C, D en H uit de spreadsheet van de Kiesraad. Een vierde getal is het aantal kandidaten. Bestaande lijsten worden vervangen.</li>
       </ul>
-      <p>Het stemcijfer is het aantal geldige stemmen op de kandidaten van de lijst (P 5). Vul ook het aantal kandidaten in; zonder dat kan de app lijstuitputting (P 10) niet controleren.</p>
+      <p>Het stemcijfer is het aantal geldige stemmen op de kandidaten van de lijst (P 5). Gelijkluidende lijsten en lijstengroepen tellen als één lijst: de app telt de stemmen van alle kieskringen per lijst op. Vul ook het aantal kandidaten in; zonder dat kan de app lijstuitputting (P 10) niet controleren.</p>
     </div></div>
 
-    <h3 id="zv-s2">5. Stap 2 · Berekening</h3>
+    <h3 id="zv-s2">6. Stap 2 · Berekening</h3>
     <p>Bovenaan staat de status van de berekening. Daaronder volgt de berekening in de volgorde van de Kieswet:</p>
     <ol>
       <li><b>Kiesdeler (P 5):</b> het totaal van de stemcijfers gedeeld door het aantal zetels, als exacte breuk (bijvoorbeeld 1.711 17/39).</li>
       <li><b>Volle zetels (P 6):</b> per lijst hoe vaak de kiesdeler in het stemcijfer past, met het overschot.</li>
       <li><b>Restzetels:</b>
         <ul>
-          <li>bij 19 zetels of meer: grootste gemiddelden (P 7). De tabel toont de gemiddelden per restzetel, met het vak dat de zetel krijgt gemarkeerd;</li>
-          <li>bij minder dan 19 zetels: grootste overschotten (P 8). Lijsten met minder dan 75% van de kiesdeler doen niet mee. Zijn er daarna nog zetels over, dan volgen grootste gemiddelden met hoogstens één zetel per lijst (P 8 lid 3).</li>
+          <li><b>19 zetels of meer: grootste gemiddelden (P 7).</b> Elke restzetel gaat naar de lijst die mét die zetel het grootste gemiddelde aantal stemmen per zetel heeft: stemcijfer gedeeld door (zetels + 1). De tabel toont per ronde de gemiddelden; het gekleurde vak krijgt de zetel. Een streepje betekent dat de lijst in die ronde niet meedoet. Onder de tabel staat het laagste gemiddelde dat nog een restzetel kreeg.</li>
+          <li><b>Minder dan 19 zetels: grootste overschotten (P 8).</b> De restzetels gaan één voor één naar de lijsten met de grootste overschotten, en elke lijst krijgt zo hoogstens één restzetel. Lijsten met een stemcijfer onder 75% van de kiesdeler doen niet mee; de tabel laat per lijst zien of ze de drempel haalt. Hebben alle lijsten die meedoen een restzetel en zijn er nog zetels over, dan gaan die volgens de grootste gemiddelden, met hoogstens één zetel per lijst (P 8 lid 3). Daarvoor volgt een tweede tabel.</li>
         </ul>
       </li>
-      <li><b>Meerderheid van stemmen (P 9):</b> heeft een lijst meer dan de helft van de stemmen maar niet meer dan de helft van de zetels, dan krijgt ze er één zetel bij, ten koste van de laatst toegewezen restzetel.</li>
-      <li><b>Lijstuitputting (P 10):</b> krijgt een lijst meer zetels dan ze kandidaten heeft, dan gaan de overige zetels naar andere lijsten.</li>
+      <li><b>Meerderheid van stemmen (P 9):</b> heeft een lijst meer dan de helft van de stemmen maar niet meer dan de helft van de zetels, dan krijgt ze er één zetel bij. Die zetel vervalt bij de lijst die de laatste restzetel kreeg (een restzetel van de meerderheidslijst zelf telt daarbij niet mee).</li>
+      <li><b>Lijstuitputting (P 10):</b> krijgt een lijst meer zetels dan ze kandidaten heeft, dan gaan de overige zetels naar andere lijsten. De app doet dat zoals de wet het zegt, ‘door voortgezette toepassing’: een lijst die geen kandidaten zonder zetel meer heeft, doet bij de verdere verdeling niet meer mee. Volle zetels boven het aantal kandidaten worden extra restzetels.</li>
+      <li><b>Toetsing van deze berekening:</b> zie <a href="#zv-toets">hieronder</a>.</li>
     </ol>
     <p>Rechts staat de <b>uitkomst</b> per lijst: volle zetels, restzetels en totaal. Onder <span class="ui">Alle stappen op volgorde</span> vind je elke stap van de berekening. Met <span class="ui">Berekening als CSV</span> exporteer je de berekening.</p>
 
-    <h3 id="zv-lot">6. Loting</h3>
-    <p>Bij een gelijke stand die bepaalt wie een zetel krijgt, moet het centraal stembureau loten. De app kan niet zelf loten. Ze toont dan een oranje vak met de lijsten die gelijk staan, met een knop per lijst. Klik op de lijst die de loting van het centraal stembureau heeft gewonnen; de berekening gaat daarna verder.</p>
+    <h3 id="zv-lot">7. Loting</h3>
+    <p>Bij een gelijke stand die bepaalt wie een zetel krijgt, moet het centraal stembureau loten in de openbare zitting. De app kan niet zelf loten. Ze toont dan een oranje vak <em>Loting nodig</em> met de lijsten die gelijk staan, met een knop per lijst.</p>
+    <div class="step"><span class="n">1</span><div><p>Houd de loting in de zitting (dezelfde loting als voor de programmatuur).</p></div></div>
+    <div class="step"><span class="n">2</span><div><p>Klik op de lijst die de zetel krijgt. Gaat het om de meerderheidsregel (P 9), dan kies je de lijst waarvan de zetel <em>vervalt</em>.</p></div></div>
+    <div class="step"><span class="n">3</span><div><p>De berekening gaat verder. Een volgende loting komt op dezelfde manier. Met <span class="ui">Vorige loting ongedaan maken</span> herstel je een vergissing.</p></div></div>
     <ul>
-      <li>Krijgen alle lijsten met hetzelfde getal een zetel, dan is er geen loting nodig.</li>
+      <li>Krijgen alle lijsten met hetzelfde getal een zetel, dan is er geen loting nodig. De stappen laten dat zien (‘genoeg zetels, dus geen loting’).</li>
+      <li>In het oranje vak staat of de uitkomst van de loting uitmaakt voor de zetels per lijst, of alleen voor de volgorde in het verslag.</li>
       <li>De app bewaart de lotingen op volgorde. Pas je daarna de gegevens zo aan dat een loting niet meer past, dan haalt de app die loting weg.</li>
       <li>Lotingen komen in het verslag.</li>
     </ul>
 
-    <h3 id="zv-s3">7. Stap 3 · Vergelijking met de programmatuur</h3>
+    <h3 id="zv-toets">8. Toetsing van de berekening</h3>
+    <p>In stap 2, onderdeel 6, staat de uitkomst van de toetsing. Mogelijke meldingen:</p>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Melding</th><th>Wat het betekent</th><th>Wat je doet</th></tr></thead>
+      <tbody>
+        <tr><td>Groen: de werkwijze van Abacus komt op dezelfde verdeling</td><td>Beide berekeningen geven dezelfde zetels per lijst.</td><td>Niets.</td></tr>
+        <tr><td>Rood: verschil met de werkwijze van de programmatuur</td><td>De berekening volgens de wet en die volgens Abacus geven een andere verdeling. De app toont welke.</td><td>Zoek uit welke uitleg van de wet juist is. Neem bij twijfel contact op met de Kiesraad.</td></tr>
+        <tr><td>Oranje: volgens Abacus moet hier geloot worden, volgens de wettekst niet</td><td>Bij een gelijke stand met een lijst die al haar kandidaten al heeft verkozen, vraagt Abacus om een loting en past daarna P 10 toe. Volgens de wet doet die lijst niet meer mee, dus valt de gelijke stand weg. De uitkomst van die loting maakt voor de zetels niet uit.</td><td>Houd er rekening mee dat de programmatuur om een loting kan vragen. Dit komt in het verslag.</td></tr>
+        <tr><td>Oranje: Abacus komt, afhankelijk van de loting, op meerdere verdelingen</td><td>Er is een loting die uitmaakt; de berekening is één van de mogelijke uitkomsten.</td><td>Zorg dat dezelfde lotingsuitkomst in de app en in de programmatuur wordt ingevoerd.</td></tr>
+        <tr><td>Oranje: te veel lotingen om allemaal na te rekenen</td><td>De toetsing is niet volledig.</td><td>Vergelijk extra zorgvuldig met de programmatuur.</td></tr>
+        <tr><td>Oranje: meldingen over uitlegpunten</td><td>Een onduidelijk artikel speelt een rol (zie hieronder).</td><td>Lees de melding; die komt ook in het verslag.</td></tr>
+      </tbody>
+    </table></div>
+    <div class="tip"><b>Voorbeeld</b>Kies <em>Loting en lijstuitputting (verschil met Abacus)</em> in de voorbeeldlijst om de oranje melding over een loting die alleen Abacus vraagt te zien.</div>
+
+    <h3 id="zv-uitleg">9. Onduidelijke artikelen</h3>
+    <p>Op een paar punten regelt de Kieswet niet precies wat er moet gebeuren. De app kiest dan een uitleg, meldt dat, en laat in de toetsing zien of de andere uitleg tot een andere uitkomst leidt.</p>
+    <ul>
+      <li><b>P 8 lid 3: doen lijsten onder 75% van de kiesdeler mee?</b> Lid 2 sluit ze uit ‘bij deze toewijzing’; of dat ook voor lid 3 geldt, staat er niet. Standaard laat de app ze meedoen, omdat P 7 lid 1 geen drempel kent. In onderdeel 6 kun je de uitleg wisselen met de keuzelijst <span class="ui">Uitleg P 8 lid 3</span>:
+        <ul>
+          <li><em>alle lijsten doen mee (letterlijk: P 7 lid 1 kent geen drempel)</em>, of</li>
+          <li><em>alleen lijsten met ten minste 75% van de kiesdeler</em>.</li>
+        </ul>
+        De app meldt of de keuze voor de uitkomst uitmaakt. Wisselen wist de ingevoerde lotingen.</li>
+      <li><b>Nog zetels over na P 8 lid 3.</b> Heeft elke lijst al een zetel uit lid 3 en zijn er nog zetels, dan regelt de wet dat niet. De app verdeelt de rest volgens P 7 lid 1 zonder de beperking tot één zetel per lijst, en meldt dat.</li>
+      <li><b>P 9 als de meerderheidslijst zelf de laatste restzetel had.</b> Dan vervalt de laatste restzetel van een andere lijst.</li>
+      <li><b>P 9 kan niet worden toegepast,</b> bijvoorbeeld omdat de meerderheidslijst geen kandidaten meer heeft of er geen andere restzetel is. De app meldt dat.</li>
+    </ul>
+    <div class="note"><b>Twijfel?</b>Maakt de uitleg verschil voor de uitkomst, leg het dan voor aan de Kiesraad vóór de openbare zitting.</div>
+
+    <h3 id="zv-s3">10. Stap 3 · Vergelijking met de programmatuur</h3>
     <p>Kies hoe je de uitkomst van de programmatuur invoert:</p>
     <ul>
       <li><span class="ui">520 inlezen</span>: sleep de 520 (uitslag met gekozen kandidaten) naar het vak of klik op <span class="ui">Kies de 520</span>.</li>
-      <li><span class="ui">Overtikken van het proces-verbaal</span>: tik per lijst het totaal aantal zetels over uit het proces-verbaal van de programmatuur. Volle zetels en restzetels zijn optioneel; vul je ze in, dan worden ze ook vergeleken.</li>
+      <li><span class="ui">Overtikken van het proces-verbaal</span>: tik per lijst het totaal aantal zetels over uit het proces-verbaal van de programmatuur (P 22-1, onderdeel zetelverdeling). Volle zetels en restzetels zijn optioneel; vul je ze in, dan worden ze ook vergeleken.</li>
     </ul>
     <p>Rechts zie je het antwoord op de vraag <em>Is de uitkomst gelijk aan die van de programmatuur?</em>, met de meldingen en de kenmerken (hashcode, datum, tijd) van de 510 en de 520. Controleer de eerste 8 tekens van de hashcode tegen de voettekst van het proces-verbaal.</p>
+    <p>Let op het verschil met de toetsing in stap 2: de toetsing rekent zelf na <em>zoals</em> Abacus rekent; hier vergelijk je met wat de programmatuur werkelijk heeft uitgerekend.</p>
 
-    <h3 id="zv-verslag">8. Verslag</h3>
+    <h3 id="zv-verslag">11. Verslag</h3>
     <p>Vul de toelichting in. Bij een verschil is die verplicht: beschrijf welk nader onderzoek is gedaan en wat de uitkomst is. Vul ook het centraal stembureau, de plaats en de voorzitter in.</p>
     <ul>
-      <li><span class="ui">Verslag downloaden (.html)</span>: het verslag voor onderdeel B, controle zetelverdeling, met het antwoord ja of nee, de toelichting en de bijzonderheden (loting, P 9, P 10, drempel, handmatige wijzigingen). Open het in je browser om af te drukken of als pdf te bewaren.</li>
+      <li><span class="ui">Verslag downloaden (.html)</span>: het verslag voor onderdeel B, controle zetelverdeling, met het antwoord ja of nee, de toelichting en de bijzonderheden: lotingen, P 9, P 10, de kiesdelerdrempel, de gekozen uitleg van onduidelijke artikelen, de uitkomst van de toetsing en handmatige wijzigingen van de gegevens. Open het in je browser om af te drukken of als pdf te bewaren.</li>
       <li><span class="ui">Tekst kopiëren</span>: de tekst om in het formulier van de Kiesraad te plakken.</li>
     </ul>
     <div class="note"><b>Officieel formulier</b>Het Verslag controleprotocol CSB van de Kiesraad blijft leidend.</div>
-    <p>De app bewaart de sessie in deze browser. Met <span class="ui">Sessie opslaan</span> download je hem als <code>.json</code>.</p>
+    <p>De app bewaart de sessie in deze browser. Met <span class="ui">Sessie opslaan</span> download je hem als <code>.json</code>, met <span class="ui">Sessie laden</span> zet je hem terug.</p>
 
-    <h3 id="zv-regels">9. De rekenregels</h3>
-    <p>De app volgt de Kieswet zoals die geldt per 1 oktober 2026, in dezelfde volgorde als Abacus: volle zetels, restzetels, de meerderheidsregel (P 9) en daarna lijstuitputting (P 10). De rekenkern is overgenomen uit Abacus en rekent met exacte breuken, zodat afronding nooit een verschil veroorzaakt.</p>
-    <ul>
-      <li>Gelijkluidende lijsten en lijstengroepen tellen als één lijst: de app telt de stemmen van alle kieskringen per lijst op.</li>
-      <li>De drempel van de kiesdeler voor restzetels (P 7 lid 2) geldt bij de Tweede Kamer en het Europees Parlement.</li>
-      <li>Bij P 8 lid 3 doen ook lijsten met minder dan 75% van de kiesdeler mee. De wet zegt dat niet uitdrukkelijk; de app volgt Abacus.</li>
-      <li>Het wetsvoorstel 36 641 over restzetels is niet in werking (stand 22 november 2026). De app volgt de huidige tekst.</li>
-    </ul>
-    <p>De app is getest met alle 46 tests uit Abacus, met de uitslag van 's-Hertogenbosch GR26 en met ruim 16.000 willekeurige gevallen.</p>
+    <h3 id="zv-regels">12. De rekenregels in het kort</h3>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Artikel</th><th>Regel</th></tr></thead>
+      <tbody>
+        <tr><td>P 5</td><td>Kiesdeler = totaal van de stemcijfers / aantal zetels.</td></tr>
+        <tr><td>P 6</td><td>Volle zetels = hoe vaak de kiesdeler in het stemcijfer past.</td></tr>
+        <tr><td>P 7</td><td>19 zetels of meer: restzetels één voor één naar het grootste gemiddelde. Lid 2: bij TK en EP alleen voor lijsten met ten minste de kiesdeler.</td></tr>
+        <tr><td>P 8</td><td>Minder dan 19 zetels: restzetels naar de grootste overschotten, hoogstens één per lijst, alleen lijsten met ten minste 75% van de kiesdeler. Lid 3: daarna grootste gemiddelden, hoogstens één per lijst.</td></tr>
+        <tr><td>P 9</td><td>Meerderheid van de stemmen maar niet van de zetels: één zetel erbij, ten koste van de laatst toegewezen restzetel van een andere lijst.</td></tr>
+        <tr><td>P 10</td><td>Meer zetels dan kandidaten: de lijst doet niet meer mee, de overige zetels gaan naar andere lijsten.</td></tr>
+      </tbody>
+    </table></div>
+    <p>Het wetsvoorstel 36 641 over restzetels is niet in werking (stand 22 november 2026). De app volgt de huidige tekst. De Eerste Kamer werkt met stemwaarden (hoofdstuk U); die worden niet ondersteund.</p>
+    <p>Getest met de uitslag van 's-Hertogenbosch GR26, met de uitkomsten van alle 46 tests uit Abacus, en met 160.000 willekeurige gevallen met P 9, P 10, P 8 lid 3 en lotingen, waarin beide berekeningen dezelfde zetels gaven.</p>
 
-    <h3 id="zv-faq">10. Vragen en problemen</h3>
+    <h3 id="zv-faq">13. Vragen en problemen</h3>
     <details><summary>De app meldt dat P 10 niet is gecontroleerd.</summary><p>Vul het aantal kandidaten per lijst in, of laad de 230b.</p></details>
     <details><summary>Ik heb geen 520.</summary><p>Abacus maakt (nog) geen 520. Kies dan <em>Overtikken van het proces-verbaal</em> bij stap 3.</p></details>
-    <details><summary>De berekening blijft staan op een loting.</summary><p>Klik in het oranje vak op de lijst die de loting heeft gewonnen.</p></details>
-    <details><summary>Kan ik de app gebruiken voor de Eerste Kamer?</summary><p>Niet goed: de Eerste Kamer werkt met stemwaarden (hoofdstuk U van de Kieswet). De app waarschuwt daarvoor.</p></details>
+    <details><summary>De berekening blijft staan op een loting.</summary><p>Klik in het oranje vak <em>Loting nodig</em> op de lijst die de loting heeft gewonnen (of bij P 9: de lijst waarvan de zetel vervalt).</p></details>
+    <details><summary>De programmatuur vraagt om een loting, maar de app niet.</summary><p>Dat kan bij een gelijke stand met een lijst waarvan alle kandidaten al gekozen zijn. Volgens de wettekst is die loting niet nodig; de uitkomst ervan maakt voor de zetels niet uit. De toetsing in stap 2 meldt dit, en het komt in het verslag.</p></details>
+    <details><summary>De toetsing meldt een verschil met Abacus.</summary><p>Controleer eerst de gegevens (stemcijfers, aantal zetels, aantal kandidaten, kiesdelerdrempel). Blijft het verschil, kijk dan of een onduidelijk artikel de oorzaak is, en leg het bij twijfel voor aan de Kiesraad.</p></details>
+    <details><summary>Mijn lotingen zijn weg.</summary><p>Lotingen worden gewist als je de uitleg van P 8 lid 3 wisselt, of als ze na een wijziging van de gegevens niet meer passen. Voer ze opnieuw in.</p></details>
     <details><summary>Waar controleer ik de lijsttotalen?</summary><p>In de app <a href="#controleprotocol">Controleprotocol</a>, op het niveau centraal stembureau.</p></details>
 
-    <h3 id="zv-beperk">11. Bekende beperkingen</h3>
+    <h3 id="zv-beperk">14. Bekende beperkingen</h3>
     <ul>
+      <li>De berekening volgens de wettekst is nog niet nagekeken door iemand die de Kieswet kent; vooral de uitlegpunten verdienen een review.</li>
+      <li>De uitleg van P 8 lid 3 en van P 9 bij P 8 lid 3 is nog niet voorgelegd aan de Kiesraad.</li>
       <li>Nog niet getest met een echte 520 van de programmatuur, en niet met een echte 510d van de Tweede Kamer of het Europees Parlement met meerdere kieskringen.</li>
       <li>De Eerste Kamer (stemwaarden) wordt niet ondersteund.</li>
       <li>In het voorbeeld van 's-Hertogenbosch zijn de echte aantallen kandidaten niet bekend; P 10 staat daar op ‘niet gecontroleerd’.</li>

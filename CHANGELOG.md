@@ -2,6 +2,23 @@
 
 Wat er per update is veranderd, nieuwste bovenaan. De precieze verschillen per bestand staan in de [commitgeschiedenis](https://github.com/Bonzo261/EML-hulpmiddelen/commits/main).
 
+## 23-11-2026: controle zetelverdeling rekent volgens de wettekst
+
+### Controle zetelverdeling (`zetelverdeling.html`)
+- Nieuwe hoofdberekening, rechtstreeks uit de tekst van Kieswet P 5 t/m P 10, met bij elke stap de zin uit de wet. Zo is de controle onafhankelijk van de uitslagsoftware. Eerst rekende de app met een overgenomen versie van de Abacus-berekening, en daarmee zouden fouten van Abacus ook in de controle terechtkomen.
+- De Abacus-berekening blijft als toetsing. Nieuw onderdeel 6 "Toetsing van deze berekening" in stap 2 meldt of beide op dezelfde zetels uitkomen, met de verschillen per lijst.
+- Punten waar de wet ruimte voor uitleg laat, worden gemeld: doen lijsten onder 75% mee bij P 8 lid 3 (in te stellen), wat als er daarna nog zetels over zijn, en bijzondere gevallen bij P 9.
+- P 10 werkt nu als "voortgezette toepassing": een lijst zonder kandidaten meer doet niet meer mee.
+- Bij een loting voor P 9 kies je de lijst waarvan de zetel vervalt. Nieuwe knop "Vorige loting ongedaan maken".
+- Nieuw voorbeeld "Loting en lijstuitputting": hier vraagt Abacus om een loting die volgens de wettekst niet nodig is. De zetels komen in beide gevallen hetzelfde uit.
+- Het verslag noemt ook de uitlegkeuzes en de uitkomst van de toetsing.
+
+### Handleidingen
+- Handleiding van de Controle zetelverdeling bijgewerkt voor de nieuwe werking, met uitleg over de toetsing en de uitlegpunten.
+
+### Website
+- `docs/zetelverdeling-controle.md` en de README bijgewerkt.
+
 ## 22-11-2026 (nacht): link naar de website
 - De site staat online op <https://bonzo261.github.io/EML-hulpmiddelen/>. De README verwijst daar nu naar, in plaats van uit te leggen hoe GitHub Pages aangezet moet worden.
 

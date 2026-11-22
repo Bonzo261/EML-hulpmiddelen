@@ -196,6 +196,7 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
       <option value="uitput">Lijstuitputting (P 10)</option>
       <option value="lot">Gelijke stand (loting)</option>
       <option value="p9">Meerderheidsregel (P 9)</option>
+      <option value="lotp10">Loting en lijstuitputting (verschil met Abacus)</option>
     </select>
     <button type="button" id="resetBtn">Opnieuw beginnen</button>
   </div>
@@ -301,6 +302,11 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
     <div class="q"><h2>5. Lijstuitputting <span class="art">P 10</span></h2><div id="p10Box"></div></div>
   </div>
   <div class="q" style="margin-top:16px">
+    <h2>6. Toetsing van deze berekening</h2>
+    <p class="hint">Deze berekening volgt de tekst van de Kieswet en is los van de programmatuur geschreven. Ter toetsing rekent de app dezelfde gegevens ook na volgens de werkwijze van de programmatuur Abacus (over alle mogelijke lotingen), en volgens de andere uitleg van onduidelijke artikelen. Verschillen staan hier.</p>
+    <div id="toetsBox"></div>
+  </div>
+  <div class="q" style="margin-top:16px">
     <details><summary>Alle stappen op volgorde</summary><ol id="stepLog" class="steplog"></ol></details>
     <div class="btns end"><button type="button" id="dlCsv">Berekening als CSV</button><button type="button" class="primary" data-goto="3">Naar de vergelijking →</button></div>
   </div>
@@ -350,7 +356,7 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
 </main>
 
 <footer>
-  Alles gebeurt in je browser; er gaan geen gegevens naar een server. De sessie wordt in deze browser bewaard. De berekening gebruikt exacte breuken en volgt de rekenregels van artikel P 5 tot en met P 10 Kieswet (geldende tekst per 1 oktober 2026), in dezelfde volgorde als de programmatuur Abacus: volle zetels, restzetels, dan de meerderheidsregel (P 9) en daarna lijstuitputting (P 10). Deze controle is geen formele berekening; de vaststelling gebeurt in de openbare zitting van het centraal stembureau.
+  Alles gebeurt in je browser; er gaan geen gegevens naar een server. De sessie wordt in deze browser bewaard. De berekening gebruikt exacte breuken en volgt rechtstreeks de tekst van artikel P 5 tot en met P 10 Kieswet (geldende tekst per 1 oktober 2026). Ter toetsing rekent de app ook volgens de werkwijze van de programmatuur Abacus; verschillen in uitkomst of werkwijze worden gemeld. Deze controle is geen formele berekening; de vaststelling gebeurt in de openbare zitting van het centraal stembureau.
 </footer>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
@@ -596,6 +602,216 @@ const ZV = (() => {
 
   return { apportion, averagesTable, Frac, fr };
 })();
+/* Zetelverdeling rechtstreeks volgens de tekst van de Kieswet, artikel P 5 t/m P 10
+   (geldende tekst per 1 oktober 2026). Onafhankelijk van de programmatuur geschreven: elke stap
+   verwijst naar de zin uit de wet die hij uitvoert. Waar de wet ruimte laat voor uitleg, staat dat
+   als UITLEG-punt in de code en wordt het in de uitkomst gemeld (notes).
+   Alle getallen zijn exacte breuken (BigInt), er wordt nergens afgerond. */
+const ZVW = (() => {
+  "use strict";
+  // ---- breuken ----
+  const ab = x => (x < 0n ? -x : x);
+  const ggd = (a, b) => { a = ab(a); b = ab(b); while (b) [a, b] = [b, a % b]; return a || 1n; };
+  const Q = (n, d = 1) => { n = BigInt(n); d = BigInt(d); if (d < 0n) { n = -n; d = -d; } const g = ggd(n, d); return mk(n / g, d / g); };
+  function mk(n, d) {
+    return {
+      n, d,
+      cmp(o) { const a = n * o.d, b = o.n * d; return a < b ? -1 : a > b ? 1 : 0; },
+      gt(o) { return this.cmp(o) > 0; }, ge(o) { return this.cmp(o) >= 0; }, eq(o) { return this.cmp(o) === 0; },
+      mul(o) { return Q(n * o.n, d * o.d); }, sub(o) { return Q(n * o.d - o.n * d, d * o.d); }, div(o) { return Q(n * o.d, d * o.n); },
+      int() { return n / d; }, num() { return Number(n) / Number(d); },
+      mixed() { const w = n / d, r = n % d; return r === 0n ? w.toString() : (w ? w + " " : "") + r + "/" + d; },
+    };
+  }
+
+  function verdeel(input) {
+    const S = input.seats | 0;
+    if (!(S > 0)) throw new Error("aantal zetels ontbreekt");
+    const opt = { lid3: "alle", ...(input.opties || {}) };
+    const lijsten = input.lists.map(l => ({
+      nr: l.nr, votes: Math.max(0, Math.floor(+l.votes || 0)),
+      cands: (l.cands === null || l.cands === undefined || l.cands === "") ? Infinity : +l.cands,
+    }));
+    if (new Set(lijsten.map(l => l.nr)).size !== lijsten.length) throw new Error("dubbel lijstnummer");
+    const notes = [];
+    const steps = [];
+    const lots = (input.lots || []).slice();
+    let lotIdx = 0; const lotLog = []; let required = null, badLot = null;
+
+    /* Loting ("beslist zo nodig het lot"): de uitkomst komt van het centraal stembureau.
+       Geeft het getrokken lijstnummer, of null als die uitkomst nog niet is ingevoerd. */
+    function lot(variant) {
+      if (lotIdx < lots.length) {
+        const d = lots[lotIdx];
+        if (variant.options.includes(d)) { lotIdx++; lotLog.push({ ...variant, drawn: d }); return d; }
+        badLot = { at: lotIdx, drawn: d, options: variant.options };
+      }
+      required = variant; return null;
+    }
+
+    // ---- P 5: de kiesdeler ----
+    const T = lijsten.reduce((a, l) => a + l.votes, 0);
+    const kd = Q(T, S);
+
+    const zetels = new Map(lijsten.map(l => [l.nr, 0]));   // totaal per lijst
+    const vol = new Map(lijsten.map(l => [l.nr, 0]));
+    const rest = new Map(lijsten.map(l => [l.nr, 0]));
+    const restzetels = [];                                  // {nr, fase, waarde} in volgorde van toewijzing
+    const L = nr => lijsten.find(l => l.nr === nr);
+    // P 10: een lijst kan alleen een zetel krijgen als er nog een kandidaat zonder zetel op staat.
+    const heeftKandidaat = nr => zetels.get(nr) < L(nr).cands;
+    const snap = () => lijsten.map(l => ({ nr: l.nr, full: vol.get(l.nr), res: rest.get(l.nr) }));
+    const gemiddelde = nr => Q(L(nr).votes, zetels.get(nr) + 1);   // "na toewijzing van de zetel"
+
+    // ---- P 6: volle zetels ----
+    const init = lijsten.map(l => {
+      const v = Q(l.votes);
+      const q = T > 0 ? Number(v.div(kd).int()) : 0;
+      return { nr: l.nr, votes: l.votes, full: q, remainder: T > 0 ? v.sub(Q(q).mul(kd)) : Q(0),
+        meetsThr: T > 0 && v.ge(kd.mul(Q(3, 4))), meetsKd: T > 0 && v.ge(kd) };
+    });
+    let p10vol = 0;
+    for (const s of init) {
+      let q = s.full;
+      if (q > L(s.nr).cands) {   // P 10: meer volle zetels dan kandidaten
+        const over = q - L(s.nr).cands; p10vol += over; q = L(s.nr).cands;
+        steps.push({ kind: "P10", nr: s.nr, aantal: over, fase: "vol", before: snap() });
+      }
+      vol.set(s.nr, q); zetels.set(s.nr, q);
+    }
+    const volTotaal = [...vol.values()].reduce((a, b) => a + b, 0);
+    let teVerdelen = S - volTotaal;   // restzetels, inclusief zetels die door P 10 overblijven
+    const residual = S - init.reduce((a, s) => a + s.full, 0);
+
+    function geef(nr, kind, waarde, extra) {
+      const before = snap();
+      zetels.set(nr, zetels.get(nr) + 1); rest.set(nr, rest.get(nr) + 1);
+      restzetels.push({ nr, kind, waarde });
+      steps.push({ kind, nr, value: waarde, resNo: restzetels.length, before, ...extra });
+      teVerdelen--;
+    }
+    /* Kies de lijst(en) met de hoogste waarde. Zijn er meer gelijke lijsten dan zetels, dan het lot. */
+    function hoogste(kandidaten, waardeVan, soort) {
+      let max = null, groep = [];
+      for (const nr of kandidaten) {
+        const w = waardeVan(nr);
+        if (max === null || w.gt(max)) { max = w; groep = [nr]; } else if (w.eq(max)) groep.push(nr);
+      }
+      if (max === null) return null;
+      if (groep.length <= teVerdelen) return { nr: groep[0], waarde: max, groep, drawing: null };
+      const variant = { type: soort, value: max, options: groep, seatsAvailable: teVerdelen, resNo: restzetels.length + 1 };
+      const d = lot(variant);
+      if (d === null) return "lot";
+      return { nr: d, waarde: max, groep, drawing: variant };
+    }
+    const alleNrs = lijsten.map(l => l.nr);
+    const uitgeput = () => alleNrs.filter(nr => !heeftKandidaat(nr));
+
+    const methode = S >= 19 ? "HA" : "LR";
+    let gestopt = false;
+
+    // ---- P 7 lid 1 (en lid 2): grootste gemiddelden ----
+    function grootsteGemiddelden(magMeedoen, kind) {
+      while (teVerdelen > 0) {
+        const kand = alleNrs.filter(nr => L(nr).votes > 0 && heeftKandidaat(nr) && magMeedoen(nr));
+        if (!kand.length) return "op";
+        const excluded = alleNrs.filter(nr => !kand.includes(nr));
+        const k = hoogste(kand, gemiddelde, kind);
+        if (k === "lot") return "lot";
+        geef(k.nr, kind, k.waarde, { options: k.groep, drawing: k.drawing, exhausted: uitgeput(), excluded });
+      }
+      return "klaar";
+    }
+
+    if (methode === "HA") {
+      // P 7 lid 2: bij de Tweede Kamer (en het EP) geen restzetel voor lijsten onder de kiesdeler.
+      const r = grootsteGemiddelden(nr => !input.kdDrempel || Q(L(nr).votes).ge(kd), "HA");
+      if (r === "lot") gestopt = true;
+    } else {
+      // ---- P 8 lid 1 en 2: grootste overschotten, niet voor lijsten onder 75% van de kiesdeler ----
+      const overschot = nr => init.find(s => s.nr === nr).remainder;
+      const gehad = new Set();
+      while (teVerdelen > 0) {
+        // "achtereenvolgens": elke lijst één keer, want haar overschot verandert niet.
+        const kand = alleNrs.filter(nr => L(nr).votes > 0 && init.find(s => s.nr === nr).meetsThr && !gehad.has(nr) && heeftKandidaat(nr));
+        if (!kand.length) break;
+        const k = hoogste(kand, overschot, "LR");
+        if (k === "lot") { gestopt = true; break; }
+        gehad.add(k.nr);
+        geef(k.nr, "LR", k.waarde, { options: k.groep, drawing: k.drawing, exhausted: uitgeput(), excluded: alleNrs.filter(nr => !kand.includes(nr)) });
+      }
+      // ---- P 8 lid 3: overige zetels volgens P 7 lid 1, hoogstens één per lijst ----
+      if (!gestopt && teVerdelen > 0) {
+        /* UITLEG lid3: welke lijsten doen hier mee? Lid 2 sluit lijsten onder 75% uit "bij deze toewijzing"
+           (die van lid 1). Lid 3 verwijst naar P 7 lid 1, dat geen drempel kent. Standaard: alle lijsten. */
+        const eenPerLijst = new Set();
+        const magMeedoen = nr => !eenPerLijst.has(nr) && (opt.lid3 === "alle" || init.find(s => s.nr === nr).meetsThr);
+        while (teVerdelen > 0) {
+          const kand = alleNrs.filter(nr => L(nr).votes > 0 && heeftKandidaat(nr) && magMeedoen(nr));
+          if (!kand.length) break;
+          const k = hoogste(kand, gemiddelde, "UHA");
+          if (k === "lot") { gestopt = true; break; }
+          eenPerLijst.add(k.nr);
+          geef(k.nr, "UHA", k.waarde, { options: k.groep, drawing: k.drawing, exhausted: uitgeput(), excluded: alleNrs.filter(nr => !kand.includes(nr)) });
+        }
+        if (!gestopt && teVerdelen > 0) {
+          /* UITLEG lid3-op: elke lijst heeft al een zetel uit lid 3 en er zijn nog zetels. De wet regelt dit
+             niet. Hier: gewoon verder volgens P 7 lid 1 (zonder de beperking tot één zetel). */
+          const r = grootsteGemiddelden(nr => opt.lid3 === "alle" || init.find(s => s.nr === nr).meetsThr, "HA");
+          if (r === "lot") gestopt = true;
+          else notes.push({ code: "lid3-op", text: "Alle lijsten hadden al een zetel volgens P 8 lid 3 en er waren nog zetels over. De wet regelt dat niet; de overige zetels zijn verdeeld volgens P 7 lid 1 zonder de beperking tot één zetel per lijst." });
+        }
+      }
+    }
+
+    // ---- P 9: meerderheid van stemmen, geen meerderheid van zetels ----
+    if (!gestopt && T > 0) {
+      const m = lijsten.find(l => 2 * l.votes > T);
+      if (m && zetels.get(m.nr) * 2 <= S) {
+        /* "vervalt één zetel, toegewezen aan de lijst die voor het kleinste gemiddelde of het kleinste
+           overschot een zetel heeft verworven". De restzetels zijn op dalende volgorde toegewezen; de laatst
+           toegewezen restzetel is die met het kleinste gemiddelde of overschot.
+           UITLEG p9-zelf: een zetel van de meerderheidslijst zelf telt hier niet mee. */
+        const andere = restzetels.filter(r => r.nr !== m.nr);
+        if (restzetels.length && restzetels[restzetels.length - 1].nr === m.nr && andere.length)
+          notes.push({ code: "p9-zelf", text: `De kleinste restzetel was van lijst ${m.nr} zelf. Volgens de app vervalt dan de kleinste restzetel van een andere lijst; de wet zegt dit niet met zoveel woorden.` });
+        if (!andere.length) notes.push({ code: "p9-geen", text: `Lijst ${m.nr} heeft de volstrekte meerderheid van de stemmen maar niet van de zetels, en geen andere lijst heeft een restzetel. P 9 kan dan niet worden toegepast.` });
+        else if (!heeftKandidaat(m.nr)) notes.push({ code: "p9-p10", text: `P 9 zou lijst ${m.nr} een extra zetel geven, maar de lijst heeft geen kandidaten meer (P 10). De zetel is niet verplaatst.` });
+        else {
+          const laatste = andere[andere.length - 1];
+          // UITLEG p9-mix: bij P 8 lid 3 staan overschotten en gemiddelden naast elkaar; de laatst toegewezen telt.
+          const gelijk = andere.filter(r => r.kind === laatste.kind && r.waarde.eq(laatste.waarde)).map(r => r.nr);
+          let van = laatste.nr, drawing = null;
+          if (new Set(gelijk).size > 1) {
+            const variant = { type: "AM", assignTo: m.nr, options: [...new Set(gelijk)], base: laatste.kind };
+            const d = lot(variant);
+            if (d === null) gestopt = true; else { van = d; drawing = variant; }
+          }
+          if (!gestopt) {
+            const before = snap();
+            zetels.set(van, zetels.get(van) - 1); rest.set(van, rest.get(van) - 1);
+            zetels.set(m.nr, zetels.get(m.nr) + 1); rest.set(m.nr, rest.get(m.nr) + 1);
+            steps.push({ kind: "AM", nr: m.nr, retracted: van, drawing, before });
+          }
+        }
+      }
+    }
+
+    const standings = lijsten.map(l => ({ nr: l.nr, full: vol.get(l.nr), res: rest.get(l.nr), total: zetels.get(l.nr) }));
+    const assigned = standings.reduce((a, s) => a + s.total, 0);
+    const p10 = steps.some(s => s.kind === "P10") || lijsten.some(l => l.cands !== Infinity && zetels.get(l.nr) >= l.cands && steps.some(s => s.exhausted && s.exhausted.includes(l.nr)));
+    const warnings = [];
+    if (!gestopt && assigned < S) warnings.push("ONBEZET");
+    if (steps.some(s => s.kind === "AM") && p10) warnings.push("P9P10");
+    return {
+      engine: "wet", seats: S, T, quota: kd, fullSeats: init.reduce((a, s) => a + s.full, 0), residual, method: methode,
+      init, lists: lijsten, kdDrempel: !!input.kdDrempel, opties: opt, steps, standings, warnings,
+      unassigned: gestopt ? 0 : S - assigned, lotLog, badLot, lotsUsed: lotIdx,
+      status: gestopt ? "lot" : "ok", required: gestopt ? required : null, notes, p10vol,
+    };
+  }
+  return { verdeel, Q };
+})();
 "use strict";
 /* ============================== helpers ============================== */
 const $ = id => document.getElementById(id);
@@ -636,7 +852,7 @@ const kdDefault = cat => cat === "TK" || cat === "EP";
 const STORE = "zetelverdeling.session.v1";
 const fresh = () => ({
   step: 1, seats: null, category: "GR", kd: null, lists: [], emlRef: null, files: [], election: null,
-  lots: [], prog: { src: "eml", eml: null, man: {} }, note: "", auth: "", place: "", chair: "", demo: "",
+  lots: [], lid3: "alle", prog: { src: "eml", eml: null, man: {} }, note: "", auth: "", place: "", chair: "", demo: "",
 });
 let S = fresh();
 let R = null, Rerr = "";
@@ -785,15 +1001,38 @@ function inputProblems() {
   if (S.lists.length && S.lists.every(l => !(+l.votes > 0))) p.push("Er zijn geen stemmen.");
   return p;
 }
+/* Alle mogelijke uitkomsten van een berekening over alle mogelijke lotingen (voor de toetsing). */
+function outcomes(f, input, limit = 256) {
+  const res = new Map(); let leaves = 0, first = null;
+  const rec = lots => {
+    if (leaves >= limit) return;
+    const r = f({ ...input, lots });
+    if (r.status !== "lot") { leaves++; const k = r.standings.map(s => s.total).join(","); if (!res.has(k)) res.set(k, { r, lots }); return; }
+    if (!first) first = r.required;
+    for (const o of r.required.options) rec([...lots, o]);
+  };
+  rec(input.lots || []);
+  return { res, complete: leaves < limit, firstLot: first };
+}
+const totKey = r => r.standings.map(s => s.total).join(",");
+let CHECK = null;
 function compute() {
-  R = null; Rerr = "";
+  R = null; Rerr = ""; CHECK = null;
   const p = inputProblems();
   if (p.length) { Rerr = p.join(" "); return; }
-  const input = { seats: +S.seats, kdDrempel: kdOn(), lists: S.lists.map(l => ({ nr: +l.nr, name: l.name, votes: +l.votes, cands: (l.cands === null || l.cands === "" || l.cands === undefined) ? null : +l.cands })), lots: S.lots };
+  const base = { seats: +S.seats, kdDrempel: kdOn(), lists: S.lists.map(l => ({ nr: +l.nr, name: l.name, votes: +l.votes, cands: (l.cands === null || l.cands === "" || l.cands === undefined) ? null : +l.cands })) };
+  const input = { ...base, lots: S.lots, opties: { lid3: S.lid3 || "alle" } };
   try {
-    R = ZV.apportion(input);
-    if (R.badLot) { S.lots = S.lots.slice(0, R.badLot.at); input.lots = S.lots; R = ZV.apportion(input); toast("De ingevoerde loting past niet meer bij deze gegevens en is weggehaald"); }
-  } catch (e) { Rerr = e.message; R = null; }
+    R = ZVW.verdeel(input);
+    if (R.badLot) { S.lots = S.lots.slice(0, R.badLot.at); input.lots = S.lots; R = ZVW.verdeel(input); toast("De ingevoerde loting past niet meer bij deze gegevens en is weggehaald"); }
+  } catch (e) { Rerr = e.message; R = null; return; }
+  // Toetsing: dezelfde gegevens volgens de werkwijze van de programmatuur (Abacus), en volgens de andere uitleg van P 8 lid 3.
+  try {
+    const ab = outcomes(ZV.apportion, { ...base, lots: [] });
+    const alt = R.method === "LR" ? outcomes(ZVW.verdeel, { ...base, lots: [], opties: { lid3: (S.lid3 || "alle") === "alle" ? "drempel" : "alle" } }) : null;
+    const lotNow = R.status === "lot" ? outcomes(ZVW.verdeel, input) : null;
+    CHECK = { ab, alt, lotNow };
+  } catch (e) { CHECK = { error: e.message }; }
 }
 const nameOf = nr => (S.lists.find(l => +l.nr === nr) || {}).name || "";
 const lijst = nr => `lijst ${nr}`;
@@ -861,7 +1100,7 @@ function renderListTable() {
 /* ============================== stap 2 ============================== */
 function renderStep2() {
   const st = $("calcStatus");
-  ["quotaBox", "fullTable", "resBox", "p9Box", "p10Box", "finalTable", "stepLog"].forEach(id => $(id).innerHTML = "");
+  ["quotaBox", "fullTable", "resBox", "p9Box", "p10Box", "finalTable", "stepLog", "toetsBox"].forEach(id => $(id).innerHTML = "");
   $("lotBox").hidden = true;
   if (!R) { st.className = "status big bad"; st.innerHTML = "Nog geen berekening mogelijk<small>" + esc(Rerr) + "</small>"; $("resHint").textContent = ""; return; }
   if (R.status === "lot") { st.className = "status big warn"; st.innerHTML = `Er moet worden geloot<small>Bij een gelijke stand beslist het lot. Voer hieronder de uitkomst van de loting van het centraal stembureau in om verder te rekenen.</small>`; renderLot(); }
@@ -877,6 +1116,7 @@ function renderStep2() {
 
   renderResidual();
   renderP9P10();
+  renderToets();
   renderFinal($("finalTable"));
   $("stepLog").innerHTML = R.steps.map(s => `<li>${stepText(s)}</li>`).join("") || "<li>Er zijn geen restzetels.</li>";
 }
@@ -885,12 +1125,44 @@ function lotText(v) {
   const what = v.type === "LR" ? "overschot" : "gemiddelde";
   return `Restzetel ${v.resNo}${v.seatsAvailable > 1 ? ` (en verder)` : ""}: de lijsten ${v.options.join(", ")} hebben hetzelfde ${v.type === "LR" ? "grootste overschot" : "grootste gemiddelde"} (${ff(v.value)}), maar er ${v.seatsAvailable === 1 ? "is nog 1 restzetel" : "zijn nog " + v.seatsAvailable + " restzetels"} voor ${v.options.length} lijsten. Het lot bepaalt welke lijst de${v.seatsAvailable > 1 ? " eerstvolgende" : ""} zetel krijgt (${v.type === "LR" ? "P 8 lid 1" : "P 7 lid 1"}).`;
 }
+function diffText(key) {
+  const other = key.split(",").map(Number);
+  return R.standings.map((s, i) => other[i] !== s.total ? `lijst ${s.nr}: ${other[i]} in plaats van ${s.total}` : null).filter(Boolean).join("; ");
+}
+const lots2 = v => v ? `de lijsten ${v.options.join(" en ")}` : "";
+/* Toetsing van de eigen berekening: werkwijze van de programmatuur en uitleg van P 8 lid 3. */
+function toetsing() {
+  if (!R || !CHECK) return [];
+  if (CHECK.error) return [{ cls: "warn", html: "De tweede berekening lukte niet: " + esc(CHECK.error) }];
+  if (R.status === "lot") return [{ cls: "info", html: "De toetsing volgt als de loting is ingevoerd." }];
+  const out = [], key = totKey(R), ab = CHECK.ab;
+  if (!ab.res.has(key)) out.push({ cls: "bad", html: `<b>Verschil met de werkwijze van de programmatuur (Abacus).</b> Die komt uit op: ${esc(diffText([...ab.res.keys()][0]))}. Zoek uit welke uitleg van de wet juist is; neem bij twijfel contact op met de Kiesraad.`, report: "De werkwijze van de programmatuur (Abacus) komt bij deze gegevens op een andere verdeling: " + diffText([...ab.res.keys()][0]) + "." });
+  else if (ab.res.size === 1) {
+    out.push({ cls: "ok", html: "De werkwijze van de programmatuur (Abacus), apart nagerekend, komt op dezelfde verdeling." });
+    if (ab.firstLot && !R.lotLog.length) out.push({ cls: "warn", html: `Volgens de werkwijze van Abacus moet hier geloot worden tussen ${lots2(ab.firstLot)}; volgens de wettekst niet: daar doet een lijst zonder kandidaten zonder zetel (P 10) niet meer mee, zodat de gelijke stand wegvalt. De uitkomst van die loting maakt voor de zetels niet uit; de programmatuur kan er wel om vragen.`, report: `De programmatuur vraagt mogelijk om een loting tussen ${lots2(ab.firstLot)}. Volgens deze berekening is die loting niet nodig (P 10); de uitkomst ervan maakt voor de zetelverdeling niet uit.` });
+  } else out.push({ cls: "warn", html: `De werkwijze van Abacus komt, afhankelijk van de loting, op ${ab.res.size} mogelijke verdelingen. Deze berekening is daar één van.` });
+  if (!ab.complete) out.push({ cls: "warn", html: "Er zijn te veel mogelijke lotingen om allemaal na te rekenen; de toetsing is niet volledig." });
+  if (CHECK.alt && R.steps.some(s => s.kind === "UHA")) {
+    const cur = (S.lid3 || "alle") === "alle";
+    const same = CHECK.alt.res.size === 1 && CHECK.alt.res.has(key);
+    const sel = `<label class="inline" style="margin-top:6px">Uitleg P 8 lid 3: <select id="lid3Sel" style="width:auto"><option value="alle"${cur ? " selected" : ""}>alle lijsten doen mee (letterlijk: P 7 lid 1 kent geen drempel)</option><option value="drempel"${cur ? "" : " selected"}>alleen lijsten met ten minste 75% van de kiesdeler</option></select></label>`;
+    if (same) out.push({ cls: "ok", html: "P 8 lid 3 is toegepast. Of lijsten onder 75% van de kiesdeler daarbij meedoen, staat niet in de wet; hier maakt het voor de uitkomst niet uit." + sel });
+    else out.push({ cls: "warn", html: `<b>De uitleg van P 8 lid 3 maakt hier uit.</b> De wet zegt niet of lijsten onder 75% van de kiesdeler meedoen. Met de andere uitleg: ${esc(diffText([...CHECK.alt.res.keys()][0]))}.` + sel, report: `De uitkomst hangt af van de uitleg van P 8 lid 3 (doen lijsten onder 75% van de kiesdeler mee?). Gekozen: ${cur ? "alle lijsten doen mee" : "alleen lijsten met ten minste 75%"}. Met de andere uitleg: ${diffText([...CHECK.alt.res.keys()][0])}.` });
+  }
+  (R.notes || []).forEach(n => out.push({ cls: "warn", html: esc(n.text) }));
+  return out;
+}
+function renderToets() {
+  const t = toetsing();
+  $("toetsBox").innerHTML = t.length ? `<ul class="checks">${t.map(x => `<li class="${x.cls}">${x.html}</li>`).join("")}</ul>` : `<p class="hint">Nog geen berekening.</p>`;
+}
 function renderLot() {
   const v = R.required, box = $("lotBox");
   box.hidden = false;
   box.innerHTML = `<h2>Loting nodig</h2><p>${esc(lotText(v))}</p>
     <p class="hint">Voer de uitkomst in van de loting die het centraal stembureau in de openbare zitting houdt (dezelfde als in de programmatuur). ${v.type === "AM" ? "Kies de lijst waarvan de zetel vervalt." : "Kies de lijst die de zetel krijgt."}</p>
     <div class="lotopts">${v.options.map(nr => `<button type="button" data-lot="${nr}"><b>${nr}</b><span>${esc(nameOf(nr) || lijst(nr))}</span></button>`).join("")}</div>
+    ${CHECK && CHECK.lotNow && CHECK.lotNow.complete ? `<p class="hint">${CHECK.lotNow.res.size === 1 ? "De uitkomst van deze loting maakt voor de zetelverdeling per lijst niet uit (wel voor de volgorde in het verslag)." : "De uitkomst van deze loting maakt uit voor de zetelverdeling."}</p>` : ""}
     ${S.lots.length ? `<div class="btns"><button type="button" class="small" id="lotUndo">Vorige loting ongedaan maken</button></div>` : ""}`;
 }
 function stepText(s) {
@@ -900,7 +1172,7 @@ function stepText(s) {
   if (s.kind === "HA") return `Restzetel ${s.resNo}: <b>${lijst(s.nr)}</b>, grootste gemiddelde ${ff(s.value)}${d}${tie}`;
   if (s.kind === "UHA") return `Restzetel ${s.resNo}: <b>${lijst(s.nr)}</b>, grootste gemiddelde ${ff(s.value)} <small>(P 8 lid 3: hoogstens één zetel per lijst)</small>${d}${tie}`;
   if (s.kind === "AM") return `P 9: <b>${lijst(s.nr)}</b> heeft de volstrekte meerderheid van de stemmen maar niet van de zetels; de restzetel van ${lijst(s.retracted)} vervalt en gaat naar ${lijst(s.nr)}${s.drawing ? ` <small>(lijst ${s.retracted} aangewezen door loting)</small>` : ""}`;
-  if (s.kind === "EX") return `P 10: ${lijst(s.retracted)} heeft meer zetels dan kandidaten; een ${s.fullSeat ? "volle zetel" : "restzetel"} vervalt en gaat naar een andere lijst`;
+  if (s.kind === "P10") return `P 10: ${lijst(s.nr)} zou ${s.aantal} ${s.aantal === 1 ? "volle zetel" : "volle zetels"} meer krijgen dan er kandidaten zijn; ${s.aantal === 1 ? "die zetel gaat" : "die zetels gaan"} als restzetel naar andere lijsten`;
   return s.kind;
 }
 function renderResidual() {
@@ -923,10 +1195,9 @@ function renderResidual() {
   if (ha.length) {
     if (R.method === "LR") html += `<h3 style="margin-top:14px">Overige restzetels: grootste gemiddelden, hoogstens één per lijst <span class="art">P 8 lid 3</span></h3>`;
     const rows = R.init.filter(s => s.votes > 0);
-    const uhaBefore = (s, i) => ha.slice(0, i).some(x => x.kind === "UHA" && x.nr === s.nr);
     html += `<div class="tablewrap" style="max-height:none"><table><thead><tr><th>Lijst</th><th class="num">Stemcijfer</th>${ha.map(s => `<th class="frac">Rest&shy;zetel ${s.resNo}</th>`).join("")}</tr></thead><tbody>${rows.map(r => `<tr><td class="mono">${r.nr} <span class="hint">${esc(nameOf(r.nr)).slice(0, 26)}</span></td><td class="num">${nl(r.votes)}</td>${ha.map((s, i) => {
       const b = s.before.find(x => x.nr === r.nr), avg = ZV.fr(r.votes, b.full + b.res + 1);
-      const excl = (s.exhausted || []).includes(r.nr) || (R.kdDrempel && s.kind === "HA" && !r.meetsKd) || (s.kind === "UHA" && uhaBefore(r, i));
+      const excl = (s.excluded || []).includes(r.nr) || (s.exhausted || []).includes(r.nr);
       if (s.nr === r.nr) return `<td class="frac hit">${ff(avg)}${s.drawing ? "<small>loting</small>" : ""}</td>`;
       return `<td class="frac${excl ? " na" : ""}">${excl ? "–" : ff(avg)}</td>`;
     }).join("")}</tr>`).join("")}</tbody></table></div>`;
@@ -945,16 +1216,23 @@ function renderP9P10() {
   else if (R.status === "lot") p9 = `<p class="hint">Wordt beoordeeld als de restzetels verdeeld zijn.</p>`;
   else p9 = `<p>${lijst(ml.nr)} heeft de volstrekte meerderheid van de stemmen en ook meer dan de helft van de zetels. Niet van toepassing.</p>`;
   $("p9Box").innerHTML = p9;
-  const ex = R.steps.filter(s => s.kind === "EX");
+  const uit = exhaustedLists();
   let p10;
   if (!candsKnown()) p10 = `<p class="status warn">Niet gecontroleerd: niet bij elke lijst is het aantal kandidaten bekend.</p>`;
-  else if (ex.length) {
-    const per = {}; ex.forEach(s => per[s.retracted] = (per[s.retracted] || 0) + 1);
-    p10 = `<p class="status warn">Toegepast. ${Object.entries(per).map(([nr, n]) => `${lijst(nr)} heeft ${n} ${n === 1 ? "zetel" : "zetels"} meer dan kandidaten`).join("; ")}. Die zetels gaan door voortgezette toepassing van P 7 of P 8 naar andere lijsten.</p>`;
-  } else p10 = `<p>Geen lijst krijgt meer zetels dan zij kandidaten heeft. Niet van toepassing.</p>`;
+  else if (uit.length) p10 = `<p class="status warn">Toegepast. ${uit.map(u => `${lijst(u.nr)} heeft ${u.cands} ${u.cands === 1 ? "kandidaat" : "kandidaten"}${u.overVol ? ` maar zou ${u.overVol} volle ${u.overVol === 1 ? "zetel" : "zetels"} te veel krijgen` : " en die hebben allemaal een zetel"}`).join("; ")}. Zetels die deze lijsten niet kunnen bezetten, gaan door voortgezette toepassing van P 7 of P 8 naar lijsten die nog kandidaten zonder zetel hebben.</p>`;
+  else p10 = `<p>Geen lijst krijgt meer zetels dan zij kandidaten heeft. Niet van toepassing.</p>`;
   if (R.unassigned > 0) p10 += `<p class="status bad">${R.unassigned} ${R.unassigned === 1 ? "zetel blijft" : "zetels blijven"} onbezet.</p>`;
   if (R.warnings.includes("P9P10")) p10 += `<p class="status warn">Zowel P 9 als P 10 is toegepast. Overleg bij twijfel met de Kiesraad.</p>`;
   $("p10Box").innerHTML = p10;
+}
+/* Lijsten waarbij P 10 een rol speelde: te veel volle zetels, of uitgesloten van een restzetel omdat alle kandidaten al een zetel hadden. */
+function exhaustedLists() {
+  if (!R) return [];
+  return R.lists.filter(l => l.cands !== Infinity).map(l => {
+    const overVol = R.steps.filter(s => s.kind === "P10" && s.nr === l.nr).reduce((a, s) => a + s.aantal, 0);
+    const skipped = R.steps.some(s => (s.exhausted || []).includes(l.nr));
+    return (overVol || skipped) ? { nr: l.nr, cands: l.cands, overVol } : null;
+  }).filter(Boolean);
 }
 function renderFinal(t) {
   const fin = R.standings;
@@ -1053,7 +1331,10 @@ function bijzonderheden() {
   const b = [];
   if (R.lotLog.length) b.push(`Er is ${R.lotLog.length === 1 ? "één keer" : R.lotLog.length + " keer"} geloot: ` + R.lotLog.map(v => v.type === "AM" ? `bij P 9 tussen de lijsten ${v.options.join(", ")}, getrokken lijst ${v.drawn} (zetel vervalt)` : `voor restzetel ${v.resNo} tussen de lijsten ${v.options.join(", ")}, getrokken lijst ${v.drawn}`).join("; ") + ".");
   const am = R.steps.find(s => s.kind === "AM"); if (am) b.push(`Artikel P 9 is toegepast: de restzetel van lijst ${am.retracted} is toegewezen aan lijst ${am.nr}.`);
-  const ex = R.steps.filter(s => s.kind === "EX"); if (ex.length) b.push(`Artikel P 10 (lijstuitputting) is toegepast bij lijst ${[...new Set(ex.map(s => s.retracted))].join(", ")}.`);
+  const ex = exhaustedLists(); if (ex.length) b.push(`Artikel P 10 (lijstuitputting) is toegepast bij lijst ${ex.map(u => u.nr).join(", ")}.`);
+  if (R.opties && R.opties.lid3 === "drempel" && R.steps.some(s => s.kind === "UHA")) b.push("Bij P 8 lid 3 deden alleen lijsten mee met ten minste 75% van de kiesdeler (gekozen uitleg).");
+  (R.notes || []).forEach(n => b.push(n.text));
+  toetsing().forEach(x => { if (x.report) b.push(x.report); });
   if (R.unassigned) b.push(`${R.unassigned} zetel(s) blijven onbezet.`);
   if (R.kdDrempel) b.push("Lijsten met een stemcijfer onder de kiesdeler kwamen niet in aanmerking voor restzetels (P 7 lid 2).");
   if (!candsKnown()) b.push("Lijstuitputting (P 10) is niet gecontroleerd: niet bij elke lijst was het aantal kandidaten bekend.");
@@ -1130,6 +1411,7 @@ const DEMOS = {
   lid3: { label: "fictieve gemeente met 9 zetels waar P 8 lid 3 nodig is", seats: 9, cat: "GR", lists: [["Gemeentebelangen", 4780, 15], ["CDA", 400, 8], ["VVD", 370, 8], ["D66", 310, 6], ["Groen Lokaal", 300, 6]] },
   uitput: { label: "fictieve gemeente met 23 zetels; lijst 2 heeft te weinig kandidaten", seats: 23, cat: "GR", lists: [["Stadspartij", 7000, 30], ["Nieuw Lokaal", 4400, 4], ["CDA", 2300, 25], ["VVD", 1700, 25], ["SP", 600, 12]] },
   lot: { label: "fictieve gemeente met 19 zetels en een gelijke stand", seats: 19, cat: "GR", lists: [["Lokaal Belang", 5000, 30], ["CDA", 3400, 25], ["VVD", 1400, 25], ["D66", 1700, 25], ["PvdA", 800, 20]] },
+  lotp10: { label: "fictieve gemeente met 11 zetels waar Abacus een overbodige loting vraagt (P 10)", seats: 11, cat: "GR", lists: [["Stadsbelang", 4240, 30], ["Nieuwe Lijst", 2940, 3], ["CDA", 1180, 15], ["VVD", 980, 10], ["SP", 340, 8]] },
   p9: { label: "gemeente met 15 zetels waar P 9 geldt (geval uit GR2022, uit de tests van Abacus)", seats: 15, cat: "GR", lists: [["Grote Partij", 2571, 30], ["Partij B", 977, 15], ["Partij C", 567, 15], ["Partij D", 536, 15], ["Partij E", 453, 15]] },
 };
 function loadDemo(k) {
@@ -1150,7 +1432,7 @@ function update() {
   const b1 = $("b1"), b2 = $("b2"), b3 = $("b3");
   const p = inputProblems();
   b1.className = "badge " + (p.length ? (S.lists.length ? "warn" : "") : "ok"); b1.textContent = p.length ? (S.lists.length ? "onvolledig" : "–") : `${S.lists.length} lijsten`;
-  b2.className = "badge " + (!R ? "" : R.status === "lot" ? "warn" : "ok"); b2.textContent = !R ? "–" : R.status === "lot" ? "loting" : `${R.seats} zetels`;
+  const tw = toetsing(); b2.className = "badge " + (!R ? "" : R.status === "lot" || tw.some(x => x.cls === "warn") ? "warn" : tw.some(x => x.cls === "bad") ? "bad" : "ok"); b2.textContent = !R ? "–" : R.status === "lot" ? "loting" : `${R.seats} zetels`;
   const C = compareRes();
   b3.className = "badge " + ({ ok: "ok", diff: "bad", lot: "warn", incomplete: "warn" }[C.state] || ""); b3.textContent = { ok: "gelijk", diff: "verschil", lot: "loting", incomplete: "onvolledig" }[C.state] || "–";
   if (S.step === 1) renderStep1();
@@ -1203,6 +1485,7 @@ function bind() {
     if (!out.length) return toast("Geen lijsten herkend");
     S.lists = out; S.lots = []; $("pasteBox").hidden = true; update(); toast(out.length + " lijsten overgenomen");
   };
+  $("toetsBox").addEventListener("change", e => { if (e.target.id === "lid3Sel") { S.lid3 = e.target.value; S.lots = []; update(); } });
   $("lotBox").addEventListener("click", e => {
     const b = e.target.closest("[data-lot]"); if (b) { S.lots.push(+b.dataset.lot); update(); return; }
     if (e.target.id === "lotUndo") { S.lots.pop(); update(); }
