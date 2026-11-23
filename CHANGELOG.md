@@ -2,6 +2,12 @@
 
 Wat er per update is veranderd, nieuwste bovenaan. De precieze verschillen per bestand staan in de [commitgeschiedenis](https://github.com/Bonzo261/EML-hulpmiddelen/commits/main).
 
+## 23-11-2026 (ochtend, 2): logo en nieuwe startpagina
+
+- **Logo:** de site heeft een eigen logo: twee haken met een rood potlood. Het logo staat in de kop van de startpagina en is ook het icoon in het browsertabblad en op het beginscherm van je telefoon, op alle pagina's.
+- **Nieuwe startpagina:** een korte uitleg voor wie de apps gebruikt, een duidelijkere disclaimer ("Niet verbonden aan de Kiesraad"), genummerde app-kaarten met het EML-bestand dat ze maken of lezen, en nieuwe teksten bij de Verkiezingsdefinitie-maker en de Kandidatenlijsten-maker.
+- De voettekst noemt de broncode op GitHub, de licentie en de bronnen (Abacus en e-KS).
+
 ## 23-11-2026 (ochtend): aansluiten op e-KS
 
 De Verkiezingsdefinitie-maker en de Kandidatenlijsten-maker maken hun bestanden nu zoals [e-KS](https://github.com/kiesraad/e-ks), het nieuwe kandidaatstellingssysteem van de Kiesraad. De indeling van Nederland komt uit de `MasterElectionTree.xml` van e-KS. De bestanden zijn vergeleken met de e-KS-voorbeelden voor Provinciale Staten Groningen en Limburg, waterschap Fryslân en de Eerste Kamer, en zijn daaraan gelijk.

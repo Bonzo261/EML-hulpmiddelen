@@ -3,15 +3,20 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>EML-hulpmiddelen</title>
-<meta name="description" content="Testhulpmiddelen rond de EML_NL-standaard: verkiezingsdefinities, stembureaus, kandidatenlijsten, uitslagen, processen-verbaal, het controleprotocol en de controle van de zetelverdeling.">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>EML-hulpmiddelen voor verkiezingen – hobbyproject</title>
+<meta name="description" content="Zeven hulpmiddelen rond EML_NL-bestanden voor verkiezingen: verkiezingsdefinitie (110a), kandidatenlijsten (230b), stembureaus (110b), test-uitslagen (510), processen-verbaal, het controleprotocol en de controle van de zetelverdeling. Een hobbyproject, niet verbonden aan de Kiesraad.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
   --ink:#17202b; --muted:#5b6673; --paper:#f5f6f4; --panel:#ffffff; --line:#d9ddd8;
-  --accent:#c4122f; --accent-soft:#fbe7ea; --warn:#a15c00; --warn-soft:#fdf0dc;
+  --accent:#c4122f; --accent-soft:#fbe7ea;
+  --warn:#a15c00; --warn-soft:#fdf0dc;
   --font-display:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;
   --font-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --font-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
@@ -20,117 +25,171 @@
 @media (prefers-color-scheme:dark){
   :root{
     --ink:#e6e9ec; --muted:#9aa4ae; --paper:#12161b; --panel:#1a2027; --line:#2e3640;
-    --accent:#ff5468; --accent-soft:#3a1d23; --warn:#f0b357; --warn-soft:#33260f;
+    --accent:#ff5468; --accent-soft:#3a1d23;
+    --warn:#f0b357; --warn-soft:#33260f;
     color-scheme:dark;
   }
 }
 *{box-sizing:border-box}
 html,body{margin:0}
-body{background:var(--paper);color:var(--ink);font:15.5px/1.6 var(--font-body)}
-a{color:var(--accent)}
-header.top{padding:28px 24px 20px;border-bottom:1px solid var(--line);background:var(--panel)}
-header.top .in{max-width:1180px;margin:0 auto;padding:0 24px}
-header.top h1{font:600 30px/1.1 var(--font-display);margin:0}
-header.top h1 .tag{font:500 12px/1 var(--font-mono);color:var(--accent);border:1px solid var(--accent);border-radius:3px;padding:3px 6px;margin-left:8px;vertical-align:6px}
-header.top p{margin:8px 0 0;color:var(--muted);max-width:72ch}
-.wrap{max-width:1180px;padding:24px;margin:0 auto}
-.disclaimer{background:var(--warn-soft);border-left:4px solid var(--warn);border-radius:5px;padding:12px 16px;margin-bottom:20px;max-width:90ch}
-.disclaimer b{display:block;font:600 13px/1.4 var(--font-mono);text-transform:uppercase;letter-spacing:.04em;color:var(--warn)}
-.guide{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:18px 20px;display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;justify-content:space-between;margin-bottom:28px}
-.guide h2{margin:0;font:600 20px/1.2 var(--font-display)}
-.guide p{margin:2px 0 0;color:var(--muted)}
-h2.group{font:600 13px/1 var(--font-mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 12px}
-.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-bottom:28px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:18px 20px;display:grid;gap:10px;align-content:start}
-.card h3{margin:0;font:600 20px/1.2 var(--font-display)}
-.card .lvl{font:500 12px/1 var(--font-mono);color:var(--accent)}
-.card p{margin:0;color:var(--muted)}
-.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
-.btn{display:inline-block;font:500 14px/1 var(--font-body);border-radius:4px;padding:10px 13px;border:1px solid var(--line);background:var(--panel);color:var(--ink);text-decoration:none}
-.btn:hover{border-color:var(--ink)}
-.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
-footer{padding:0 24px 30px;color:var(--muted);font-size:13px;max-width:1180px;margin:0 auto}
+body{background:var(--paper);color:var(--ink);font:15px/1.55 var(--font-body);min-height:100vh;display:flex;flex-direction:column}
+a{color:inherit}
+
+header.top{padding:22px 24px 14px;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px 24px;align-items:end;justify-content:space-between}
+header.top h1{font:600 26px/1.1 var(--font-display);margin:0;text-wrap:balance}
+.brand{display:flex;gap:14px;align-items:center}
+.brand img{width:56px;height:56px;flex:none;background:#fff;border:1px solid var(--line);border-radius:10px;padding:5px}
+header.top h1 .tag{font:500 12px/1 var(--font-mono);color:var(--accent);border:1px solid var(--accent);border-radius:3px;padding:3px 6px;margin-left:8px;vertical-align:4px}
+header.top p{margin:4px 0 0;color:var(--muted);max-width:66ch}
+.hobby{font:500 12px/1 var(--font-mono);color:var(--muted);border:1px dashed var(--line);border-radius:999px;padding:6px 11px;white-space:nowrap}
+
+main{width:100%;max-width:1120px;margin:0 auto;padding:28px 24px 40px;display:grid;gap:28px;flex:1}
+
+.intro{display:grid;gap:8px;max-width:72ch}
+.intro h2{font:600 30px/1.15 var(--font-display);margin:0;text-wrap:balance}
+.intro p{margin:0;color:var(--muted);font-size:16px}
+
+.notice{background:var(--warn-soft);border:1px solid var(--warn);border-left-width:4px;border-radius:6px;padding:14px 18px;display:grid;gap:6px}
+.notice strong{font:600 16px/1.3 var(--font-display);color:var(--warn)}
+.notice p{margin:0;font-size:14.5px}
+
+.apps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;counter-reset:app}
+@media (max-width:900px){.apps{grid-template-columns:1fr}}
+.app{display:grid;grid-template-rows:auto auto 1fr auto;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:20px 20px 18px;position:relative;transition:border-color .15s,box-shadow .15s,transform .15s}
+.app:hover{border-color:var(--accent);box-shadow:inset 4px 0 0 var(--accent),0 6px 18px rgba(0,0,0,.07);transform:translateY(-2px)}
+.app:focus-within{outline:2px solid var(--accent);outline-offset:2px}
+.app h3 a.main{text-decoration:none;color:inherit}
+.app h3 a.main::after{content:"";position:absolute;inset:0;border-radius:8px}
+.app h3 a.main:focus-visible{outline:none}
+@media (prefers-reduced-motion:reduce){.app,.guide{transition:none}.app:hover{transform:none}}
+.app .head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.app .n{font:500 13px/1 var(--font-mono);color:#fff;background:var(--accent);border-radius:3px;padding:4px 7px;min-width:24px;text-align:center}
+.app .tag{font:500 12px/1 var(--font-mono);color:var(--accent);border:1px solid var(--accent);border-radius:3px;padding:3px 6px}
+.app h3{margin:0;font:600 21px/1.2 var(--font-display)}
+.app p{margin:0;color:var(--muted);font-size:14.5px}
+.app .go{display:flex;justify-content:space-between;align-items:center;margin-top:6px;padding-top:12px;border-top:1px dashed var(--line);font-weight:600;font-size:14.5px;color:var(--accent)}
+.app .go .arrow{font:500 18px/1 var(--font-mono);transition:transform .15s}
+.app:hover .go .arrow{transform:translateX(4px)}
+
+.group{display:grid;gap:14px}
+.group h2{margin:0;font:600 20px/1.2 var(--font-display);display:flex;gap:10px;align-items:baseline}
+.group h2 small{font:500 12.5px/1 var(--font-mono);color:var(--muted)}
+.guide{display:flex;flex-wrap:wrap;gap:14px 24px;align-items:center;justify-content:space-between;text-decoration:none;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:18px 20px;transition:border-color .15s,box-shadow .15s}
+.guide:hover{border-color:var(--accent);box-shadow:inset 4px 0 0 var(--accent)}
+.guide:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.guide .txt{display:grid;gap:4px;max-width:78ch}
+.guide strong{font:600 20px/1.2 var(--font-display)}
+.guide span.d{color:var(--muted);font-size:14.5px}
+.guide .cta{font-weight:600;color:#fff;background:var(--accent);border-radius:4px;padding:10px 14px;white-space:nowrap}
+.app .go .man{position:relative;z-index:1;font:500 12.5px/1 var(--font-mono);color:var(--muted);text-decoration:underline;text-underline-offset:3px}
+.app .go .man:hover{color:var(--accent)}
+.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font:500 12.5px/1 var(--font-mono);color:var(--muted)}
+.flow span.s{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:6px 10px;color:var(--ink)}
+
+footer{border-top:1px solid var(--line);padding:18px 24px 28px;color:var(--muted);font-size:12.5px}
+footer .in{max-width:1120px;margin:0 auto;display:grid;gap:6px}
+footer p{margin:0;max-width:110ch}
 </style>
 </head>
 <body>
+
 <header class="top">
-  <div class="in">
+  <div class="brand">
+    <img src="logo-512.png" alt="" width="56" height="56">
+    <div>
     <h1>EML-hulpmiddelen <span class="tag">EML_NL</span></h1>
-    <p>Een hobbyproject met hulpmiddelen om testbestanden te maken en te controleren volgens de EML_NL-standaard: van verkiezingsdefinitie tot proces-verbaal. Alles draait in je browser; er wordt niets naar een server gestuurd.</p>
+    <p>Zeven kleine webapps om verkiezingsbestanden in het EML_NL-formaat te maken, te testen en te controleren.</p>
+    </div>
   </div>
+  <span class="hobby">hobbyproject · geen officiële software</span>
 </header>
 
-<main class="wrap">
-  <div class="disclaimer">
-    <b>Niet verbonden aan de Kiesraad</b>
-    Dit is een onafhankelijk hulpmiddel. Het is niet gemaakt, gecontroleerd of goedgekeurd door de Kiesraad. Gebruik het alleen voor test en oefening, met fictieve gegevens. Controleer bestanden altijd tegen de officiële XSD's en modellen voordat je erop vertrouwt.
-  </div>
+<main>
 
-  <div class="guide">
-    <div>
-      <h2>Handleidingen</h2>
-      <p>Per app een stap-voor-stap uitleg, met tips, veelgestelde vragen en bekende beperkingen.</p>
-    </div>
-    <a class="btn primary" href="handleidingen.html">Handleidingen openen</a>
-  </div>
+  <section class="intro">
+    <h2>Gemaakt door een enthousiasteling, voor wie met verkiezingsbestanden speelt</h2>
+    <p>Wie uitslagsoftware wil uitproberen, een training geeft of gewoon wil snappen hoe de bestanden in elkaar zitten, heeft testbestanden nodig. Met de eerste drie apps maak je de basisbestanden. De andere vier bouwen daarop voort: ze verzinnen een uitslag, maken er processen-verbaal van, helpen je de optellingen te controleren en rekenen de zetelverdeling na.</p>
+  </section>
 
-  <h2 class="group">Basisbestanden maken</h2>
-  <div class="cards">
-    <div class="card">
-      <span class="lvl">EML 110a</span>
-      <h3>Verkiezingsdefinitie-maker</h3>
-      <p>Soort verkiezing, gebied, datums, zetels, geregistreerde aanduidingen en de indeling in kieskringen. De basis voor alle andere apps.</p>
-      <div class="btns"><a class="btn primary" href="verkiezingsdefinitie.html">App openen</a><a class="btn" href="handleidingen.html#verkiezingsdefinitie-maker">Handleiding</a></div>
-    </div>
-    <div class="card">
-      <span class="lvl">EML 110b</span>
-      <h3>Stembureaus-maker</h3>
-      <p>De stembureaus van een gemeente, in EML_NL 1.2.2 of 1.3.1. Invoeren op het scherm, uit Excel of vanuit een bestaand bestand.</p>
-      <div class="btns"><a class="btn primary" href="stembureaus.html">App openen</a><a class="btn" href="handleidingen.html#stembureaus-maker">Handleiding</a></div>
-    </div>
-    <div class="card">
-      <span class="lvl">EML 230b</span>
-      <h3>Kandidatenlijsten-maker</h3>
-      <p>Kandidatenlijsten met fictieve personen, per kieskring, met stellen, lijstengroepen en hashcodes.</p>
-      <div class="btns"><a class="btn primary" href="kandidatenlijsten.html">App openen</a><a class="btn" href="handleidingen.html#kandidatenlijsten-maker">Handleiding</a></div>
-    </div>
-  </div>
+  <section class="notice" role="note" aria-label="Disclaimer">
+    <strong>Niet verbonden aan de Kiesraad</strong>
+    <p>Dit is een persoonlijk hobbyproject. Het is op geen enkele wijze verbonden aan, goedgekeurd door of gemaakt in opdracht van de Kiesraad, het ministerie van BZK of een gemeente. De bestanden die je hier maakt zijn niet officieel. Gebruik ze om te oefenen en te testen, en controleer ze altijd zelf voordat je er iets mee doet. Gebruik is op eigen risico.</p>
+  </section>
 
-  <h2 class="group">Uitslagen testen</h2>
-  <div class="cards">
-    <div class="card">
-      <span class="lvl">510b · 510c · 510d</span>
-      <h3>Uitslagen-generator</h3>
-      <p>Consistente test-uitslagen voor GSB, HSB en CSB, optioneel ondertekend, met een importzip per bestand.</p>
-      <div class="btns"><a class="btn primary" href="uitslagen-generator.html">App openen</a><a class="btn" href="handleidingen.html#uitslagen-generator">Handleiding</a></div>
-    </div>
-    <div class="card">
-      <span class="lvl">Modellen · PDF</span>
-      <h3>PV-generator</h3>
-      <p>Processen-verbaal als PDF, gevuld met de EML-bestanden uit de andere apps. Met watermerk TESTGEGEVENS in de testmodus.</p>
-      <div class="btns"><a class="btn primary" href="pv-generator.html">App openen</a><a class="btn" href="handleidingen.html#pv-generator">Handleiding</a></div>
-    </div>
-  </div>
+  <a class="guide" href="handleidingen.html">
+    <span class="txt"><strong>Handleidingen</strong><span class="d">Per app een stap-voor-stap uitleg met de knoppen uit de app, tips, veelgestelde vragen en bekende beperkingen. Met een schema van hoe de apps samenhangen.</span></span>
+    <span class="cta">Lees de handleidingen →</span>
+  </a>
 
-  <h2 class="group">Uitslag controleren</h2>
-  <div class="cards">
-    <div class="card">
-      <span class="lvl">GSB · HSB · CSB · GR26</span>
-      <h3>Controleprotocol</h3>
-      <p>Controleer of de uitslagsoftware goed heeft opgeteld: loot lijsten, voer de lijsttotalen in (op het scherm of offline in Excel) en vergelijk die met de uitslag-EML.</p>
-      <div class="btns"><a class="btn primary" href="controleprotocol.html">App openen</a><a class="btn" href="handleidingen.html#controleprotocol">Handleiding</a></div>
+  <section class="group" aria-labelledby="g1">
+    <h2 id="g1">Basisbestanden maken <small>110a → 230b → 110b</small></h2>
+    <div class="apps">
+      <div class="app">
+        <div class="head"><span class="n">1</span><span class="tag">EML_NL 110a</span></div>
+        <h3><a class="main" href="verkiezingsdefinitie.html">Verkiezingsdefinitie-maker</a></h3>
+        <p>Kies de soort verkiezing, het gebied en de datum. De indeling in kieskringen en gemeenten volgt e-KS, ook voor alle 21 waterschappen, de Eerste Kamer, de kiescolleges en stadsdelen. Je ziet het verkiezingsdefinitiebestand direct ontstaan, met controles erbij.</p>
+        <div class="go"><a class="man" href="handleidingen.html#verkiezingsdefinitie-maker">Handleiding</a><span>Open de app <span class="arrow" aria-hidden="true">→</span></span></div>
+      </div>
+      <div class="app">
+        <div class="head"><span class="n">2</span><span class="tag">EML_NL 230b</span></div>
+        <h3><a class="main" href="kandidatenlijsten.html">Kandidatenlijsten-maker</a></h3>
+        <p>Laad een verkiezingsdefinitie in en geef aan hoeveel partijen meedoen. De app maakt per kieskring kandidatenlijsten met fictieve personen, met geboortedata, stellen en lijstengroepen in de opbouw van e-KS, en levert ze met hashcodes als download.</p>
+        <div class="go"><a class="man" href="handleidingen.html#kandidatenlijsten-maker">Handleiding</a><span>Open de app <span class="arrow" aria-hidden="true">→</span></span></div>
+      </div>
+      <div class="app">
+        <div class="head"><span class="n">3</span><span class="tag">EML_NL 110b</span></div>
+        <h3><a class="main" href="stembureaus.html">Stembureaus-maker</a></h3>
+        <p>Maak de lijst met stembureaus van een gemeente, in de oude (1.2.2) of de nieuwe standaard (1.3.1). Vul de stembureaus in op het scherm of lees ze in uit Excel.</p>
+        <div class="go"><a class="man" href="handleidingen.html#stembureaus-maker">Handleiding</a><span>Open de app <span class="arrow" aria-hidden="true">→</span></span></div>
+      </div>
     </div>
-    <div class="card">
-      <span class="lvl">CSB · P 5–P 10</span>
-      <h3>Controle zetelverdeling</h3>
-      <p>Reken de zetelverdeling zelf na, stap voor stap volgens de Kieswet, en vergelijk de uitkomst met die van de uitslagsoftware. Met verslag voor onderdeel B.</p>
-      <div class="btns"><a class="btn primary" href="zetelverdeling.html">App openen</a><a class="btn" href="handleidingen.html#zetelverdeling-controle">Handleiding</a></div>
+  </section>
+
+  <section class="group" aria-labelledby="g2">
+    <h2 id="g2">Uitslagen testen <small>510 · PV</small></h2>
+    <div class="apps">
+      <div class="app">
+        <div class="head"><span class="n">4</span><span class="tag">510b · 510c · 510d</span></div>
+        <h3><a class="main" href="uitslagen-generator.html">Uitslagen-generator</a></h3>
+        <p>Laad de verkiezingsdefinitie, kandidatenlijsten en stembureaus in. De app verzint een kloppende uitslag per stembureau en telt die op per gemeente (GSB), kieskring (HSB) en voor het centraal stembureau (CSB). Desgewenst ondertekend zoals Abacus dat doet.</p>
+        <div class="go"><a class="man" href="handleidingen.html#uitslagen-generator">Handleiding</a><span>Open de app <span class="arrow" aria-hidden="true">→</span></span></div>
+      </div>
+      <div class="app">
+        <div class="head"><span class="n">5</span><span class="tag">Abacus-modellen</span></div>
+        <h3><a class="main" href="pv-generator.html">PV-generator</a></h3>
+        <p>Maak processen-verbaal als PDF in de opmaak van Abacus: blanco om met de hand in te vullen, of al ingevuld op basis van uitslagbestanden. Kies een model; de app laat zien welke EML-bestanden uit de andere apps nodig zijn.</p>
+        <div class="go"><a class="man" href="handleidingen.html#pv-generator">Handleiding</a><span>Open de app <span class="arrow" aria-hidden="true">→</span></span></div>
+      </div>
     </div>
-  </div>
+  </section>
+
+  <section class="group" aria-labelledby="g3">
+    <h2 id="g3">Uitslag controleren <small>controleprotocol · zetelverdeling</small></h2>
+    <div class="apps">
+      <div class="app">
+        <div class="head"><span class="n">6</span><span class="tag">GSB · HSB · CSB</span></div>
+        <h3><a class="main" href="controleprotocol.html">Controleprotocol</a></h3>
+        <p>Controleer of de uitslagsoftware goed heeft opgeteld. Loot de te controleren lijsten, voer de lijsttotalen per stembureau, gemeente of kieskring in vanaf de papieren processen-verbaal (online, of offline in Excel) en vergelijk ze met de uitslag (510b, 510c of 510d). Met verslag en Excel-export.</p>
+        <div class="go"><a class="man" href="handleidingen.html#controleprotocol">Handleiding</a><span>Open de app <span class="arrow" aria-hidden="true">→</span></span></div>
+      </div>
+      <div class="app">
+        <div class="head"><span class="n">7</span><span class="tag">CSB · P 5–P 10</span></div>
+        <h3><a class="main" href="zetelverdeling.html">Controle zetelverdeling</a></h3>
+        <p>Reken de zetelverdeling zelf na, rechtstreeks volgens de tekst van de Kieswet (P 5 tot en met P 10): volle zetels, restzetels, loting, absolute meerderheid en uitgeputte lijsten, stap voor stap uitgelegd. De app toetst de uitkomst ook aan de werkwijze van Abacus. Vergelijk met de programmatuur (520 of overgetikt PV) en maak het verslag voor onderdeel B van het controleprotocol CSB.</p>
+        <div class="go"><a class="man" href="handleidingen.html#zetelverdeling-controle">Handleiding</a><span>Open de app <span class="arrow" aria-hidden="true">→</span></span></div>
+      </div>
+    </div>
+  </section>
+
 </main>
 
 <footer>
-  Broncode op <a href="https://github.com/Bonzo261/EML-hulpmiddelen">GitHub</a> · Licentie EUPL-1.2 · Opbouw en opmaak van de processen-verbaal en de PDF-lettertypen komen uit <a href="https://github.com/kiesraad/abacus">kiesraad/abacus</a> (EUPL-1.2).
+  <div class="in">
+    <p>EML-hulpmiddelen is een hobbyproject en geen product van de Kiesraad of een andere overheidsinstantie. Namen en gegevens van kandidaten die de apps maken zijn verzonnen; elke overeenkomst met bestaande personen berust op toeval.</p>
+    <p>Voor officiële informatie en software over verkiezingen: <a href="https://www.kiesraad.nl" rel="noopener">kiesraad.nl</a>.</p>
+    <p>Broncode op <a href="https://github.com/Bonzo261/EML-hulpmiddelen" rel="noopener">GitHub</a> · Licentie EUPL-1.2 · Opbouw en opmaak van de processen-verbaal komen uit <a href="https://github.com/kiesraad/abacus" rel="noopener">kiesraad/abacus</a>, de indeling van Nederland uit <a href="https://github.com/kiesraad/e-ks" rel="noopener">kiesraad/e-ks</a> (beide EUPL-1.2).</p>
+  </div>
 </footer>
+
 </body>
 </html>

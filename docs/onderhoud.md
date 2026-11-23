@@ -4,7 +4,7 @@ Statische website: alle apps zijn losse HTML-bestanden in de hoofdmap. Huisstijl
 
 | Bestand | Inhoud |
 |---|---|
-| `index.html` | Startpagina met disclaimer, link naar de handleidingen en zeven app-kaarten in drie groepen (basisbestanden maken, uitslagen testen, uitslag controleren) |
+| `index.html` | Startpagina met logo, uitleg, disclaimer, link naar de handleidingen en zeven app-kaarten in drie groepen (basisbestanden maken, uitslagen testen, uitslag controleren) |
 | `handleidingen.html` | Handleidingen per app (tabbladen via de hash, bijv. `#controleprotocol`, `#cp-excel` of `#zetelverdeling-controle`; prefixen vd, sb, kl, pv, ug, cp, zv) |
 | `verkiezingsdefinitie.html` | Verkiezingsdefinitie-maker (110a) |
 | `kandidatenlijsten.html` | Kandidatenlijsten-maker (230b) |
@@ -13,11 +13,13 @@ Statische website: alle apps zijn losse HTML-bestanden in de hoofdmap. Huisstijl
 | `pv-generator.html` + `pv-fonts.js` | PV-generator |
 | `controleprotocol.html` | Controleprotocol (GR26) |
 | `zetelverdeling.html` | Controle zetelverdeling (CSB, P 5–P 10) |
+| `logo-512.png`, `favicon.ico`, `favicon-16.png`, `favicon-32.png`, `apple-touch-icon.png` | Logo en iconen |
 
 ## Een app bijwerken
 1. Vervang het HTML-bestand door de nieuwe versie.
 2. Zet bovenaan in `<header class="top"><div>` de terugknop en de disclaimer terug:
    `<a class="back" href="index.html">← Alle hulpmiddelen</a><span class="nk"> · Onafhankelijk hulpmiddel, niet van de Kiesraad</span>`, met de CSS voor `.back` en `.nk` onderaan in `<style>`.
+2b. Zet vóór `<title>` de vier icon-links (favicon.ico, favicon-32.png, favicon-16.png, apple-touch-icon.png); zie `index.html`.
 3. Komt de app uit een artifact met meer bestanden (zoals `pv-fonts.js` bij de PV-generator), neem die bestanden ook over.
 4. In `handleidingen.html` verwijzen de knoppen "App openen" naar de lokale bestandsnamen.
 5. Werk de handleiding en de notitie in `docs/` bij als de werking verandert.
