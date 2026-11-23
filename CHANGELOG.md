@@ -2,6 +2,34 @@
 
 Wat er per update is veranderd, nieuwste bovenaan. De precieze verschillen per bestand staan in de [commitgeschiedenis](https://github.com/Bonzo261/EML-hulpmiddelen/commits/main).
 
+## 23-11-2026 (ochtend): aansluiten op e-KS
+
+De Verkiezingsdefinitie-maker en de Kandidatenlijsten-maker maken hun bestanden nu zoals [e-KS](https://github.com/kiesraad/e-ks), het nieuwe kandidaatstellingssysteem van de Kiesraad. De indeling van Nederland komt uit de `MasterElectionTree.xml` van e-KS. De bestanden zijn vergeleken met de e-KS-voorbeelden voor Provinciale Staten Groningen en Limburg, waterschap Fryslân en de Eerste Kamer, en zijn daaraan gelijk.
+
+### Verkiezingsdefinitie-maker (`verkiezingsdefinitie.html`)
+- **Waterschappen:** de 21 echte waterschappen staan in de keuzelijst, met hun nummer en gemeenten. Het aantal zetels wordt automatisch ingevuld: alleen de gekozen zetels, zonder de 4 geborgde zetels (bijvoorbeeld Fryslân 21 in plaats van 25). Een waarschuwing volgt als je het totaal inclusief geborgde zetels invult.
+- **Provinciale Staten:** kieskringen en gemeenten volgens e-KS, met de nummering van e-KS (Noord-Holland nu 1 Amsterdam, 2 Den Helder, 3 Haarlem). De naam wordt "Verkiezing van de provinciale staten van …".
+- **Eerste Kamer:** de indeling is nu gelijk aan het e-KS-voorbeeld (12 provincies, de 3 eilanden en het buitenland, met de Kiesraad als centraal stembureau). Drie fouten opgelost: de voorkeurdrempel is 100% (niet 50%), de kandidaatstelling is op de 34e dag vóór de stemming (niet de 44e), en de kandidaatstelling geldt voor "alle" kieskringen.
+- **Kiescolleges:** nu vier aparte kiescolleges (Bonaire, Sint Eustatius, Saba en niet-ingezetenen) in plaats van één, met het aantal leden vanaf 2027.
+- **Stadsdelen en gebieden:** de stadsdelen van Amsterdam en de gebieden van Rotterdam kunnen als DEELGEMEENTE in de indeling, zoals e-KS. Deze optie staat standaard uit.
+- **Fries toegestaan** staat nu ook bij Provinciale Staten Fryslân en bij de 18 Friese gemeenten.
+
+### Kandidatenlijsten-maker (`kandidatenlijsten.html`)
+- Kandidaten krijgen een **geboortedatum** (18 t/m 80 jaar op de dag van stemming). Deze optie staat standaard aan.
+- **Geslacht onbekend** is mogelijk, met een instelbaar percentage.
+- In `kr:ListData` kun je instellen of het geslacht gepubliceerd wordt en in welke taal de lijst gepubliceerd wordt: Nederlands, of Fries als de verkiezing dat toestaat.
+- Kandidaten in het buitenland kunnen nu bij alle soorten verkiezingen.
+- Bij Limburg is de kieskring nu "1" zoals in e-KS. Met een schakelaar kies je Romeinse cijfers ("I"), zoals Abacus verwacht.
+- Met hetzelfde startgetal krijg je nog steeds dezelfde namen en woonplaatsen als in eerdere versies.
+- De woonplaatsen bij Provinciale Staten in Gelderland, Noord-Holland en Noord-Brabant passen weer bij de juiste kieskring.
+
+### Handleidingen
+- De handleidingen van de Verkiezingsdefinitie-maker en de Kandidatenlijsten-maker zijn herschreven, met nieuwe paragrafen over Provinciale Staten, waterschappen, de Eerste Kamer, kiescolleges, stadsdelen en Fries.
+
+### Website
+- Nieuw: [`WENSEN.md`](WENSEN.md), met wat er nog op de to-do-lijst staat.
+- `docs/verkiezingsdefinitie-maker.md`, `docs/kandidatenlijsten-maker.md` en de README bijgewerkt.
+
 ## 23-11-2026: controle zetelverdeling rekent volgens de wettekst
 
 ### Controle zetelverdeling (`zetelverdeling.html`)

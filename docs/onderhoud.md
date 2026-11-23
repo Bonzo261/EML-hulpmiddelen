@@ -22,6 +22,7 @@ Statische website: alle apps zijn losse HTML-bestanden in de hoofdmap. Huisstijl
 4. In `handleidingen.html` verwijzen de knoppen "App openen" naar de lokale bestandsnamen.
 5. Werk de handleiding en de notitie in `docs/` bij als de werking verandert.
 6. Beschrijf de wijziging in `CHANGELOG.md`.
+7. Haal afgeronde punten weg uit `WENSEN.md` en zet nieuwe wensen erbij.
 
 ## Afhankelijkheden buiten de site
 - Google Fonts.

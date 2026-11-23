@@ -167,11 +167,13 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
     <h2><span class="n">3</span>Hoe moeten de personen eruitzien?</h2>
     <div class="row">
       <div class="field narrow"><label for="pctF">Aandeel vrouwen (%)</label><input type="number" id="pctF" min="0" max="100" value="50"></div>
+      <div class="field narrow"><label for="pctU">Aandeel geslacht onbekend (%)</label><input type="number" id="pctU" min="0" max="100" value="0"></div>
       <div class="field narrow"><label for="seed">Startgetal</label><input type="text" id="seed" inputmode="numeric"></div>
       <button type="button" id="reseed">Nieuwe personen</button>
     </div>
+    <label class="inline"><input type="checkbox" id="dob" checked> Geboortedatum opnemen</label>
     <label class="inline" id="abroadWrap"><input type="checkbox" id="abroad"> Enkele kandidaten wonen in het buitenland</label>
-    <p class="hint">Alle namen zijn willekeurig samengesteld uit veelvoorkomende voor- en achternamen. Met hetzelfde startgetal krijg je dezelfde personen terug.</p>
+    <p class="hint">Alle namen zijn willekeurig samengesteld uit veelvoorkomende voor- en achternamen. Het aandeel vrouwen geldt voor de kandidaten met een bekend geslacht. Elke kandidaat is op de dag van stemming tussen 18 en 80 jaar. Met hetzelfde startgetal krijg je dezelfde personen terug, ook met geboortedatum en geslacht onbekend.</p>
   </div>
 
   <div class="q locked" id="qOut">
@@ -179,6 +181,12 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
     <p class="hint" id="totalHint">Er wordt altijd een totaalbestand gemaakt met alle kieskringen samen. Dat bestand is nodig voor de uitslagvaststelling door het centraal stembureau.</p>
     <label class="inline" id="oneFileWrap"><input type="checkbox" id="perKK" checked> Ook een apart bestand per kieskring maken (voor de hoofdstembureaus)</label>
     <label class="inline" id="listDataWrap"><input type="checkbox" id="listData" checked> kr:ListData opnemen (EML_NL 1.3 en hoger)</label>
+    <div class="row" id="listDataOpts" style="padding-left:24px">
+      <label class="inline"><input type="checkbox" id="publishGender" checked> Geslacht publiceren (PublishGender)</label>
+      <div class="field narrow"><label for="pubLang">Taal van publicatie</label><select id="pubLang"><option value="nl">nl (Nederlands)</option><option value="fy">fy (Fries)</option></select></div>
+    </div>
+    <p class="hint" id="pubLangHint" style="padding-left:24px">Fries kan alleen als de verkiezingsdefinitie Fries toestaat (FrysianExportAllowed).</p>
+    <label class="inline" id="romanWrap"><input type="checkbox" id="romanIds"> Romeinse cijfers in ContestIdentifier (zoals Abacus verwacht; e-KS schrijft gewone nummers)</label>
     <details>
       <summary>Geavanceerd</summary>
       <div class="row" style="margin-top:10px">
@@ -258,7 +266,12 @@ const TOWNS={
  20:["Kralendijk","Rincon","Oranjestad","The Bottom"]
 };
 /* provincienummer -> TK-kieskringnummers per provinciale kieskring */
-const PS_KK={1:[1],2:[2],3:[3],4:[4],5:[5],6:[6,7],7:[8],8:[9,10,11],9:[12,13,14,15],10:[16],11:[17,18],12:[19,19]};
+/* provincienummer -> TK-kieskringnummers, op volgorde van het PS-kieskringnummer (1, 2, ...).
+   Bron: MasterElectionTree.xml van e-KS (github.com/kiesraad/e-ks), PROVINCIAAL_KIESKRING-nummers, gecontroleerd 23-11-2026.
+   Gelderland: 1 Arnhem (TK 7), 2 Nijmegen (TK 6); Noord-Holland: 1 Amsterdam (9), 2 Den Helder (11), 3 Haarlem (10);
+   Zuid-Holland: 1 's-Gravenhage, 2 Rotterdam, 3 Dordrecht, 4 Leiden; Noord-Brabant: 1 's-Hertogenbosch (18), 2 Tilburg (17);
+   Limburg: 1 Maastricht, 2 Venlo (beide onder TK 19). */
+const PS_KK={1:[1],2:[2],3:[3],4:[4],5:[5],6:[7,6],7:[8],8:[9,11,10],9:[12,13,14,15],10:[16],11:[18,17],12:[19,19]};
 const ABROAD=[["BE","Brussel"],["BE","Antwerpen"],["DE","Berlijn"],["DE","Keulen"],["GB","Londen"],["FR","Parijs"],["ES","Barcelona"],["US","New York"]];
 const MALE=["Jan","Pieter","Kees","Willem","Hendrik","Johan","Gerrit","Dirk","Bas","Thijs","Daan","Sander","Ruben","Joost","Maarten","Erik","Rob","Mark","Tom","Stefan","Niels","Jeroen","Bram","Lars","Wouter","Michiel","Frank","Arjen","Ronald","Marco","Hans","Peter","Martijn","Koen","Jesse","Milan","Sem","Luuk","Stijn","Gijs","Mehmet","Mohamed","Youssef","Ahmed","Kevin","Rik","Jasper","Hugo","Floris","Teun","Reinier","Ferry","Ivo","Olaf","Ewout","Siem","Wessel","Dennis","Patrick","Remco"];
 const FEMALE=["Anna","Maria","Sophie","Emma","Julia","Lisa","Eva","Sanne","Anouk","Fleur","Lotte","Iris","Femke","Ingrid","Petra","Monique","Esther","Marloes","Karin","Linda","Saskia","Annemiek","Judith","Mirjam","Wendy","Ilse","Noor","Lieke","Marieke","Hanneke","Nienke","Merel","Romy","Fatima","Samira","Yasmina","Elif","Priya","Chantal","Joyce","Charlotte","Sara","Roos","Tessa","Marit","Jolien","Ellen","Renate","Astrid","Danielle","Kim","Mandy","Nathalie","Bregje","Gerda","Hilde","Wilma","Carla","Tamara","Vera"];
@@ -291,7 +304,7 @@ let FILES=[]; // [{name,xml,hash,contests}]
 let view={tab:"lists",kk:0};
 
 function freshSettings(){
-  S={parties:[],seed:String(Math.floor(Math.random()*900000)+100000),pctF:50,abroad:false,perKK:true,listData:true,
+  S={parties:[],seed:String(Math.floor(Math.random()*900000)+100000),pctF:50,pctU:0,dob:true,abroad:false,perKK:true,listData:true,publishGender:true,pubLang:"nl",romanIds:false,
      authId:"",authName:"",transactionId:"1",issueDate:iso(new Date())};
 }
 
@@ -307,7 +320,7 @@ function parse110a(text){
   const dom=one(NS_KR,"ElectionDomain"), sch=one(NS_KR,"Schema"), ci=one(NS_EML,"ContestIdentifier"), ai=one(NS_EML,"AuthorityIdentifier");
   const regions=[...doc.getElementsByTagNameNS(NS_KR,"Region")].map(el=>({
     cat:el.getAttribute("RegionCategory")||"", num:el.getAttribute("RegionNumber")||"", name:txt(NS_KR,"RegionName",el),
-    supCat:el.getAttribute("SuperiorRegionCategory")||"", supNum:el.getAttribute("SuperiorRegionNumber")||"", roman:el.getAttribute("RomanNumerals")==="true"
+    supCat:el.getAttribute("SuperiorRegionCategory")||"", supNum:el.getAttribute("SuperiorRegionNumber")||"", roman:el.getAttribute("RomanNumerals")==="true", frys:el.getAttribute("FrysianExportAllowed")==="true"
   }));
   const d={
     id:ei.getAttribute("Id")||"", name:txt(NS_EML,"ElectionName"), cat:txt(NS_EML,"ElectionCategory"), sub:txt(NS_KR,"ElectionSubcategory"),
@@ -321,7 +334,9 @@ function parse110a(text){
   if(!d.cat) throw new Error("Geen ElectionCategory gevonden.");
   const kks=regions.filter(r=>r.cat==="KIESKRING").sort((a,b)=>(+a.num)-(+b.num));
   d.single = d.cat==="EP" || d.cat==="EK" || kks.length<=1;
-  d.kks = d.single ? [{id:d.contestId,name:"",num:kks[0]?kks[0].num:""}] : kks.map(k=>({id:k.roman?toRoman(+k.num):k.num,name:k.name,num:k.num}));
+  d.kks = d.single ? [{id:d.contestId,name:"",num:kks[0]?kks[0].num:""}] : kks.map(k=>({id:k.num,name:k.name,num:k.num,roman:k.roman}));
+  d.frys=regions.some(r=>r.frys);
+  d.roman=!d.single && d.kks.some(k=>k.roman);
   d.root=regions.find(r=>!r.supCat)||regions[0]||null;
   return d;
 }
@@ -401,7 +416,10 @@ function generate(){
       if(used.has(key)) continue;
       used.add(key);
       const p={first,prefix,last,ini,gender:female?"female":"male",town:pick(towns),country:null};
-      if(S.abroad && (D.cat==="TK"||D.cat==="EP") && rng()<0.03){ const [c,t]=pick(ABROAD); p.country=c; p.town=t; }
+      if(S.abroad && rng()<0.03){ const [c,t]=pick(ABROAD); p.country=c; p.town=t; }
+      /* geslacht onbekend en geboortedatum: eigen afgeleide generatoren, zodat de hoofdreeks gelijk blijft */
+      if(S.pctU>0 && mulberry(hashStr(S.seed+"|gender|"+key))()*100<S.pctU) p.gender="unknown";
+      p.dob=birthDate(mulberry(hashStr(S.seed+"|dob|"+key)));
       return p;
     }
     throw new Error("Te weinig naamcombinaties.");
@@ -450,6 +468,16 @@ function generate(){
 
 /* ---------- XML ---------- */
 function useListData(){ return S.listData && D.version!=="1.2.2"; }
+function pubLang(){ return (S.pubLang==="fy" && D.frys)?"fy":"nl"; }
+/* geboortedatum zodat de kandidaat op de dag van stemming 18 t/m 80 jaar is */
+function birthDate(r){
+  const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(D.date||""); if(!m) return null;
+  const y=+m[1], mo=+m[2]-1, d=+m[3], day=86400000;
+  const latest=Date.UTC(y-18,mo,d);           /* precies 18 op de dag van stemming */
+  const earliest=Date.UTC(y-81,mo,d)+day;     /* één dag later dan 81 worden: nog 80 */
+  const t=earliest+Math.floor(r()*((latest-earliest)/day+1))*day;
+  return new Date(t).toISOString().slice(0,10);
+}
 function buildXml(contests,stamp){
   const I="    ", L=[], p=(d,s)=>L.push(I.repeat(d)+s);
   L.push('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>');
@@ -475,6 +503,7 @@ function buildXml(contests,stamp){
   contests.forEach(c=>{
     p(3,"<Contest>");
     if(D.single) p(4,'<ContestIdentifier Id="'+esc(c.id)+'"/>');
+    else if(S.romanIds && c.roman) { p(4,'<ContestIdentifier Id="'+toRoman(+c.num)+'">'); p(5,"<ContestName>"+esc(c.name)+"</ContestName>"); p(4,"</ContestIdentifier>"); }
     else { p(4,'<ContestIdentifier Id="'+esc(c.id)+'">'); p(5,"<ContestName>"+esc(c.name)+"</ContestName>"); p(4,"</ContestIdentifier>"); }
     c.lists.forEach(l=>{
       p(4,"<Affiliation>");
@@ -482,7 +511,7 @@ function buildXml(contests,stamp){
       p(6, l.name ? "<RegisteredName>"+esc(l.name)+"</RegisteredName>" : "<RegisteredName/>");
       p(5,"</AffiliationIdentifier>");
       p(5,"<Type>"+l.type+"</Type>");
-      if(useListData()) p(5,'<kr:ListData PublishGender="true"'+(l.set?' BelongsToSet="'+l.set+'"':"")+"/>");
+      if(useListData()) p(5,'<kr:ListData PublishGender="'+(S.publishGender?"true":"false")+'" PublicationLanguage="'+pubLang()+'"'+(l.set?' BelongsToSet="'+l.set+'"':"")+"/>");
       l.cands.forEach((k,ix)=>{
         p(5,"<Candidate>");
         p(6,'<CandidateIdentifier Id="'+(ix+1)+'"/>');
@@ -494,6 +523,7 @@ function buildXml(contests,stamp){
         p(8,"<xnl:LastName>"+esc(k.last)+"</xnl:LastName>");
         p(7,"</xnl:PersonName>");
         p(6,"</CandidateFullName>");
+        if(S.dob && k.dob) p(6,"<DateOfBirth>"+k.dob+"</DateOfBirth>");
         p(6,"<Gender>"+k.gender+"</Gender>");
         p(6,"<QualifyingAddress>");
         if(k.country){ p(7,"<xal:Country>"); p(8,"<xal:CountryNameCode>"+k.country+"</xal:CountryNameCode>"); p(8,"<xal:Locality>"); p(9,"<xal:LocalityName>"+esc(k.town)+"</xal:LocalityName>"); p(8,"</xal:Locality>"); p(7,"</xal:Country>"); }
@@ -595,6 +625,9 @@ function validate(){
   if(gen) info(gen+(gen===1?" partij heeft":" partijen hebben")+" een fictieve aanduiding, omdat de definitie maar "+D.parties.length+" geregistreerde aanduidingen bevat.");
   if(!AUTH_RE.test(S.authId.trim())) bad("ManagingAuthority Id \""+S.authId+"\" is ongeldig. EML_NL staat alleen CSB, HSB+nummer, SB+nummer of een 4-cijferige gemeentecode toe (vraag 4, Geavanceerd).");
   if(D.domId!==null && !DOMID_RE.test(D.domId)) bad("Het ElectionDomain-Id \""+D.domId+"\" in de definitie is ongeldig (4 cijfers of 0 t/m 29). Pas de definitie aan.");
+  if(D.frys && D.version!=="1.2.2") info("Deze verkiezing staat Fries toe. Kies bij vraag 4 de taal van publicatie.");
+  if(D.cat==="GR"||D.cat==="PS"||D.cat==="AB") info("Een kandidaat mag bij de kandidaatstelling in het buitenland wonen; e-KS gebruikt dit ook in zijn voorbeeld voor een waterschap.");
+  if(D.roman) info(S.romanIds?"De kieskringen krijgen Romeinse cijfers als ContestIdentifier-Id (I, II), zoals Abacus verwacht. e-KS schrijft hier gewone nummers.":"De definitie gebruikt Romeinse cijfers voor de kieskringen. In het bestand blijft het ContestIdentifier-Id een gewoon nummer, zoals in e-KS (230b-ps27-2). Abacus verwacht bij deze kieskringen Romeinse cijfers; zet daarvoor bij vraag 4 de Romeinse cijfers aan.");
   if(!D.single) info("Abacus leest per bestand precies één kieskring in. Gebruik in Abacus de bestanden per kieskring; het totaalbestand met alle kieskringen is daar niet voor bedoeld.");
   if(D.single && D.regions.filter(r=>r.cat==="KIESKRING").length>1) info("Bij "+D.cat+" gelden dezelfde lijsten in het hele land; de app maakt één set lijsten.");
   if(!D.single) info(D.kks.length+" kieskringen. De lijstnummers zijn in alle kieskringen gelijk; een partij die niet overal meedoet, ontbreekt in die kieskringen.");
@@ -603,7 +636,7 @@ function validate(){
 }
 
 /* ---------- weergave ---------- */
-function fmtName(k){ return k.last+", "+k.ini+(k.prefix?" "+k.prefix:"")+" ("+k.first+") ("+(k.gender==="female"?"v":"m")+")"; }
+function fmtName(k){ const g=k.gender==="female"?"v":k.gender==="male"?"m":""; return k.last+", "+k.ini+(k.prefix?" "+k.prefix:"")+" ("+k.first+")"+(g?" ("+g+")":""); }
 function renderDef(){
   const on=!!D;
   ["qParties","qGen","qOut"].forEach(id=>$(id).classList.toggle("locked",!on));
@@ -617,7 +650,12 @@ function renderDef(){
   $("modeHint").hidden=D.single;
   $("oneFileWrap").hidden=D.single; $("totalHint").hidden=D.single;
   $("listDataWrap").hidden=D.version==="1.2.2";
-  $("abroadWrap").hidden=!(D.cat==="TK"||D.cat==="EP");
+  $("abroadWrap").hidden=false;
+  $("listDataOpts").hidden=D.version==="1.2.2"; $("pubLangHint").hidden=D.version==="1.2.2"||D.frys;
+  $("pubLang").querySelector('option[value="fy"]').disabled=!D.frys;
+  if(!D.frys && S.pubLang==="fy") S.pubLang="nl";
+  $("pubLang").value=S.pubLang;
+  $("romanWrap").hidden=!D.roman;
 }
 function renderParties(){
   const rows=S.parties.map((p,i)=>{
@@ -637,7 +675,7 @@ function renderKKPick(){
   sel.hidden=false;
   if(view.kk>=G.contests.length) view.kk=-1;
   sel.innerHTML='<option value="-1"'+(view.kk===-1?" selected":"")+">Totaal – alle kieskringen</option>"+
-    G.contests.map((c,i)=>'<option value="'+i+'"'+(i===view.kk?" selected":"")+">Kieskring "+c.num+" – "+esc(c.name)+" ("+c.lists.length+" lijsten)</option>").join("");
+    G.contests.map((c,i)=>'<option value="'+i+'"'+(i===view.kk?" selected":"")+">Kieskring "+(c.roman?toRoman(+c.num):c.num)+" – "+esc(c.name)+" ("+c.lists.length+" lijsten)</option>").join("");
 }
 function totalMatrix(){
   const cs=G.contests, rows=S.parties.map((p,i)=>i+1);
@@ -710,9 +748,9 @@ function loadDef(text,label){
     toast("Definitie ingeladen: "+D.name+(label?" ("+label+")":""));
   }catch(e){ toast(e.message||"Inlezen mislukt."); }
 }
-function freshSettingsKeep(){ const keep=S?{seed:S.seed,pctF:S.pctF,abroad:S.abroad}:{}; freshSettings(); Object.assign(S,keep); }
+function freshSettingsKeep(){ const keep=S?{seed:S.seed,pctF:S.pctF,pctU:S.pctU,dob:S.dob,abroad:S.abroad}:{}; freshSettings(); Object.assign(S,keep); }
 function syncInputs(){
-  $("nParties").value=S.parties.length; $("pctF").value=S.pctF; $("seed").value=S.seed; $("abroad").checked=S.abroad;
+  $("nParties").value=S.parties.length; $("pctF").value=S.pctF; $("pctU").value=S.pctU; $("dob").checked=S.dob; $("publishGender").checked=S.publishGender; $("pubLang").value=S.pubLang; $("romanIds").checked=S.romanIds; $("seed").value=S.seed; $("abroad").checked=S.abroad;
   $("perKK").checked=S.perKK; $("listData").checked=S.listData; $("authId").value=S.authId; $("authName").value=S.authName;
   $("transactionId").value=S.transactionId; $("issueDate").value=S.issueDate;
 }
@@ -760,6 +798,11 @@ tb.addEventListener("change",e=>{
   renderParties(); update();
 });
 $("pctF").addEventListener("input",e=>{ S.pctF=Math.max(0,Math.min(100,+e.target.value||0)); update(); });
+$("pctU").addEventListener("input",e=>{ S.pctU=Math.max(0,Math.min(100,+e.target.value||0)); update(); });
+$("dob").addEventListener("change",e=>{ S.dob=e.target.checked; update(); });
+$("publishGender").addEventListener("change",e=>{ S.publishGender=e.target.checked; update(); });
+$("pubLang").addEventListener("change",e=>{ S.pubLang=e.target.value; update(); });
+$("romanIds").addEventListener("change",e=>{ S.romanIds=e.target.checked; update(); });
 $("seed").addEventListener("input",e=>{ S.seed=e.target.value; update(); });
 $("reseed").addEventListener("click",()=>{ S.seed=String(Math.floor(Math.random()*900000)+100000); $("seed").value=S.seed; update(); toast("Nieuwe personen gegenereerd"); });
 $("abroad").addEventListener("change",e=>{ S.abroad=e.target.checked; update(); });

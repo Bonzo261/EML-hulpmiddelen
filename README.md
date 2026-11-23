@@ -18,7 +18,7 @@ Elke app is één HTML-bestand dat helemaal in de browser draait. Er gaat niets 
 | Controleprotocol (GR26) | [`controleprotocol.html`](controleprotocol.html) | leest 110a/b, 230b, 510b/c/d; offline invoer via Excel |
 | Controle zetelverdeling | [`zetelverdeling.html`](zetelverdeling.html) | leest 110a, 230b, 510b/c/d, 520 |
 
-Wat er per versie is veranderd, staat in [`CHANGELOG.md`](CHANGELOG.md).
+Wat er per versie is veranderd, staat in [`CHANGELOG.md`](CHANGELOG.md). Wat er nog op de to-do-lijst staat, staat in [`WENSEN.md`](WENSEN.md).
 
 De startpagina is [`index.html`](index.html), de gebruikershandleidingen staan in [`handleidingen.html`](handleidingen.html). Technische notities en bekende beperkingen per app staan in [`docs/`](docs/).
 
@@ -36,12 +36,23 @@ Externe afhankelijkheden, geladen vanaf een CDN (daarvoor is internet nodig):
 
 Sommige apps bewaren hun werk in `localStorage` van je browser. De Uitslagen-generator bewaart daar ook de testsleutels voor ondertekening. Die sleutels verlaten je browser alleen als je ze zelf exporteert. **Zet geëxporteerde sleutelbestanden (.json) nooit in deze repository.**
 
+## Wensen
+
+De belangrijkste punten op de to-do-lijst:
+- kandidatenlijsten voor de Eerste Kamer per provincie;
+- EML 210 en 230c maken, zoals e-KS;
+- referenda en de TK-kieskring Bonaire;
+- de nieuwe bestanden proef inlezen in Abacus en OSV.
+
+De volledige lijst staat in [`WENSEN.md`](WENSEN.md). Ideeën en fouten zijn welkom als [issue](https://github.com/Bonzo261/EML-hulpmiddelen/issues).
+
 ## Bronnen en dank
 
 - De opbouw, teksten en opmaak van de processen-verbaal komen uit de Typst-sjablonen van [kiesraad/abacus](https://github.com/kiesraad/abacus) (`backend/templates`, EUPL-1.2).
 - Het formaat van de 510-bestanden en de ondertekening volgen de testbestanden en de code van Abacus.
 - De Controle zetelverdeling rekent volgens de tekst van de Kieswet en toetst de uitkomst aan een port van de zetelverdeling in Abacus (`backend/apportionment`), getest met alle eind-tot-eindtests daarvan.
 - Het Controleprotocol volgt de controleprotocollen GR26 van de Kiesraad (november 2025).
+- De indeling van Nederland (kieskringen, waterschappen, deelgemeenten, kiescolleges) en de opbouw van de 110a- en 230b-bestanden volgen [e-KS](https://github.com/kiesraad/e-ks), het kandidaatstellingssysteem van de Kiesraad (EUPL-1.2), stand 23-11-2026.
 - PDF-lettertypen in `pv-fonts.js`: DM Sans (aangepast door de Kiesraad) en Geist Mono, beide onder de SIL Open Font License 1.1, uit `kiesraad/abacus`.
 
 ## Licentie

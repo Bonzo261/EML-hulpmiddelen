@@ -124,7 +124,7 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
     <div class="card">
       <span class="lvl">EML 110a</span>
       <h2>Verkiezingsdefinitie-maker</h2>
-      <p>Maak de verkiezingsdefinitie: soort verkiezing, gebied, datums, zetels, geregistreerde aanduidingen en de indeling in kieskringen. Dit bestand is de basis voor alle andere apps.</p>
+      <p>Maak de verkiezingsdefinitie: soort verkiezing, gebied, datums, zetels, geregistreerde aanduidingen en de indeling in kieskringen, volgens de indeling van e-KS. Ook voor waterschappen, de Eerste Kamer en kiescolleges. Dit bestand is de basis voor alle andere apps.</p>
       <div class="btns">
         <a class="btn primary" href="#verkiezingsdefinitie-maker">Handleiding lezen</a>
         <a class="btn" href="verkiezingsdefinitie.html">App openen</a>
@@ -142,7 +142,7 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
     <div class="card">
       <span class="lvl">EML 230b</span>
       <h2>Kandidatenlijsten-maker</h2>
-      <p>Maak kandidatenlijsten met fictieve personen, per kieskring, voor test en oefening. Met stellen, lijstengroepen en hashcodes.</p>
+      <p>Maak kandidatenlijsten met fictieve personen, per kieskring, voor test en oefening. Met stellen, lijstengroepen, geboortedata en hashcodes, in de opbouw van e-KS.</p>
       <div class="btns">
         <a class="btn primary" href="#kandidatenlijsten-maker">Handleiding lezen</a>
         <a class="btn" href="kandidatenlijsten.html">App openen</a>
@@ -219,6 +219,12 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
       <li><a href="#vd-v5">5 · Aanduidingen</a></li>
       <li><a href="#vd-v6">6 · Indeling</a></li>
       <li><a href="#vd-v7">7 · Bestand</a></li>
+      <li><a href="#vd-ps">Provinciale Staten</a></li>
+      <li><a href="#vd-ab">Waterschappen</a></li>
+      <li><a href="#vd-ek">Eerste Kamer</a></li>
+      <li><a href="#vd-kc">Kiescolleges</a></li>
+      <li><a href="#vd-bc">Stadsdelen en gebieden</a></li>
+      <li><a href="#vd-fy">Fries toegestaan</a></li>
       <li><a href="#vd-dl">Downloaden</a></li>
       <li><a href="#vd-faq">Vragen en problemen</a></li>
       <li><a href="#vd-beperk">Bekende beperkingen</a></li>
@@ -231,10 +237,11 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
 
     <h3 id="vd-doel">1. Waarvoor is de app?</h3>
     <p>De verkiezingsdefinitie beschrijft de verkiezing: welke verkiezing, in welk gebied, op welke dag, hoeveel zetels, welke aanduidingen geregistreerd zijn en hoe het gebied is ingedeeld in kieskringen en gemeenten. De uitslagsoftware leest dit bestand als eerste in. Alle andere apps in deze reeks gebruiken het ook.</p>
+    <p>Waar mogelijk volgt de app de opbouw van <b>e-KS</b>, het nieuwe kandidaatstellingssysteem van de Kiesraad: de indeling van Nederland uit de MasterElectionTree en de voorbeeldbestanden voor Provinciale Staten, waterschap en Eerste Kamer (stand 23 november 2026).</p>
 
     <h3 id="vd-scherm">2. Het scherm</h3>
     <ul>
-      <li><b>Links</b> staan zeven vragen. Velden met het label <em>automatisch</em> vult de app zelf in. Pas je zo'n veld aan, dan blijft jouw waarde staan.</li>
+      <li><b>Links</b> staan zeven vragen. Velden met het label <em>automatisch</em> vult de app zelf in. Pas je zo'n veld aan, dan staat er <em>aangepast</em> en blijft jouw waarde staan.</li>
       <li><b>Rechts</b> zie je direct het resultaat: categorie, subcategorie, zetels, aantal gebieden, de status, meldingen en de XML.</li>
       <li><b>Bovenaan</b> staan <span class="ui">Bestaand 110a-bestand openen</span> (om een bestand verder te bewerken) en <span class="ui">Opnieuw beginnen</span>.</li>
     </ul>
@@ -244,68 +251,163 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
     <div class="note"><b>Let op</b>Een kiescollege kan pas vanaf EML_NL 1.3. Een bestuursraad heeft geen eigen categorie in EML_NL; het bestand gebruikt dan categorie BC, net als een stadsdeelcommissie.</div>
 
     <h3 id="vd-v2">4. Vraag 2 · Voor welk gebied?</h3>
-    <p>Kies de gemeente, provincie of het waterschap uit de keuzelijst. Staat het gebied er niet in, vul dan zelf de naam en de code in.</p>
-    <ul>
-      <li><b>Gemeente:</b> de 4-cijferige CBS-code, met voorloopnullen (Assen = <code>0106</code>).</li>
-      <li><b>Provincie:</b> het nummer van 1 (Groningen) t/m 12 (Limburg).</li>
-      <li><b>Stadsdeelcommissie, wijkraad of bestuursraad:</b> kies ook de gemeente en vul de naam van de commissie in. Elke commissie krijgt een eigen bestand.</li>
-    </ul>
+    <p>Kies het gebied uit de keuzelijst. Staat het er niet in, kies dan <em>handmatig invullen</em> en vul de naam en de code zelf in.</p>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Verkiezing</th><th>Keuzelijst</th><th>Code</th></tr></thead>
+      <tbody>
+        <tr><td>Gemeenteraad</td><td>Alle gemeenten, per provincie, plus vier fictieve testgemeenten</td><td>4-cijferige CBS-code, met voorloopnullen (Assen = <code>0106</code>)</td></tr>
+        <tr><td>Provinciale Staten</td><td>De 12 provincies, plus twee fictieve testprovincies</td><td>Provincienummer 1 (Groningen) t/m 12 (Limburg)</td></tr>
+        <tr><td>Waterschap</td><td>De 21 waterschappen uit e-KS (alfabetisch), plus het fictieve Rivier en Polder</td><td>Waterschapsnummer van de Kiesraad. Na fusies ontbreken 4, 6, 21 en 22.</td></tr>
+        <tr><td>Kiescollege</td><td>13 Bonaire, 14 Sint Eustatius, 15 Saba, 16 niet-ingezetenen</td><td>Nummer uit e-KS</td></tr>
+        <tr><td>Stadsdeelcommissie, wijkraad, bestuursraad</td><td>De gemeente, en daarna de naam van de raad of commissie (met suggesties voor Amsterdam, Rotterdam en 's-Hertogenbosch)</td><td>CBS-code van de gemeente</td></tr>
+      </tbody>
+    </table></div>
+    <p>Bij de Tweede Kamer, het Europees Parlement en de Eerste Kamer is er geen gebied te kiezen. Onder de keuzelijst staan de kenmerken van het gekozen gebied, zoals het aantal zetels, de kieskringen of ‘Fries toegestaan’.</p>
 
     <h3 id="vd-v3">5. Vraag 3 · Wanneer is de stemming?</h3>
-    <p>Vul de dag van stemming in. De dag van kandidaatstelling wordt automatisch de 44e dag daarvoor. Pas die aan als er voor deze verkiezing iets anders geldt.</p>
+    <p>Vul de dag van stemming in. De dag van kandidaatstelling wordt automatisch de <b>44e dag</b> daarvoor; bij de <b>Eerste Kamer de 34e dag</b>. Pas die aan als er voor deze verkiezing iets anders geldt.</p>
+    <p>Voorbeelden: Provinciale Staten, waterschappen en kiescolleges op 17 maart 2027 geven kandidaatstelling op 1 februari 2027. De Eerste Kamer op 24 mei 2027 geeft 20 april 2027.</p>
 
     <h3 id="vd-v4">6. Vraag 4 · Hoeveel zetels?</h3>
-    <p>Het aantal zetels komt uit de keuzelijst (voor gemeenten uit het overzicht GR2026 van de Kiesraad). De voorkeurdrempel en de subcategorie worden automatisch bepaald:</p>
+    <p>Het aantal zetels wordt, waar dat kan, ingevuld uit de keuzelijst. De voorkeurdrempel en de subcategorie worden automatisch bepaald:</p>
     <ul>
-      <li>Voorkeurdrempel: 25% van de kiesdeler; 50% bij minder dan 19 zetels en bij de Eerste Kamer; 10% bij het Europees Parlement.</li>
-      <li>Provinciale Staten met één kieskring wordt PS1, met meer kieskringen PS2.</li>
+      <li><b>Voorkeurdrempel:</b> 25% van de kiesdeler; 50% bij minder dan 19 zetels; <b>100% bij de Eerste Kamer</b>; 10% bij het Europees Parlement.</li>
+      <li><b>Subcategorie:</b> GR1/GR2 en AB1/AB2 bij minder of meer dan 19 zetels; Provinciale Staten met één kieskring wordt PS1, met meer kieskringen PS2; bij kiescolleges KCCN of KCNI.</li>
     </ul>
+    <p>Waar de zetels vandaan komen: gemeenteraad uit GR2026 van de Kiesraad, Provinciale Staten uit 2023, waterschappen uit de provinciale reglementen 2027 (zie <a href="#vd-ab">Waterschappen</a>), kiescolleges uit de wet (zie <a href="#vd-kc">Kiescolleges</a>). De hint onder het veld legt uit wat er bij jouw keuze geldt.</p>
 
     <h3 id="vd-v5">7. Vraag 5 · Geregistreerde aanduidingen</h3>
     <p>Zet de aanduidingen uit het register van het centraal stembureau in het tekstvak, letterlijk zoals ze daar staan, één per regel.</p>
     <ul>
-      <li><span class="ui">Landelijk register toevoegen (37)</span> voegt de aanduidingen uit het landelijk register van de Kiesraad toe. Die gelden ook voor deze verkiezing.</li>
+      <li><span class="ui">Landelijk register toevoegen (37)</span> voegt de aanduidingen uit het landelijk register van de Kiesraad toe. Bij de Tweede Kamer, het Europees Parlement en de Eerste Kamer staan die er al in.</li>
       <li><span class="ui">Inlezen uit bestand van het CSB</span> leest aanduidingen uit een 110a, een 230b, of een txt- of csv-bestand (één per regel; bij csv de eerste kolom).</li>
-      <li>Vink <span class="ui">Aanvullen in plaats van vervangen</span> aan om bestaande regels te bewaren.</li>
+      <li>Vink <span class="ui">Aanvullen in plaats van vervangen</span> aan om bestaande regels te bewaren. <span class="ui">Lijst leegmaken</span> wist alles.</li>
     </ul>
 
     <h3 id="vd-v6">8. Vraag 6 · Hoe ziet de indeling eruit?</h3>
-    <p>De tabel toont de verkiezingsboom: de gebieden, hun nummer en naam, onder welk gebied ze vallen, en waar het centraal stembureau (CSB) en de hoofdstembureaus (HSB) zitten. Voor bekende provincies en de Tweede Kamer vult de app de kieskringen en hoofdstembureaus zelf in.</p>
+    <p>De tabel toont de verkiezingsboom: de gebieden, hun nummer en naam, onder welk gebied ze vallen, en welke stembureaus erbij horen (CSB, HSB of PROV_SB). In de kolom <em>Opties</em> zet je Romeinse cijfers, ‘Fries’ en ‘Centraal inleveren’ aan of uit. Voor de meeste verkiezingen vult de app de indeling helemaal zelf in; de paragrafen hieronder beschrijven per soort verkiezing hoe.</p>
     <ul>
       <li><span class="ui">Gebied toevoegen</span> en <span class="ui">Standaardindeling herstellen</span>.</li>
-      <li><span class="ui">HSB opnemen bij het CSB</span>: de Kieswet kent alleen een hoofdstembureau bij TK, EP en PS met meerdere kieskringen, maar de bestanden van de Kiesraad nemen er toch een op. Vink dit aan als je die bestanden wilt nabootsen.</li>
-      <li><span class="ui">Fictieve testindeling</span>: de fictieve gebieden uit de testbestanden van Abacus (Heemdamseburg, Juinen, Middelgein, 's-Gravenveen, Oost-Holland, Zuid-Brabant, Rivier en Polder).</li>
-      <li><span class="ui">Gemeenten opnemen in de indeling</span>: nodig als je later per hoofdstembureau wilt werken (Uitslagen-generator, Controleprotocol).</li>
+      <li><span class="ui">HSB opnemen bij het CSB, zoals de Kiesraad-bestanden doen</span>: de Kieswet kent alleen een hoofdstembureau bij de Tweede Kamer, het Europees Parlement en Provinciale Staten met meerdere kieskringen, maar de bestanden van de Kiesraad nemen er toch een op. Deze optie staat niet bij de Eerste Kamer.</li>
+      <li><span class="ui">Fictieve testindeling (Juinen e.a.)</span>: bij de Tweede Kamer en het Europees Parlement, de fictieve gebieden uit de testbestanden van Abacus.</li>
+      <li><span class="ui">Gemeenten opnemen in de indeling</span>: bij Provinciale Staten, de Tweede Kamer, het Europees Parlement en elk waterschap. Nodig als je later per hoofdstembureau wilt werken.</li>
+      <li><span class="ui">Stadsdeel/gebied als DEELGEMEENTE opnemen</span>: zie <a href="#vd-bc">Stadsdelen en gebieden</a>.</li>
       <li>Onder <span class="ui">Gemeenten in één keer toevoegen</span> plak je regels als <code>0106;Assen;3</code> (code;naam;kieskringnummer).</li>
     </ul>
 
     <h3 id="vd-v7">9. Vraag 7 · Naam en kenmerken van het bestand</h3>
     <ul>
-      <li><b>EML_NL-versie:</b> 1.3.1 (huidige versie), 1.3, of 1.2.2 (gebruikt bij de herindelingsverkiezingen van 18 november 2026).</li>
-      <li><b>Naam verkiezing</b> en <b>Verkiezings-Id</b> worden automatisch gevuld.</li>
-      <li>Onder <span class="ui">Geavanceerd</span>: TransactionId, IssueDate, ManagingAuthority Id (leeg = weglaten), MaxVotes en ContestIdentifier.</li>
+      <li><b>EML_NL-versie:</b> 1.3.1 (huidige versie), 1.3, of 1.2.2 (alleen voor de herindelingsverkiezingen van 18 november 2026).</li>
+      <li><b>Naam verkiezing</b> en <b>Verkiezings-Id</b> worden automatisch gevuld, met dezelfde namen als e-KS, bijvoorbeeld ‘Verkiezing van de provinciale staten van Limburg 2027’ met Id <code>PS2027_Limburg</code>.</li>
+      <li>Onder <span class="ui">Geavanceerd</span>: TransactionId, IssueDate, ManagingAuthority Id (leeg = weglaten), MaxVotes en ContestIdentifier (automatisch ‘geen’ of ‘alle’).</li>
     </ul>
 
-    <h3 id="vd-dl">10. Downloaden</h3>
-    <p>Staat de status op groen, klik dan op <span class="ui">Download .eml.xml + hashcode</span>. Je krijgt het bestand en de SHA-256-hashcode. Met <span class="ui">Kopieer XML</span> zet je de XML op het klembord.</p>
-    <div class="note"><b>Proef inlezen</b>De app controleert de opbouw, maar valideert niet tegen de XSD. Lees het bestand altijd eerst proef in de uitslagsoftware in.</div>
+    <h3 id="vd-ps">10. Provinciale Staten</h3>
+    <p>De indeling volgt de MasterElectionTree en de voorbeeldbestanden van e-KS voor Groningen en Limburg:</p>
+    <ul>
+      <li>PROVINCIE (zonder stembureau) &gt; KIESKRING(en) &gt; GEMEENTE, met de gemeenten per kieskring in de volgorde van e-KS.</li>
+      <li>De kieskring waar het centraal stembureau zit, krijgt CSB en HSB; de andere kieskringen alleen een HSB. Bij meer kieskringen mag bij dat HSB centraal worden ingeleverd. Limburg gebruikt Romeinse cijfers.</li>
+      <li>De kieskringnummers zijn die van e-KS, zoals Noord-Holland: 1 Amsterdam, 2 Den Helder, 3 Haarlem (centraal stembureau bij Haarlem).</li>
+    </ul>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Provincie</th><th>Kieskringen (aantal gemeenten)</th></tr></thead>
+      <tbody>
+        <tr><td>Groningen, Fryslân, Drenthe, Overijssel, Flevoland, Utrecht, Zeeland</td><td>één kieskring</td></tr>
+        <tr><td>Gelderland</td><td>1 Arnhem (37), 2 Nijmegen (14)</td></tr>
+        <tr><td>Noord-Holland</td><td>1 Amsterdam (1), 2 Den Helder (24), 3 Haarlem (18)</td></tr>
+        <tr><td>Zuid-Holland</td><td>1 's-Gravenhage (1), 2 Rotterdam (1), 3 Dordrecht (23), 4 Leiden (25)</td></tr>
+        <tr><td>Noord-Brabant</td><td>1 's-Hertogenbosch (32), 2 Tilburg (24)</td></tr>
+        <tr><td>Limburg</td><td>1 Maastricht (16), 2 Venlo (15)</td></tr>
+      </tbody>
+    </table></div>
+    <div class="note"><b>Zetels</b>Het aantal statenzetels komt nog uit 2023. Controleer het voor de verkiezing.</div>
 
-    <h3 id="vd-faq">11. Vragen en problemen</h3>
-    <details><summary>Mijn gemeente heeft een ander aantal zetels.</summary><p>Vul het juiste aantal zelf in bij vraag 4. De voorkeurdrempel past zich aan.</p></details>
-    <details><summary>De subcategorie klopt niet.</summary><p>De subcategorie hangt af van het aantal kieskringen (PS) of het aantal zetels. Kies hem desnoods zelf bij vraag 4.</p></details>
-    <details><summary>Een ElectionDomain-Id wordt afgekeurd.</summary><p>Volgens EML_NL mag dat alleen 4 cijfers zijn, of een getal van 0 t/m 29.</p></details>
+    <h3 id="vd-ab">11. Waterschappen</h3>
+    <p>Kies het waterschap uit de keuzelijst. De indeling volgt het e-KS-voorbeeld voor Fryslân: WATERSCHAP &gt; KIESKRING 1 (met CSB en HSB) &gt; GEMEENTE. De gemeenten neem je op met <span class="ui">Gemeenten opnemen in de indeling</span>. Een gemeente kan bij meer waterschappen horen.</p>
+    <p><b>Zetels:</b> in het bestand hoort alleen het aantal <b>gekozen</b> zetels. De 4 geborgde zetels (2 ongebouwd, 2 natuurterreinen) worden benoemd, niet gekozen, en tellen niet mee. De app vult het aantal gekozen zetels zelf in, uit de provinciale reglementen voor 2027:</p>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Waterschap</th><th class="num">Algemeen bestuur</th><th class="num">Gekozen (in het bestand)</th></tr></thead>
+      <tbody>
+        <tr><td>Noorderzijlvest, Hunze en Aa's</td><td>23</td><td>19</td></tr>
+        <tr><td>Fryslân, Zuiderzeeland</td><td>25</td><td>21</td></tr>
+        <tr><td>Vechtstromen</td><td>27</td><td>23</td></tr>
+        <tr><td>Drents Overijsselse Delta</td><td>29</td><td>25</td></tr>
+        <tr><td>Alle andere waterschappen</td><td>30</td><td>26</td></tr>
+      </tbody>
+    </table></div>
+    <p>Vul je het totaal van het algemeen bestuur in (bijvoorbeeld 25 bij Fryslân), dan waarschuwt de app. Alle waterschappen hebben 19 of meer gekozen zetels, dus overal subcategorie AB2 en een drempel van 25%.</p>
+    <p>Het fictieve waterschap Rivier en Polder blijft beschikbaar om te testen (26 zetels).</p>
+
+    <h3 id="vd-ek">12. Eerste Kamer</h3>
+    <p>De app maakt de definitie zoals het e-KS-voorbeeld voor de Eerste Kamer van 2027:</p>
+    <ul>
+      <li>75 zetels, voorkeurdrempel 100%, ContestIdentifier ‘alle’, kandidaatstelling op de 34e dag vóór de stemming.</li>
+      <li>Indeling van 33 gebieden: STAAT Nederland, daaronder PROVINCIE 1–12 plus 13 Bonaire, 14 Sint Eustatius, 15 Saba en 16 Buitenland (het kiescollege niet-ingezetenen), elk met een provinciaal stembureau (PROV_SB), en onder elke provincie een STEMBUREAU met hetzelfde nummer.</li>
+      <li>Het centraal stembureau (De Kiesraad) staat bij Zuid-Holland, en daar mag centraal worden ingeleverd. Er zijn geen hoofdstembureaus.</li>
+    </ul>
+    <p>De uitslag van de Eerste Kamer werkt met stemwaarden; die horen niet in dit bestand.</p>
+
+    <h3 id="vd-kc">13. Kiescolleges</h3>
+    <p>Er zijn vier aparte kiescolleges, elk met een eigen centraal stembureau en dus een eigen definitie. Kies er één bij vraag 2:</p>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Nr</th><th>Kiescollege</th><th>Subcategorie</th><th class="num">Leden (standaard)</th></tr></thead>
+      <tbody>
+        <tr><td>13</td><td>Bonaire</td><td>KCCN</td><td>11</td></tr>
+        <tr><td>14</td><td>Sint Eustatius</td><td>KCCN</td><td>7</td></tr>
+        <tr><td>15</td><td>Saba</td><td>KCCN</td><td>7</td></tr>
+        <tr><td>16</td><td>Niet-ingezetenen</td><td>KCNI</td><td>25</td></tr>
+      </tbody>
+    </table></div>
+    <ul>
+      <li>Een kiescollege in Caribisch Nederland telt evenveel leden als de eilandsraad: 11, 7 en 7 vanaf 2027 (Verhogingswet).</li>
+      <li>Het aantal leden van het kiescollege niet-ingezetenen hangt af van het aantal registraties van kiezers in het buitenland. 25 is het aantal van 2023; de app waarschuwt dat je het moet controleren.</li>
+      <li>De indeling is één KIESCOLLEGE met het nummer uit e-KS en een CSB (plus HSB als die optie aan staat).</li>
+    </ul>
+
+    <h3 id="vd-bc">14. Stadsdelen en gebieden</h3>
+    <p>Bij een stadsdeelcommissie, wijkraad of bestuursraad kies je de gemeente en de naam van de raad of commissie. e-KS kent een aantal van deze gebieden als <b>DEELGEMEENTE</b>, met een eigen nummer:</p>
+    <ul>
+      <li>Amsterdam (stadsdeelcommissies): 101 Centrum, 102 Noord, 103 Oost, 104 Zuidoost, 105 Zuid, 106 West, 107 Nieuw-West;</li>
+      <li>Rotterdam (gebieden): 201 Centrum tot en met 214 Rozenburg.</li>
+    </ul>
+    <p>Heeft het gekozen gebied zo'n nummer, dan verschijnt bij vraag 6 de optie <span class="ui">Stadsdeel/gebied als DEELGEMEENTE opnemen (zoals MasterElectionTree van e-KS)</span>. Die staat standaard <b>uit</b>, omdat er geen voorbeeldbestand is en niet bevestigd is dat de uitslagsoftware dit accepteert.</p>
+    <ul>
+      <li><b>Uit:</b> één GEMEENTE met CSB en HSB.</li>
+      <li><b>Aan:</b> GEMEENTE (zonder stembureau) &gt; DEELGEMEENTE met het nummer en de naam uit e-KS, met CSB en HSB.</li>
+    </ul>
+    <p>Bestuurscommissie Weesp en de bestuursraden in 's-Hertogenbosch hebben geen nummer in e-KS; daar is de optie er niet. Lees je een bestand met een DEELGEMEENTE in, dan zet de app de optie zelf aan.</p>
+
+    <h3 id="vd-fy">15. Fries toegestaan</h3>
+    <p>De app zet ‘Fries toegestaan’ (FrysianExportAllowed) zelf aan, zoals in e-KS:</p>
+    <ul>
+      <li>bij een gemeenteraad (of stadsdeel, wijkraad, bestuursraad) in een van de 18 Friese gemeenten;</li>
+      <li>bij Provinciale Staten Fryslân: op de provincie en de 18 gemeenten, niet op de kieskring;</li>
+      <li>bij waterschap Fryslân: op het waterschap en zijn 19 gemeenten;</li>
+      <li>bij de Eerste Kamer: op provincie Fryslân.</li>
+    </ul>
+    <p>Bij de Tweede Kamer, het Europees Parlement, kiescolleges en fictieve gebieden staat het nooit aan. Je kunt het vinkje ‘Fries’ in de indeling altijd zelf aan- of uitzetten. Staat Fries toe, dan kun je in de Kandidatenlijsten-maker Fries als taal van publicatie kiezen.</p>
+
+    <h3 id="vd-dl">16. Downloaden</h3>
+    <p>Staat de status op groen, klik dan op <span class="ui">Download .eml.xml + hashcode</span>. Je krijgt het bestand en de SHA-256-hashcode. Met <span class="ui">Kopieer XML</span> zet je de XML op het klembord.</p>
+    <div class="note"><b>Proef inlezen</b>De app controleert de opbouw, maar valideert niet tegen de XSD. Lees het bestand altijd eerst proef in de uitslagsoftware in. Voor kiescolleges, PS Fryslân, een Friese gemeenteraad en deelgemeenten heeft e-KS geen voorbeeldbestand; daar is proef inlezen extra belangrijk.</div>
+
+    <h3 id="vd-faq">17. Vragen en problemen</h3>
+    <details><summary>Mijn gemeente of provincie heeft een ander aantal zetels.</summary><p>Vul het juiste aantal zelf in bij vraag 4. De voorkeurdrempel en de subcategorie passen zich aan.</p></details>
+    <details><summary>Ik krijg een waarschuwing bij de zetels van een waterschap.</summary><p>Waarschijnlijk heb je het totaal van het algemeen bestuur ingevuld. In het bestand horen alleen de gekozen zetels, dus zonder de 4 geborgde zetels.</p></details>
+    <details><summary>Waarom is de drempel bij de Eerste Kamer 100%?</summary><p>Sinds een wijziging van de Kieswet in 2010 is de voorkeurdrempel voor de Eerste Kamer gelijk aan de volle kiesdeler. e-KS gebruikt ook 100.</p></details>
+    <details><summary>De kieskringen van Noord-Holland hebben andere nummers dan ik gewend ben.</summary><p>De app gebruikt de nummers van e-KS: 1 Amsterdam, 2 Den Helder, 3 Haarlem.</p></details>
+    <details><summary>Een ElectionDomain-Id wordt afgekeurd.</summary><p>Volgens EML_NL mag dat alleen 4 cijfers zijn, of een getal van 0 t/m 29. Daarom krijgt een deelgemeente (101 enz.) dat Id niet; het ElectionDomain blijft de gemeentecode.</p></details>
     <details><summary>Na herladen is mijn werk weg.</summary><p>Deze app bewaart niets in de browser. Download het bestand als je klaar bent en open het later weer met <span class="ui">Bestaand 110a-bestand openen</span>.</p></details>
 
-    <h3 id="vd-beperk">12. Bekende beperkingen</h3>
+    <h3 id="vd-beperk">18. Bekende beperkingen</h3>
     <ul>
       <li>De app valideert niet tegen de XSD. Lees het bestand altijd eerst proef in.</li>
       <li>Je werk wordt niet in de browser bewaard.</li>
-      <li>De zetelaantallen komen uit GR2026 (raadszetels), 2023 (statenzetels en kieskringen) en 2024 (31 EP-zetels). Controleer ze bij latere verkiezingen.</li>
+      <li>Zetels: raadszetels uit GR2026, statenzetels uit 2023, EP-zetels (31) uit 2024. De waterschapszetels zijn een momentopname van 23 november 2026; voor Delfland, Schieland en de Krimpenerwaard, Hollandse Delta en Noorderzijlvest komen ze nog uit een ontwerpbesluit.</li>
+      <li>Kiescolleges: het aantal leden (11/7/7 en 25) moet worden gecontroleerd bij de bekendmaking.</li>
+      <li>De indeling uit e-KS (kieskringen, waterschappen, deelgemeenten) is een momentopname van 23 november 2026. Of de 14 Rotterdamse gebieden nog kloppen, is niet nagegaan.</li>
       <li>Het landelijk register (37 aanduidingen) is de stand van 27 augustus 2026.</li>
-      <li>De keuzelijst voor waterschappen bevat alleen het fictieve waterschap Rivier en Polder. Een echt waterschap vul je met de hand in.</li>
-      <li>Bij een kiescollege worden het aantal leden en de indeling niet automatisch ingevuld. Bij de Eerste Kamer horen de stemwaarden niet in dit bestand.</li>
-      <li>EML_NL kent geen gebiedscategorie voor stadsdelen en wijken. De indeling gebruikt de gemeente; proef inlezen is extra belangrijk.</li>
-      <li>Of Abacus een HSB bij het CSB verwacht (zoals de Kiesraad-bestanden) of niet (zoals de Kieswet), moet nog worden nagegaan.</li>
+      <li>Of Abacus een HSB bij het CSB verwacht (zoals de Kiesraad-bestanden) of niet (zoals de Kieswet), moet nog worden nagegaan. Hetzelfde geldt voor DEELGEMEENTE.</li>
     </ul>
   </article>
 </div>
@@ -418,7 +520,10 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
       <li><a href="#kl-kk">Per kieskring</a></li>
       <li><a href="#kl-v3">3 · Personen</a></li>
       <li><a href="#kl-v4">4 · Bestanden</a></li>
+      <li><a href="#kl-listdata">Geslacht en taal (kr:ListData)</a></li>
+      <li><a href="#kl-roman">Romeinse cijfers</a></li>
       <li><a href="#kl-dl">Bekijken en downloaden</a></li>
+      <li><a href="#kl-kand">Hoe een kandidaat eruitziet</a></li>
       <li><a href="#kl-faq">Vragen en problemen</a></li>
       <li><a href="#kl-beperk">Bekende beperkingen</a></li>
     </ol>
@@ -429,12 +534,13 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
     <p class="lead">Handleiding voor het maken van kandidatenlijsten (EML 230b) met fictieve personen.</p>
 
     <h3 id="kl-doel">1. Waarvoor is de app?</h3>
-    <p>Voor testen en oefenen heb je kandidatenlijsten nodig die passen bij je verkiezingsdefinitie. Deze app maakt ze, per kieskring, met fictieve personen en met de hashcodes erbij.</p>
+    <p>Voor testen en oefenen heb je kandidatenlijsten nodig die passen bij je verkiezingsdefinitie. Deze app maakt ze, per kieskring, met fictieve personen en met de hashcodes erbij. De opbouw van de bestanden volgt de voorbeelden van e-KS, het nieuwe kandidaatstellingssysteem van de Kiesraad.</p>
     <div class="note"><b>Alleen voor testen</b>Alle personen zijn fictief, samengesteld uit veelvoorkomende voor- en achternamen. Gebruik de bestanden alleen voor test en oefening.</div>
 
     <h3 id="kl-v1">2. Vraag 1 · Laad de verkiezingsdefinitie in</h3>
-    <p>Sleep een 110a-bestand naar het vak of klik op <span class="ui">Kies 110a-bestand</span>. Gebruik het bestand uit de Verkiezingsdefinitie-maker of uit de uitslagsoftware. De andere vragen zijn vergrendeld tot er een definitie is ingeladen.</p>
+    <p>Sleep een 110a-bestand naar het vak of klik op <span class="ui">Kies 110a-bestand</span>. Gebruik het bestand uit de Verkiezingsdefinitie-maker of uit de uitslagsoftware. De andere vragen zijn vergrendeld tot er een definitie is ingeladen. Onder het vak staan de kenmerken van de definitie.</p>
     <p>Wil je de app eerst proberen, kies dan <span class="ui">Voorbeeld: gemeenteraad</span> of <span class="ui">Voorbeeld: Tweede Kamer</span>.</p>
+    <div class="tip"><b>Zelfde personen terug?</b>Vul het startgetal (vraag 3) in vóórdat je de definitie inlaadt. Anders verschilt de standaard partijtabel.</div>
 
     <h3 id="kl-v2">3. Vraag 2 · Hoeveel partijen doen mee?</h3>
     <p>Vul het aantal partijen in. De eerste partijen krijgen de geregistreerde aanduidingen uit de definitie; de rest krijgt een fictieve naam. In de tabel kun je per lijst aanpassen:</p>
@@ -457,38 +563,76 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
 
     <h3 id="kl-v3">5. Vraag 3 · Hoe moeten de personen eruitzien?</h3>
     <ul>
-      <li><b>Aandeel vrouwen (%)</b>.</li>
-      <li><b>Startgetal:</b> met hetzelfde startgetal krijg je dezelfde personen terug. Handig om een test te herhalen.</li>
-      <li><span class="ui">Nieuwe personen</span> kiest een nieuw startgetal.</li>
-      <li><span class="ui">Enkele kandidaten wonen in het buitenland</span>: voor het testen van buitenlandse adressen.</li>
+      <li><b>Aandeel vrouwen (%)</b>: geldt voor de kandidaten met een bekend geslacht.</li>
+      <li><b>Aandeel geslacht onbekend (%)</b>: standaard 0. Deze kandidaten krijgen in het bestand geslacht ‘unknown’ en in de weergave geen geslachtsletter.</li>
+      <li><b>Startgetal:</b> met hetzelfde startgetal krijg je dezelfde personen terug, ook met geboortedatum en geslacht onbekend. <span class="ui">Nieuwe personen</span> kiest een nieuw startgetal.</li>
+      <li><span class="ui">Geboortedatum opnemen</span>: standaard aan. Elke kandidaat is op de dag van stemming tussen 18 en 80 jaar.</li>
+      <li><span class="ui">Enkele kandidaten wonen in het buitenland</span>: kan nu bij alle soorten verkiezingen. Een kandidaat mag bij de kandidaatstelling in het buitenland wonen; e-KS doet dit ook in zijn voorbeeld voor een waterschap.</li>
     </ul>
+    <p>De woonplaatsen komen uit de gemeenten in de definitie. Staan daar geen gemeenten in, dan gebruikt de app een vaste lijst plaatsen per kieskring.</p>
 
     <h3 id="kl-v4">6. Vraag 4 · Bestanden</h3>
     <p>Er wordt altijd een <b>totaalbestand</b> gemaakt met alle kieskringen samen. Dat is nodig voor de uitslagvaststelling door het centraal stembureau.</p>
     <ul>
-      <li><span class="ui">Ook een apart bestand per kieskring maken</span>: voor de hoofdstembureaus. Deze bestanden heb je ook nodig in de Uitslagen-generator.</li>
-      <li><span class="ui">kr:ListData opnemen</span>: alleen voor EML_NL 1.3 en hoger.</li>
-      <li>Onder <span class="ui">Geavanceerd</span>: ManagingAuthority Id en naam, TransactionId en IssueDate.</li>
+      <li><span class="ui">Ook een apart bestand per kieskring maken</span>: voor de hoofdstembureaus. Deze bestanden heb je ook nodig in Abacus en in de Uitslagen-generator.</li>
+      <li><span class="ui">kr:ListData opnemen (EML_NL 1.3 en hoger)</span>: met daaronder het geslacht en de taal (zie de volgende paragraaf).</li>
+      <li><span class="ui">Romeinse cijfers in ContestIdentifier</span>: alleen bij een definitie met Romeinse cijfers (zie <a href="#kl-roman">Romeinse cijfers</a>).</li>
+      <li>Onder <span class="ui">Geavanceerd</span>: ManagingAuthority Id en naam, TransactionId en IssueDate. Standaard is de afzender het centraal stembureau (‘Centraal stembureau &lt;naam&gt;’), bij een gemeenteraad de gemeentecode.</li>
     </ul>
 
-    <h3 id="kl-dl">7. Bekijken en downloaden</h3>
-    <p>Rechts zie je het aantal kieskringen, lijsten, unieke kandidaten en bestanden, met de meldingen eronder. Kies met het tabblad <span class="ui">Lijsten</span> of <span class="ui">XML</span> hoe je het resultaat bekijkt, en kies de kieskring in de keuzelijst. In de lijstweergave betekent een rood nummer: regionale kandidaat (verschilt per kieskring).</p>
-    <p>Klik op <span class="ui">Download .zip (lijsten + hashcodes)</span>. De hashcodes zijn SHA-256 over het hele bestand, in groepen van vier zoals op de processen-verbaal.</p>
+    <h3 id="kl-listdata">7. Geslacht en taal (kr:ListData)</h3>
+    <p>Per lijst kan het bestand aangeven of het geslacht van de kandidaten wordt gepubliceerd, en in welke taal. Onder <span class="ui">kr:ListData opnemen</span> stel je in:</p>
+    <ul>
+      <li><span class="ui">Geslacht publiceren (PublishGender)</span>: standaard aan.</li>
+      <li><span class="ui">Taal van publicatie</span>: <em>nl (Nederlands)</em> of <em>fy (Fries)</em>.</li>
+    </ul>
+    <p>Fries kan alleen als de verkiezingsdefinitie Fries toestaat. Dat is zo bij een definitie uit de Verkiezingsdefinitie-maker voor waterschap Fryslân, Provinciale Staten Fryslân, de Eerste Kamer of een Friese gemeenteraad. De app meldt het als de definitie Fries toestaat.</p>
+    <p>Bij een definitie in EML_NL 1.2.2 is er geen kr:ListData.</p>
+
+    <h3 id="kl-roman">8. Romeinse cijfers</h3>
+    <p>Sommige definities gebruiken Romeinse cijfers voor de kieskringen, zoals Provinciale Staten Limburg. Dan verschijnt bij vraag 4 de schakelaar <span class="ui">Romeinse cijfers in ContestIdentifier (zoals Abacus verwacht; e-KS schrijft gewone nummers)</span>.</p>
+    <ul>
+      <li><b>Uit</b> (standaard): het bestand gebruikt gewone nummers, zoals e-KS: <code>&lt;ContestIdentifier Id="1"&gt;</code> met ContestName Maastricht.</li>
+      <li><b>Aan</b>: het bestand gebruikt I en II, zoals Abacus verwacht.</li>
+    </ul>
+    <p>EML_NL staat beide toe. Kies wat de software waarin je het bestand inleest verwacht.</p>
+
+    <h3 id="kl-dl">9. Bekijken en downloaden</h3>
+    <p>Rechts zie je het aantal kieskringen, lijsten, unieke kandidaten en bestanden, met de meldingen eronder. Kies met de tabbladen <span class="ui">Lijsten</span> of <span class="ui">XML</span> hoe je het resultaat bekijkt, en kies de kieskring in de keuzelijst.</p>
+    <ul>
+      <li>In de lijstweergave betekent een rood nummer: regionale kandidaat (verschilt per kieskring). De geboortedatum staat hier niet bij; in de XML wel.</li>
+      <li>‘Totaal – alle kieskringen’ toont een overzicht van alle kieskringen: S = stel gelijkluidende lijsten, G = lijstengroep, Z = op zichzelf staande lijst, – = doet niet mee. Het kleine getal is het aantal kandidaten.</li>
+    </ul>
+    <p>Klik op <span class="ui">Download .zip (lijsten + hashcodes)</span>. De zip bevat de lijstbestanden, per bestand een hashcode-bestand en een overzicht van alle hashcodes. De hashcodes zijn SHA-256 over het hele bestand, in groepen van vier zoals op de processen-verbaal. Met <span class="ui">Kopieer XML van getoond bestand</span> zet je één bestand op het klembord.</p>
     <div class="note"><b>Proef inlezen</b>De app valideert niet tegen de XSD. Lees de bestanden altijd eerst proef in.</div>
 
-    <h3 id="kl-faq">8. Vragen en problemen</h3>
+    <h3 id="kl-kand">10. Hoe een kandidaat eruitziet</h3>
+    <p>Elke kandidaat staat in het bestand in dezelfde volgorde als in de voorbeelden van e-KS:</p>
+    <ol>
+      <li>volgnummer op de lijst;</li>
+      <li>naam: voorletters, voornaam, tussenvoegsel en achternaam;</li>
+      <li>geboortedatum (als die aan staat);</li>
+      <li>geslacht: male, female of unknown;</li>
+      <li>woonplaats, of land en plaats bij een kandidaat in het buitenland.</li>
+    </ol>
+
+    <h3 id="kl-faq">11. Vragen en problemen</h3>
     <details><summary>Ik kan vraag 2 t/m 4 niet invullen.</summary><p>Laad eerst een verkiezingsdefinitie (110a) in bij vraag 1.</p></details>
     <details><summary>Ik zie de kolommen voor kieskringen niet.</summary><p>Die verschijnen alleen als de definitie meerdere kieskringen heeft.</p></details>
-    <details><summary>Ik wil dezelfde lijsten nog een keer maken.</summary><p>Gebruik dezelfde definitie, dezelfde instellingen en hetzelfde startgetal. De app onthoudt het startgetal niet: noteer het.</p></details>
-    <details><summary>Welk bestand lees ik in Abacus in?</summary><p>De bestanden per kieskring. Abacus leest per bestand precies één kieskring in; het totaalbestand is bedoeld voor de uitslagvaststelling door het centraal stembureau.</p></details>
+    <details><summary>Ik kan Fries niet kiezen.</summary><p>De definitie staat Fries niet toe. Maak de definitie in de Verkiezingsdefinitie-maker, bijvoorbeeld voor waterschap of Provinciale Staten Fryslân, of zet in de indeling het vinkje ‘Fries’ aan.</p></details>
+    <details><summary>Ik wil dezelfde lijsten nog een keer maken.</summary><p>Gebruik dezelfde definitie, dezelfde instellingen en hetzelfde startgetal. De app onthoudt het startgetal niet: noteer het. Namen, geslacht en woonplaatsen blijven ook gelijk als je de geboortedatum of ‘geslacht onbekend’ aan- of uitzet.</p></details>
+    <details><summary>Welk bestand lees ik in Abacus in?</summary><p>De bestanden per kieskring. Abacus leest per bestand precies één kieskring in; het totaalbestand is bedoeld voor de uitslagvaststelling door het centraal stembureau. Bij Limburg: zet de Romeinse cijfers aan.</p></details>
+    <details><summary>Bij de Eerste Kamer krijg ik maar één set lijsten.</summary><p>Dat klopt nog: bij de Eerste Kamer is elke provincie een kieskring voor de kandidaatstelling, maar dat ondersteunt de app nog niet.</p></details>
 
-    <h3 id="kl-beperk">9. Bekende beperkingen</h3>
+    <h3 id="kl-beperk">12. Bekende beperkingen</h3>
     <ul>
       <li>De app valideert niet tegen de XSD. Lees de bestanden altijd eerst proef in.</li>
+      <li>Bij de Eerste Kamer maakt de app één set lijsten, niet per provincie.</li>
+      <li>Of Abacus bij Limburg echt Romeinse cijfers verwacht, is niet bevestigd.</li>
       <li>De lijstnummers zijn in alle kieskringen gelijk.</li>
       <li>Een lijst met minder dan 4 kandidaten wordt altijd overal gelijk gemaakt, ook als je regionale stellen of een lijstengroep kiest.</li>
       <li>Instellingen worden niet bewaard; bij elke start krijgt het startgetal een nieuwe waarde.</li>
-      <li>De woonplaatsen van kandidaten zijn indicatief. Kandidaten in het buitenland kunnen alleen bij TK en EP.</li>
+      <li>De woonplaatsen zijn indicatief.</li>
       <li>Maximaal 60 partijen. De XML-weergave toont maximaal 2.500 regels; de download is wel volledig.</li>
     </ul>
   </article>

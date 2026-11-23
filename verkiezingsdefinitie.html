@@ -160,7 +160,7 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
       <div class="field"><label for="electionDate">Dag van stemming</label><input type="date" id="electionDate"></div>
       <div class="field"><label for="nominationDate">Dag van kandidaatstelling <span class="auto" id="nomAuto">automatisch</span></label><input type="date" id="nominationDate"></div>
     </div>
-    <p class="hint">De dag van kandidaatstelling is standaard de 44e dag vóór de stemming. Pas hem aan als er voor deze verkiezing iets anders geldt.</p>
+    <p class="hint">De dag van kandidaatstelling is standaard de 44e dag vóór de stemming; bij de Eerste Kamer de 34e dag. Pas hem aan als er voor deze verkiezing iets anders geldt.</p>
   </div>
 
   <div class="q">
@@ -201,6 +201,7 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
     <div class="tree-actions">
       <label id="hsbWrap" style="display:flex;gap:6px;align-items:center;color:var(--ink);font-weight:500" title="De Kieswet kent alleen een hoofdstembureau bij de Tweede Kamer, het Europees Parlement en Provinciale Staten met meerdere kieskringen. De bestanden van de Kiesraad nemen bij het CSB toch een HSB op."><input type="checkbox" id="hsbCompat"> HSB opnemen bij het CSB, zoals de Kiesraad-bestanden doen</label>
       <label id="fictWrap" style="display:flex;gap:6px;align-items:center;color:var(--ink);font-weight:500"><input type="checkbox" id="fictTree"> Fictieve testindeling (Juinen e.a.)</label>
+      <label id="dgWrap" style="display:flex;gap:6px;align-items:center;color:var(--ink);font-weight:500"><input type="checkbox" id="dgOpt"> Stadsdeel/gebied als DEELGEMEENTE opnemen (zoals MasterElectionTree van e-KS)</label>
       <label id="incGemWrap" style="display:flex;gap:6px;align-items:center;color:var(--ink);font-weight:500"><input type="checkbox" id="includeGem"> Gemeenten opnemen in de indeling</label>
       <button type="button" class="small" id="addRegion">Gebied toevoegen</button>
       <button type="button" class="small" id="resetTree">Standaardindeling herstellen</button>
@@ -256,8 +257,8 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
 </main>
 
 <footer>
-  Gebaseerd op EML_NL 1.3.1 (github.com/kiesraad/EML_NL) en de voorbeeldbestanden van de Kiesraad (EML-schema versie 5, namespace <code>http://www.kiesraad.nl/extensions</code>). De app controleert de opbouw, maar valideert niet tegen de XSD. Lees het bestand altijd eerst proef in de uitslagsoftware in. Voorkeurdrempels volgen de Kieswet: 25% van de kiesdeler, 50% bij minder dan 19 zetels en voor de Eerste Kamer, 10% voor het Europees Parlement.<br>
-  Bronnen van de keuzelijsten: raadszetels en gemeentecodes uit het Kiesraad-bestand <em>Aantal raadzetels GR2026</em> (data.overheid.nl), aangevuld met Hilversum (39 zetels, na samenvoeging met Wijdemeren per 1-1-2027); statenzetels uit het Kiesraad-overzicht van 2023; kieskringen en hoofdstembureaus uit <em>Kieskringen provinciale statenverkiezingen 2023</em> (Kiesraad). Het landelijk register van aanduidingen (37 namen) komt van kiesraad.nl (Tweede Kamer, partijnamen en logo's, register; pagina gewijzigd 27 augustus 2026). Fictieve testgebieden (Heemdamseburg, Juinen, Middelgein, 's-Gravenveen, Oost-Holland, Zuid-Brabant, Rivier en Polder) en de testpartijen komen uit de testbestanden van de Kiesraad in github.com/kiesraad/abacus; de zetelaantallen van de fictieve gemeenten zijn zelf gekozen. Provincienummers lopen van 1 (Groningen) t/m 12 (Limburg); een ElectionDomain-Id mag volgens EML_NL alleen 4 cijfers of een getal van 0 t/m 29 zijn.
+  Gebaseerd op EML_NL 1.3.1 (github.com/kiesraad/EML_NL) en de voorbeeldbestanden van de Kiesraad (EML-schema versie 5, namespace <code>http://www.kiesraad.nl/extensions</code>). De app controleert de opbouw, maar valideert niet tegen de XSD. Lees het bestand altijd eerst proef in de uitslagsoftware in. Voorkeurdrempels volgen de Kieswet: 25% van de kiesdeler, 50% bij minder dan 19 zetels, 100% voor de Eerste Kamer en 10% voor het Europees Parlement.<br>
+  Bronnen van de keuzelijsten: raadszetels en gemeentecodes uit het Kiesraad-bestand <em>Aantal raadzetels GR2026</em> (data.overheid.nl), aangevuld met Hilversum (39 zetels, na samenvoeging met Wijdemeren per 1-1-2027); statenzetels uit het Kiesraad-overzicht van 2023; kieskringen en hoofdstembureaus uit MasterElectionTree.xml van e-KS (stand 23-11-2026). Het landelijk register van aanduidingen (37 namen) komt van kiesraad.nl (Tweede Kamer, partijnamen en logo's, register; pagina gewijzigd 27 augustus 2026). Waterschapsnummers en de gemeenten per waterschap komen uit MasterElectionTree.xml van e-KS (github.com/kiesraad/e-ks, EUPL-1.2, stand 23-11-2026); zetels per waterschap uit de provinciale reglementen 2027 (gekozen = omvang algemeen bestuur min 4 geborgde zetels). Fictieve testgebieden (Heemdamseburg, Juinen, Middelgein, 's-Gravenveen, Oost-Holland, Zuid-Brabant, Rivier en Polder) en de testpartijen komen uit de testbestanden van de Kiesraad in github.com/kiesraad/abacus; de zetelaantallen van de fictieve gemeenten zijn zelf gekozen. Provincienummers lopen van 1 (Groningen) t/m 12 (Limburg); een ElectionDomain-Id mag volgens EML_NL alleen 4 cijfers of een getal van 0 t/m 29 zijn.
 </footer>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -276,11 +277,11 @@ const TYPES = {
   PS:{label:"Provinciale Staten", domain:"PROVINCIE", domainTitle:"Voor welke provincie?", nameLbl:"Naam provincie", codeLbl:"Provincienummer",
       hint:"Het provincienummer loopt van 1 (Groningen) t/m 12 (Limburg), in de volgorde van de Kieswet. Met één kieskring wordt het PS1, met meer kieskringen PS2.", seats:55, subs:["PS1","PS2"], prefix:"Provinciale Staten"},
   AB:{label:"Waterschap", domain:"WATERSCHAP", domainTitle:"Voor welk waterschap?", nameLbl:"Naam waterschap", codeLbl:"Waterschapsnummer",
-      hint:"Gebruik het nummer van het waterschap zoals de Kiesraad het hanteert.", seats:23, subs:["AB1","AB2"], prefix:"Waterschap"},
+      hint:"Het waterschapsnummer is het nummer dat de Kiesraad gebruikt (uit e-KS). De nummers lopen niet door: na fusies ontbreken 4, 6, 21 en 22.", seats:23, subs:["AB1","AB2"], prefix:"Waterschap"},
   TK:{label:"Tweede Kamer", domain:null, seats:150, subs:["TK"], prefix:"Tweede Kamer der Staten-Generaal"},
   EP:{label:"Europees Parlement", domain:null, seats:31, subs:["EP"], prefix:"Europees Parlement"},
   EK:{label:"Eerste Kamer", domain:null, seats:75, subs:["EK"], prefix:"Eerste Kamer der Staten-Generaal"},
-  KC:{label:"Kiescollege", domain:null, seats:"", subs:["KCCN","KCNI"], prefix:"Kiescollege", minVersion:"1.3"},
+  KC:{label:"Kiescollege", domain:null, seats:"", subs:["KCCN","KCNI"], prefix:"Kiescollege", minVersion:"1.3", domainTitle:"Voor welk kiescollege?", hint:"Er zijn vier kiescolleges, elk met een eigen CSB en een eigen definitie. Nummers uit MasterElectionTree van e-KS: 13 Bonaire, 14 Sint Eustatius, 15 Saba, 16 niet-ingezetenen (Buitenland)."},
   BC:{label:"Stadsdeelcommissie", cat:"BC", local:true, defGem:"0363", domain:"GEMEENTE", domainTitle:"Voor welke stadsdeelcommissie of bestuurscommissie?", nameLbl:"Naam gemeente", codeLbl:"CBS-gemeentecode",
       hint:"Kies de gemeente en de commissie. In EML_NL valt dit onder categorie BC (bestuurscommissie). Elke commissie heeft een eigen centraal stembureau en dus een eigen definitiebestand.", seats:"", subs:["BC"]},
   GC:{label:"Wijkraad / gebiedscommissie", cat:"GC", local:true, defGem:"0599", domain:"GEMEENTE", domainTitle:"Voor welke wijkraad of gebiedscommissie?", nameLbl:"Naam gemeente", codeLbl:"CBS-gemeentecode",
@@ -289,7 +290,7 @@ const TYPES = {
       hint:"Kies de gemeente en de bestuursraad. EML_NL kent geen aparte categorie voor bestuursraden; het bestand gebruikt categorie BC (bestuurscommissie), net als een stadsdeelcommissie.", seats:"", subs:["BC"]}
 };
 const COMMITTEES = ["CSB","HSB","PROV_SB"];
-const REGION_CATS = ["STAAT","WATERSCHAP","PROVINCIE","KIESCOLLEGE","KIESKRING","GEMEENTE"];
+const REGION_CATS = ["STAAT","WATERSCHAP","PROVINCIE","KIESCOLLEGE","KIESKRING","GEMEENTE","DEELGEMEENTE","STEMBUREAU"];
 
 let S;           // state
 let edited = {}; // which auto-fields the user overrode
@@ -310,8 +311,30 @@ function region(cat,num,name,sup,committees){ return {id:++uid,cat,num:num||"",n
 const BODIES={
   "0363":["Stadsdeelcommissie Centrum","Stadsdeelcommissie Nieuw-West","Stadsdeelcommissie Noord","Stadsdeelcommissie Oost","Stadsdeelcommissie West","Stadsdeelcommissie Zuid","Stadsdeelcommissie Zuidoost","Bestuurscommissie Weesp"],
   "0796":["Bestuursraad Empel en Meerwijk","Bestuursraad Engelen en Bokhoven","Commissie van ingezetenen Orthen"],
-  "0599":[]
+  "0599":["Gebied Centrum","Gebied Charlois","Gebied Delfshaven","Gebied Feijenoord","Gebied Hillegersberg-Schiebroek","Gebied Hoek van Holland","Gebied Hoogvliet","Gebied IJsselmonde","Gebied Kralingen-Crooswijk","Gebied Noord","Gebied Overschie","Gebied Prins Alexander","Gebied Pernis","Gebied Rozenburg"]
 };
+/* deelgemeenten (stadsdelen en gebieden) uit MasterElectionTree van e-KS (github.com/kiesraad/e-ks, stand 23-11-2026):
+   categorie DEELGEMEENTE onder de GEMEENTE, met zelf het CSB en HSB voor de BC- of GC-verkiezing */
+const DEELGEMEENTEN=[
+  {gem:"0363",nr:"101",name:"Amsterdam - Centrum",cat:"BC"},{gem:"0363",nr:"102",name:"Amsterdam - Noord",cat:"BC"},{gem:"0363",nr:"103",name:"Amsterdam - Oost",cat:"BC"},
+  {gem:"0363",nr:"104",name:"Amsterdam - Zuidoost",cat:"BC"},{gem:"0363",nr:"105",name:"Amsterdam - Zuid",cat:"BC"},{gem:"0363",nr:"106",name:"Amsterdam - West",cat:"BC"},
+  {gem:"0363",nr:"107",name:"Amsterdam - Nieuw-West",cat:"BC"},
+  {gem:"0599",nr:"201",name:"Rotterdam - Centrum",cat:"GC"},{gem:"0599",nr:"202",name:"Rotterdam - Charlois",cat:"GC"},{gem:"0599",nr:"203",name:"Rotterdam - Delfshaven",cat:"GC"},
+  {gem:"0599",nr:"204",name:"Rotterdam - Feijenoord",cat:"GC"},{gem:"0599",nr:"205",name:"Rotterdam - Hillegersberg-Schiebroek",cat:"GC"},{gem:"0599",nr:"206",name:"Rotterdam - Hoek van Holland",cat:"GC"},
+  {gem:"0599",nr:"207",name:"Rotterdam - Hoogvliet",cat:"GC"},{gem:"0599",nr:"208",name:"Rotterdam - IJsselmonde",cat:"GC"},{gem:"0599",nr:"209",name:"Rotterdam - Kralingen-Crooswijk",cat:"GC"},
+  {gem:"0599",nr:"210",name:"Rotterdam - Noord",cat:"GC"},{gem:"0599",nr:"211",name:"Rotterdam - Overschie",cat:"GC"},{gem:"0599",nr:"212",name:"Rotterdam - Prins Alexander",cat:"GC"},
+  {gem:"0599",nr:"213",name:"Rotterdam - Pernis",cat:"GC"},{gem:"0599",nr:"214",name:"Rotterdam - Rozenburg",cat:"GC"}];
+/* koppeling naam raad/commissie -> deelgemeentenummer; Bestuurscommissie Weesp heeft geen nummer in e-KS */
+const BODY_DG={"Stadsdeelcommissie Centrum":"101","Stadsdeelcommissie Noord":"102","Stadsdeelcommissie Oost":"103","Stadsdeelcommissie Zuidoost":"104","Stadsdeelcommissie Zuid":"105","Stadsdeelcommissie West":"106","Stadsdeelcommissie Nieuw-West":"107"};
+DEELGEMEENTEN.filter(d=>d.gem==="0599").forEach(d=>{ BODY_DG["Gebied "+d.name.replace(/^Rotterdam - /,"")]=d.nr; });
+function dgFor(){
+  if(!TYPES[S.type].local) return null;
+  const nr=S.dgNr || BODY_DG[String(S.body||"").trim()];
+  return nr? (DEELGEMEENTEN.find(d=>d.gem===S.domainCode && d.nr===nr)||null) : null;
+}
+/* kiescolleges: nummers uit MasterElectionTree van e-KS (stand 23-11-2026); leden KCCN = eilandsraad vanaf 2027 (Verhogingswet BES), KCNI 25 = aantal 2023 */
+const KC_LIST=[{nr:"13",name:"Bonaire",sub:"KCCN",seats:11},{nr:"14",name:"Sint Eustatius",sub:"KCCN",seats:7},{nr:"15",name:"Saba",sub:"KCCN",seats:7},{nr:"16",name:"Kiescollege niet-ingezetenen",sub:"KCNI",seats:25}];
+const KC_BY=Object.fromEntries(KC_LIST.map(k=>[k.nr,k]));
 function catOf(t){ return (TYPES[t]&&TYPES[t].cat)||t; }
 const PROV_BY_NAME=Object.fromEntries(PROVINCIES.map(p=>[p.name,p]));
 const GEM_BY_CODE=Object.fromEntries(GEMEENTEN.map(g=>[g[0],g]));
@@ -323,14 +346,31 @@ const FICT_PROV=[
   {name:"Oost-Holland",nr:"13",seats:43,fict:true,csb:"Heemdamseburg",roman:false,kk:[{nr:1,hsb:"Heemdamseburg",gem:["0123","0124","0125","0126"]}]},
   {name:"Zuid-Brabant",nr:"14",seats:47,fict:true,csb:"Heemdamseburg",roman:true,kk:[{nr:1,hsb:"Heemdamseburg",gem:["0123","0124"]},{nr:2,hsb:"'s-Gravenveen",gem:["0125","0126"]}]}
 ];
-const FICT_WS={name:"Rivier en Polder",nr:"10",seats:26,gem:["0123","0124","0125","0126"]};
+const FICT_WS={name:"Rivier en Polder",nr:"10",pick:"F",seats:26,gem:["0123","0124","0125","0126"]};
+/* echte waterschappen: nummer en gemeenten uit MasterElectionTree.xml van e-KS (github.com/kiesraad/e-ks, EUPL-1.2, stand 23-11-2026) */
+const WATERSCHAPPEN=[{"nr":"1","name":"Noorderzijlvest","gem":"0106,1979,0014,1966,1731,1970,1699,1730,1969"},{"nr":"2","name":"Fryslân","gem":"0059,0060,1891,1940,0072,0074,0080,1970,0085,0086,0088,0090,1900,0093,0737,0096,1949,1969,0098"},{"nr":"3","name":"Hunze en Aa's","gem":"1680,0106,1681,0109,1979,0114,0014,1731,1952,1895,0765,0037,1730,0047,1950"},{"nr":"5","name":"Vechtstromen","gem":"0141,1859,1681,0147,0109,1690,1774,0114,0153,0158,0160,0163,0164,1735,0118,0168,1731,0173,0175,1742,0183,1700,0189"},{"nr":"7","name":"Vallei en Veluwe","gem":"0307,0200,0202,0308,0203,0213,0313,0310,0150,0228,0317,0230,0232,0233,0243,0244,0246,0327,0267,0302,0269,1773,0273,0274,0339,0275,0340,0277,0279,0342,1581,0345,0285,0289,0351,0355,0301"},{"nr":"8","name":"Rijn en IJssel","gem":"0197,0202,1859,1876,0150,0221,0222,0226,0158,1735,1705,0262,1955,1586,1509,0275,1742,0277,0293,0294,0299,0301"},{"nr":"9","name":"De Stichtse Rijnlanden","gem":"0484,1901,0312,0310,0321,0353,1931,0331,0335,0356,0569,0589,0340,1904,0344,1581,0352,0632,0351,0355"},{"nr":"10","name":"Amstel, Gooi en Vecht","gem":"0358,0362,0363,0376,0310,0736,0384,1942,0394,0402,0406,1884,0417,0569,0437,1904,0451,0344"},{"nr":"11","name":"Hollands Noorderkwartier","gem":"0361,0363,0373,0375,0383,0400,1980,0498,0385,0388,0396,0399,1911,0405,1598,0415,0420,0431,0432,0439,0441,0532,0448,0450,0453,0852,0880,0479"},{"nr":"12","name":"Rijnland","gem":"0358,0484,0362,0363,0377,1901,0513,0392,0394,0397,0534,1884,0537,1931,0546,0547,1916,0553,0569,0575,0579,1525,0453,0626,0627,0629,0473,0637,0638"},{"nr":"13","name":"Delfland","gem":"0503,1621,1916,0556,1842,1926,0603,0599,0606,0518,0622,0629,1783,0637"},{"nr":"14","name":"Schieland en de Krimpenerwaard","gem":"0502,0513,0542,1931,1621,0599,0627,0637,1892"},{"nr":"15","name":"Rivierenland","gem":"0482,1959,0202,1945,0209,0214,0216,1719,0225,0512,0523,0252,1705,0263,1740,1978,0268,1734,0590,0610,0281,1961,0289,1960,0668,0296,0297"},{"nr":"16","name":"Hollandse Delta","gem":"0613,0489,0505,1924,0531,1963,1930,0597,0599,1992,0642"},{"nr":"17","name":"Scheldestromen","gem":"0654,0664,0677,0678,0687,1695,0703,1676,1714,0715,0716,0717,0718,0873"},{"nr":"18","name":"Brabantse Delta","gem":"1723,0744,0748,0758,0766,1719,0777,0779,0784,0785,1655,0809,1709,0826,1674,0840,0851,0855,0867,0873,0879"},{"nr":"19","name":"De Dommel","gem":"1723,0744,1724,0753,1728,0757,1706,0770,0772,1771,0785,1658,0794,0797,0798,1659,0809,1948,0820,0823,0824,1667,0796,0845,0847,0848,0855,0858,0861,0865,0866"},{"nr":"20","name":"Aa en Maas","gem":"0743,1721,0755,0762,1771,1652,1658,0794,0797,1659,1982,1991,1948,0820,0828,0796,0845,0847,0865,0867"},{"nr":"23","name":"Zuiderzeeland","gem":"0034,1940,0303,0995,0171,1708,0184,0050"},{"nr":"24","name":"Drents Overijsselse Delta","gem":"1680,0106,0109,0148,1690,0150,0160,0163,0118,0166,0119,1731,1699,1773,0175,0177,1742,0180,1708,1701,1896,0193"},{"nr":"25","name":"Limburg","gem":"0888,1954,0889,0893,0899,1711,1903,0907,1729,0917,1507,0928,0882,1640,1641,0935,0938,0944,0946,1894,1669,0957,0965,1883,0971,0981,0994,0983,0984,0986,0988"}];
+WATERSCHAPPEN.forEach(w=>{ w.gem=w.gem.split(","); w.frys=(w.nr==="2"); });
+/* algemeen bestuur 2027 volgens provinciale reglementen; seats = ab − 4 geborgde zetels (Waterschapswet art. 13); stand 23-11-2026 */
+const WS_ZETELS={"1":[23,19],"2":[25,21],"3":[23,19],"5":[27,23],"7":[30,26],"8":[30,26],"9":[30,26],"10":[30,26],"11":[30,26],"12":[30,26],"13":[30,26],"14":[30,26],"15":[30,26],"16":[30,26],"17":[30,26],"18":[30,26],"19":[30,26],"20":[30,26],"23":[25,21],"24":[29,25],"25":[30,26]};
+WATERSCHAPPEN.forEach(w=>{ const z=WS_ZETELS[w.nr]; if(z){ w.ab=z[0]; w.seats=z[1]; } });
+/* kieskringindeling PS uit MasterElectionTree.xml van e-KS (github.com/kiesraad/e-ks, EUPL-1.2, stand 23-11-2026); sleutel = provincienummer */
+const PS_KK={"1":[{"nr":1,"name":"Groningen","gem":"0014,1966,1979,1952,1895,0765,0037,0047,1969,1950"}],"2":[{"nr":1,"name":"Leeuwarden","gem":"0059,0060,1891,1940,0072,0074,0080,1970,0085,0086,0088,0090,1900,0093,0737,0096,1949,0098"}],"3":[{"nr":1,"name":"Assen","gem":"1680,0106,1681,0109,0114,0118,0119,1731,1699,1730,1701,1690"}],"4":[{"nr":1,"name":"Zwolle","gem":"0141,0147,0148,0150,1774,0153,0158,0160,0163,0164,1735,0166,0168,0173,1773,0175,0177,1742,0180,1708,0183,1700,0189,1896,0193"}],"5":[{"nr":1,"name":"Lelystad","gem":"0034,0303,0995,0171,0184,0050"}],"6":[{"nr":1,"name":"Arnhem","gem":"0197,0200,0202,0203,1859,1876,0213,0221,0222,0226,0228,0230,0232,0233,0243,0244,0246,1705,0262,1955,0267,0302,0269,1586,1509,1734,0273,0274,0275,0277,0279,0285,0289,0293,0294,0299,0301"},{"nr":2,"name":"Nijmegen","gem":"1945,0209,0214,0216,0225,0252,0263,1740,0268,0281,1960,0668,0296,0297"}],"7":[{"nr":1,"name":"Utrecht","gem":"0307,0308,0310,0312,0313,0317,0321,0353,0327,0331,0335,0356,0589,0339,0340,0736,0342,1904,0344,1581,0345,1961,0352,0632,0351,0355"}],"8":[{"nr":1,"name":"Amsterdam","gem":"0363"},{"nr":2,"name":"Den Helder","gem":"0361,0373,0383,1980,0498,0385,0388,0399,0400,1911,0405,1598,0415,0420,0431,0432,0439,0441,0532,0448,0450,0852,0880,0479"},{"nr":3,"name":"Haarlem","gem":"0358,0362,0375,0376,0377,0384,1942,0392,0394,0396,0397,0402,0406,0417,0437,0451,0453,0473"}],"9":[{"nr":1,"name":"'s-Gravenhage","gem":"0518"},{"nr":2,"name":"Rotterdam","gem":"0599"},{"nr":3,"name":"Dordrecht","gem":"0482,0613,0489,0503,0505,1924,0512,0523,0531,1963,0556,1842,1978,1930,0590,0597,0603,0606,0610,0622,1992,1783,0642"},{"nr":4,"name":"Leiden","gem":"0484,1901,0502,0513,0534,1884,0537,0542,1931,1621,0546,0547,1916,0553,0569,0575,0579,1926,1525,0626,0627,0629,0637,0638,1892"}],"10":[{"nr":1,"name":"Middelburg","gem":"0654,0664,0677,0678,0687,1695,0703,1676,1714,0715,0716,0717,0718"}],"11":[{"nr":1,"name":"'s-Hertogenbosch","gem":"0743,1724,1721,0753,1728,0755,0757,1706,0762,0770,0772,1771,1652,1658,0794,0796,0797,1659,1982,1991,1948,0820,0823,0828,1667,0845,0847,0848,0858,0861,0865,0866"},{"nr":2,"name":"Tilburg","gem":"1723,1959,0744,0748,0758,0766,1719,0777,0779,0784,0785,1655,0798,0809,1709,0824,0826,1674,0840,0851,0855,0867,0873,0879"}],"12":[{"nr":1,"name":"Maastricht","gem":"0888,1954,0899,1903,1729,0917,0928,0882,0935,0938,0965,1883,0971,0981,0994,0986"},{"nr":2,"name":"Venlo","gem":"0889,0893,1711,0907,1507,1640,1641,0944,0946,1894,1669,0957,0983,0984,0988"}]};
+Object.values(PS_KK).forEach(l=>l.forEach(k=>{ k.gem=k.gem.split(","); }));
+/* Friese gemeenten met FrysianExportAllowed="true" volgens MasterElectionTree van e-KS (stand 23-11-2026).
+   Westerkwartier (1969) hoort hier niet bij: die gemeente ligt in Groningen en heeft het attribuut alleen binnen waterschap Fryslân. */
+const FRYS_GEM=new Set(["0059","0060","1891","1940","0072","0074","0080","1970","0085","0086","0088","0090","1900","0093","0737","0096","1949","0098"]);
+function isFrysPick(){ const g=GEM_BY_CODE[S.pick];
+  if(S.type==="GR"||TYPES[S.type].local) return FRYS_GEM.has(S.domainCode) && !(g&&g[3]==="Fictief");
+  if(S.type==="PS"){ const P=provByNr(S.pick); return !!(P && !P.fict && P.nr==="2"); }
+  return false; }
+function wsByPick(p){ return p===FICT_WS.pick? FICT_WS : WATERSCHAPPEN.find(w=>w.nr===p); }
 const FICT_PARTIES=["Partijdige Partij","Partij voor de Stemmer","Stemmmers 22","STEM","De Stemunie","Stemalliantie","Lijst De Partij","Het Stembiljet","Partij voor de Opkomst","Kiezers nu!","Verkiespartij","WET","Partij van de Wet","Stem van de partij","Kiesregelingsunie","De Lijst","Groep De Partij","Stemmersgroep","Algemene Partij","Stem voor de Partij","Partij van de Keuze","KEUS","Keuzepartij","Voorkeurskeuzepartij","De Kandidatenlijst"].join("\n");
 const SAMPLE_PARTIES="";
 /* landelijk register van aanduidingen (Kiesraad, Tweede Kamer); werkt door naar EK, PS, AB en GR. Stand: pagina gewijzigd 27-08-2026 */
 const NATIONAL_PARTIES=["VVD", "CDA", "D66", "Staatkundig Gereformeerde Partij (SGP)", "SP (Socialistische Partij)", "ChristenUnie", "Partij voor de Dieren", "PVV (Partij voor de Vrijheid)", "Piratenpartij", "50PLUS", "LP (Libertaire Partij)", "DENK", "Forum voor Democratie", "BIJ1", "BBB", "Volt", "JA21", "Belang Van Nederland (BVNL)", "Nieuw Sociaal Contract (NSC)", "NL PLAN", "ELLECT", "Vrij Verbond", "DE LINIE", "Vrede voor Dieren", "Partij voor de Rechtsstaat", "FNP", "LEF - Voor de Nieuwe Generatie", "Liberale Partij", "1 WERELD 1 TOEKOMST (1W1T)", "Hart voor Vrijheid", "ORDA / ORP", "PDIB (Partij voor Democratie in Balans)", "RESOLUUT", "De Nederlandse Alliantie (DNA)", "Mijn Stem Telt! Het Burgerinitiatief (MST)", "Herstel Nederland", "Progressief Nederland (PRO)"];
 function provByNr(nr){ return PROVINCIES.find(p=>p.nr===nr)||FICT_PROV.find(p=>p.nr===nr); }
 function isFict(){ const g=GEM_BY_CODE[S.pick], P=S.type==="PS"&&provByNr(S.pick);
-  return (S.type==="PS"? !!(P&&P.fict) : S.type==="AB"? S.pick===FICT_WS.nr : (S.type==="TK"||S.type==="EP")? !!S.fict : !!(g&&g[3]==="Fictief")); }
+  return (S.type==="PS"? !!(P&&P.fict) : S.type==="AB"? S.pick===FICT_WS.pick : (S.type==="TK"||S.type==="EP")? !!S.fict : !!(g&&g[3]==="Fictief")); }
 /* RegionNumber van een gemeente is de CBS-code zonder voorloopnullen (0037 -> 37) */
 function rn(code){ return /^\d+$/.test(code)? String(parseInt(code,10)) : code; }
 
@@ -342,16 +382,35 @@ function lawHasHSB(){
 }
 function defaultTree(){
   const tree=buildTree();
-  if(!S.hsbCompat && !lawHasHSB()) tree.forEach(r=>{ r.committees=r.committees.filter(c=>c!=="HSB"); r.central=false; });
+  if(!S.hsbCompat && !lawHasHSB() && S.type!=="EK") tree.forEach(r=>{ r.committees=r.committees.filter(c=>c!=="HSB"); r.central=false; });
   return tree;
 }
 function buildTree(){
   const t=S.type;
-  if(t==="GR"||TYPES[t].local) return [Object.assign(region("GEMEENTE",rn(S.domainCode),S.domainName,null,["CSB","HSB"]),{bound:true})];
+  if(TYPES[t].local && S.useDg && dgFor()){
+    /* zoals MasterElectionTree van e-KS: GEMEENTE (zonder stembureau) > DEELGEMEENTE met CSB en HSB */
+    const d=dgFor();
+    const g=Object.assign(region("GEMEENTE",rn(S.domainCode),S.domainName,null,[]),{bound:true}); if(FRYS_GEM.has(S.domainCode)) g.frys=true;
+    return [g, region("DEELGEMEENTE",d.nr,d.name,g.id,["CSB","HSB"])];
+  }
+  if(t==="GR"||TYPES[t].local){ const r=Object.assign(region("GEMEENTE",rn(S.domainCode),S.domainName,null,["CSB","HSB"]),{bound:true}); if(FRYS_GEM.has(S.domainCode)) r.frys=true; return [r]; }
   if(t==="PS"){
     const p=Object.assign(region("PROVINCIE",S.domainCode,S.domainName,null,[]),{bound:true});
     const P=provByNr(S.pick);
     if(!P) return [p, region("KIESKRING","1",S.domainName,p.id,["CSB","HSB"])];
+    if(!P.fict && PS_KK[P.nr]){
+      /* echte provincie: nummering, namen en gemeentevolgorde zoals e-KS (110a-ps27-1/-2) */
+      const list=PS_KK[P.nr].slice().sort((a,b)=>a.nr-b.nr), many=list.length>1, out=[p], regs=[], frys=P.nr==="2";
+      if(frys) p.frys=true;
+      list.forEach(k=>{
+        const hasCSB= !many || k.name===P.csb;
+        const r=region("KIESKRING",String(k.nr),k.name,p.id,hasCSB?["CSB","HSB"]:["HSB"]);
+        r.roman=P.name==="Limburg"; if(hasCSB&&many) r.central=true;
+        regs.push([k,r]); out.push(r);
+      });
+      if(S.includeGem) regs.forEach(([k,r])=>k.gem.forEach(c=>{ const g=GEM_BY_CODE[c]; const gr=region("GEMEENTE",rn(c),g?g[1]:"",r.id,[]); if(frys) gr.frys=true; out.push(gr); }));
+      return out;
+    }
     const multi=P.kk.length>1, out=[p], kkReg={};
     /* de kieskring waar het centraal stembureau zit krijgt nummer 1 (zoals PS2023 Gelderland: 1 Arnhem, 2 Nijmegen) */
     const kks=P.kk.slice().sort((a,b)=>((b.hsb||P.csb)===P.csb)-((a.hsb||P.csb)===P.csb) || a.nr-b.nr);
@@ -367,14 +426,24 @@ function buildTree(){
     return out;
   }
   if(t==="AB"){
+    const W=wsByPick(S.pick);
     const w=Object.assign(region("WATERSCHAP",S.domainCode,S.domainName,null,[]),{bound:true});
     const k=region("KIESKRING","1",S.domainName,w.id,["CSB","HSB"]);
     const out=[w,k];
-    if(S.pick===FICT_WS.nr && S.includeGem) FICT_WS.gem.forEach(c=>out.push(region("GEMEENTE",rn(c),GEM_BY_CODE[c][1],k.id,[])));
+    if(W && W.frys) w.frys=true;
+    if(W && S.includeGem) W.gem.forEach(c=>{ const g=GEM_BY_CODE[c]; const r=region("GEMEENTE",rn(c),g?g[1]:"",k.id,[]); if(W.frys) r.frys=true; out.push(r); });
     return out;
   }
-  if(t==="KC") return [region("KIESCOLLEGE","1",S.subcat==="KCNI"?"Kiescollege niet-ingezetenen":"Kiescollege Caribisch Nederland",null,["CSB"])];
-  if(t==="EK"){ const st=region("STAAT","","Nederland",null,["CSB"]); st.csbName="De Kiesraad"; return [st]; }
+  if(t==="KC"){ const K=KC_BY[S.pick]||KC_LIST[0]; return [region("KIESCOLLEGE",K.nr,K.name,null,["CSB","HSB"])]; }
+  if(t==="EK"){
+    /* zoals e-KS 110a-ek27: STAAT > PROVINCIE 1-16 (PROV_SB; 9 Zuid-Holland ook CSB De Kiesraad) > STEMBUREAU 1-16 */
+    const st=region("STAAT","","Nederland",null,[]);
+    const names=PROVINCIES.map(P=>P.name).concat(["Bonaire","Sint Eustatius","Saba","Buitenland"]);
+    const provs=names.map((n,i)=>{ const r=region("PROVINCIE",String(i+1),n,st.id,i===8?["CSB","PROV_SB"]:["PROV_SB"]);
+      if(i===8){ r.csbName="De Kiesraad"; r.central=true; } if(i===1) r.frys=true; return r; });
+    const sbs=provs.map(p=>region("STEMBUREAU",p.num,p.name,p.id,[]));
+    return [st].concat(provs,sbs);
+  }
   /* TK en EP: geen stembureau op STAAT; het CSB (De Kiesraad) staat bij kieskring 1, zoals in het TK-testbestand van de Kiesraad */
   const st=region("STAAT","","Nederland",null,[]);
   const names=S.fict? ["Heemdamseburg","'s-Gravenveen"] : KIESKRINGEN;
@@ -402,7 +471,9 @@ function pickOptions(){
   if(S.type==="PS") return '<option value="">Andere indeling (handmatig invullen)</option>'+
     '<optgroup label="'+FICT_LABEL+'">'+FICT_PROV.map(P=>'<option value="'+P.nr+'">'+esc(P.name)+' (fictief, '+P.nr+', '+(P.kk.length>1?P.kk.length+' kieskringen':'1 kieskring')+')</option>').join("")+'</optgroup>'+
     '<optgroup label="Provincies">'+PROVINCIES.map(P=>'<option value="'+P.nr+'">'+esc(P.name)+' ('+P.nr+')</option>').join("")+'</optgroup>';
-  if(S.type==="AB") return '<option value="">Waterschap handmatig invullen</option><optgroup label="'+FICT_LABEL+'"><option value="'+FICT_WS.nr+'">'+esc(FICT_WS.name)+' (fictief, '+FICT_WS.nr+')</option></optgroup>';
+  if(S.type==="KC") return KC_LIST.map(k=>'<option value="'+k.nr+'">'+k.nr+" "+esc(k.sub==="KCNI"?k.name:"Kiescollege "+k.name)+" ("+k.sub+")</option>").join("");
+  if(S.type==="AB") return '<option value="">Waterschap handmatig invullen</option><optgroup label="'+FICT_LABEL+'"><option value="'+FICT_WS.pick+'">'+esc(FICT_WS.name)+' (fictief, '+FICT_WS.nr+')</option></optgroup>'+
+    '<optgroup label="Waterschappen (e-KS)">'+WATERSCHAPPEN.slice().sort((a,b)=>a.name.localeCompare(b.name,"nl")).map(w=>'<option value="'+w.nr+'">'+esc(w.name)+' ('+w.nr+')</option>').join("")+'</optgroup>';
   return "";
 }
 function setTestParties(on){
@@ -415,22 +486,25 @@ function applyPick(){
   if(TYPES[S.type].local){
     const g=GEM_BY_CODE[S.pick]; if(!g) return;
     S.domainName=g[1]; S.domainCode=g[0];
-    const list=BODIES[g[0]]||[]; S.body=list[0]||(g[3]==="Fictief"?"Bestuursraad "+g[1]:"");
+    const list=BODIES[g[0]]||[]; S.body=list[0]||(g[3]==="Fictief"?"Bestuursraad "+g[1]:""); S.dgNr="";
   } else if(S.type==="GR"){
     const g=GEM_BY_CODE[S.pick]; if(!g) return;
     S.domainName=g[1]; S.domainCode=g[0]; S.seats=g[2];
   } else if(S.type==="PS"){
     const P=provByNr(S.pick); if(!P) return;
     S.domainName=P.name; S.domainCode=P.nr; S.seats=P.seats;
+  } else if(S.type==="KC"){
+    const K=KC_BY[S.pick]; if(!K) return;
+    S.domainName=K.name; S.domainCode=K.nr; S.seats=K.seats; S.subcat=K.sub;
   } else if(S.type==="AB"){
-    if(S.pick!==FICT_WS.nr) return;
-    S.domainName=FICT_WS.name; S.domainCode=FICT_WS.nr; S.seats=FICT_WS.seats;
+    const W=wsByPick(S.pick); if(!W) return;
+    S.domainName=W.name; S.domainCode=W.nr; S.seats=W===FICT_WS? FICT_WS.seats : (W.seats||"");
   }
   setTestParties(isFict());
 }
 
 function freshState(){
-  S={type:"GR",pick:"0106",body:"",includeGem:true,fict:false,hsbCompat:true,domainName:"Assen",domainCode:"0106",electionDate:"2030-03-20",nominationDate:"",seats:35,threshold:25,subcat:"GR2",
+  S={type:"GR",pick:"0106",body:"",includeGem:true,fict:false,hsbCompat:true,useDg:false,dgNr:"",domainName:"Assen",domainCode:"0106",electionDate:"2030-03-20",nominationDate:"",seats:35,threshold:25,subcat:"GR2",
      parties:SAMPLE_PARTIES,
      electionName:"",electionId:"",transactionId:"1",emlVersion:"1.3.1",contestId:"",issueDate:iso(new Date()),authorityId:"",maxVotes:"",tree:[]};
   edited={};
@@ -441,7 +515,7 @@ function freshState(){
 function autoSubcat(){
   const t=S.type, n=+S.seats||0;
   if(TYPES[t].local) return TYPES[t].cat;
-  if(t==="KC") return S.subcat==="KCNI"?"KCNI":"KCCN";
+  if(t==="KC") return (KC_BY[S.pick]||KC_LIST[0]).sub;
   if(t==="GR") return n<19?"GR1":"GR2";
   if(t==="AB") return n<19?"AB1":"AB2";
   if(t==="PS") return S.tree.filter(r=>r.cat==="KIESKRING").length>1?"PS2":"PS1";
@@ -450,16 +524,18 @@ function autoSubcat(){
 function autoThreshold(){
   const t=S.type, n=+S.seats||0;
   if(t==="EP") return 10;
-  if(t==="EK") return 50;
+  if(t==="EK") return 100; /* Kieswet sinds Stb. 2010, 790: 100% van de kiesdeler (zoals e-KS 110a-ek27) */
   return n<19?50:25;
 }
-function autoContest(){ return (S.type==="TK"||S.type==="EP"||(S.type==="PS"&&S.tree.filter(r=>r.cat==="KIESKRING").length>1))?"alle":"geen"; }
+function autoContest(){ return (S.type==="TK"||S.type==="EP"||S.type==="EK"||(S.type==="PS"&&S.tree.filter(r=>r.cat==="KIESKRING").length>1))?"alle":"geen"; }
 function year(){ return (S.electionDate||"").slice(0,4)||"JJJJ"; }
-function autoName(){ const T=TYPES[S.type]; if(S.type==="KC") return (S.subcat==="KCNI"?"Kiescollege niet-ingezetenen":"Kiescollege Caribisch Nederland")+" "+year(); if(T.local) return (S.body||T.label)+" "+year(); return T.domain? T.prefix+" "+S.domainName+" "+year() : T.prefix+" "+year(); }
-function autoId(){ const T=TYPES[S.type]; if(S.type==="KC") return S.subcat+year(); if(T.local) return T.cat+year()+"_"+slug(S.domainName)+"_"+slug(String(S.body||"").replace(/^(Stadsdeelcommissie|Bestuurscommissie|Bestuursraad|Commissie van ingezetenen|Wijkraad|Dorpsraad|Gebiedscommissie)\s+/i,"")); return T.domain? S.type+year()+"_"+slug(S.domainName) : S.type+year(); }
+function autoName(){ const T=TYPES[S.type]; if(S.type==="EK") return "Verkiezing van de Eerste Kamer der Staten-Generaal "+year();
+  if(S.type==="KC"){ const K=KC_BY[S.pick]; return "Verkiezing van de leden van het kiescollege "+(K&&K.sub==="KCNI"?"niet-ingezetenen":(K?K.name:"Bonaire"))+" "+year(); }
+  if(S.type==="PS") return "Verkiezing van de provinciale staten van "+S.domainName+" "+year(); if(S.type==="AB") return "Verkiezing van het algemeen bestuur van het waterschap "+S.domainName+" "+year(); if(S.type==="KC") return (S.subcat==="KCNI"?"Kiescollege niet-ingezetenen":"Kiescollege Caribisch Nederland")+" "+year(); if(T.local) return (S.body||T.label)+" "+year(); return T.domain? T.prefix+" "+S.domainName+" "+year() : T.prefix+" "+year(); }
+function autoId(){ const T=TYPES[S.type]; if(S.type==="KC"){ const K=KC_BY[S.pick]||KC_LIST[0]; return K.sub==="KCNI"? "KCNI"+year() : "KCCN"+year()+"_"+slug(K.name); } if(T.local) return T.cat+year()+"_"+slug(S.domainName)+"_"+slug(String(S.body||"").replace(/^(Stadsdeelcommissie|Bestuurscommissie|Bestuursraad|Commissie van ingezetenen|Wijkraad|Dorpsraad|Gebiedscommissie)\s+/i,"")); return T.domain? S.type+year()+"_"+slug(S.domainName) : S.type+year(); }
 
 function applyAuto(){
-  if(!edited.nominationDate && S.electionDate) S.nominationDate=addDays(S.electionDate,-44);
+  if(!edited.nominationDate && S.electionDate) S.nominationDate=addDays(S.electionDate,S.type==="EK"?-34:-44);
   if(!edited.subcat) S.subcat=autoSubcat();
   if(!edited.threshold) S.threshold=autoThreshold();
   if(!edited.electionName) S.electionName=autoName();
@@ -516,6 +592,7 @@ function buildXml(){
       let ca=' CommitteeCategory="'+c+'"';
       if(c==="CSB" && r.csbName.trim()) ca+=' CommitteeName="'+esc(r.csbName.trim())+'"';
       if(c==="HSB" && r.central) ca+=' AcceptCentralSubmissions="true"';
+      if(c==="CSB" && r.central && !r.committees.includes("HSB")) ca+=' AcceptCentralSubmissions="true"';
       p(5,'<kr:Committee'+ca+'/>');
     });
     p(4,"</kr:Region>");
@@ -580,19 +657,34 @@ function validate(){
   if(S.type==="PS"){
     const kk=S.tree.filter(r=>r.cat==="KIESKRING");
     if(kk.length>1 && kk.some(r=>!r.committees.includes("HSB"))) warn("Bij meerdere kieskringen hoort elke kieskring een hoofdstembureau (HSB) te hebben.");
-    if(provByNr(S.pick) && !provByNr(S.pick).fict && +S.seats===provByNr(S.pick).seats) info("Het aantal statenzetels komt uit het Kiesraad-overzicht van 2023. Controleer of het voor deze verkiezing gelijk blijft.");
+    if(provByNr(S.pick) && !provByNr(S.pick).fict) info("Kieskringen en gemeenten per kieskring komen uit MasterElectionTree van e-KS (stand 23-11-2026). Het aantal statenzetels komt nog uit 2023; controleer het.");
   }
   if(S.type==="GR" && GEM_BY_CODE[S.pick] && GEM_BY_CODE[S.pick][3]!=="Fictief" && +S.seats===GEM_BY_CODE[S.pick][2]) info("Het aantal raadszetels komt uit de Kiesraad-gegevens van GR2026. Controleer het bij een latere verkiezing.");
-  if(T.local) info("EML_NL kent geen gebiedscategorie voor stadsdelen of wijken: de indeling gebruikt de gemeente, en de naam van de raad staat in ElectionDomain en ElectionName. Lees het bestand proef in.");
-  if(S.type!=="GR" && !T.local && !isFict() && !(S.type==="PS" && provByNr(S.pick))) info("Controleer de indeling bij "+T.label+" extra goed: de standaardindeling is een uitgangspunt.");
+  if(T.local && dgFor() && !S.useDg) info("e-KS kent dit stadsdeel/gebied als DEELGEMEENTE "+dgFor().nr+". Zet de optie bij vraag 6 aan om het in de indeling op te nemen; proef inlezen.");
+  if(T.local && dgFor() && S.useDg) info("DEELGEMEENTE volgt MasterElectionTree van e-KS; er is geen voorbeeld-110a. Lees het bestand proef in.");
+  if(S.type!=="GR" && S.type!=="EK" && S.type!=="KC" && !T.local && !isFict() && !(S.type==="PS" && provByNr(S.pick))) info("Controleer de indeling bij "+T.label+" extra goed: de standaardindeling is een uitgangspunt.");
   if(!lawHasHSB()){
     const hasHSB=S.tree.some(r=>r.committees.includes("HSB"));
     if(hasHSB) info("Volgens de Kieswet (art. E 10 en E 11) is er bij deze verkiezing geen hoofdstembureau. Het bestand bevat toch een HSB bij het CSB, net als de verkiezingsdefinities van de Kiesraad. Zet dit uit bij vraag 6 als je software dat niet verwacht.");
   }
+  if(S.type==="AB" && wsByPick(S.pick) && wsByPick(S.pick)!==FICT_WS && wsByPick(S.pick).ab){
+    const W=wsByPick(S.pick), n2=+S.seats;
+    if(String(S.seats)!=="" && n2===W.seats) info("Aantal zetels uit het reglement van het waterschap (stand 23-11-2026). Controleer het bij de bekendmaking van de kandidaatstelling.");
+    else if(n2===W.ab) warn("Dit lijkt het totaal van het algemeen bestuur, inclusief de 4 geborgde zetels. In het bestand hoort alleen het aantal gekozen zetels: "+W.seats+".");
+    else if(String(S.seats)!=="") warn("Het aantal zetels wijkt af van het reglement ("+W.seats+" gekozen zetels).");
+  }
+  if(S.type==="AB" && wsByPick(S.pick) && wsByPick(S.pick)!==FICT_WS) info("Waterschapsnummer en gemeenten komen uit MasterElectionTree van e-KS (stand 23-11-2026). Een gemeente kan bij meer waterschappen horen.");
+  if(isFrysPick()) info("Fries toegestaan (FrysianExportAllowed) staat op het gebied en de gemeenten, zoals in MasterElectionTree van e-KS. Er is geen e-KS-voorbeeldbestand voor deze verkiezing; lees het bestand proef in.");
   if(isFict()) info("Fictief testgebied, zoals in de testbestanden van de Kiesraad. Alleen gebruiken om software te testen, niet voor een echte verkiezing.");
   if(S.type==="KC" && S.emlVersion==="1.2.2") bad("Kiescolleges (KC) bestaan pas vanaf EML_NL 1.3. Kies bij vraag 7 versie 1.3 of hoger.");
-  if(S.type==="KC") info("Het aantal leden van het kiescollege en de indeling zijn niet automatisch ingevuld. Controleer ze.");
+  if(S.type==="KC"){
+    const K=KC_BY[S.pick];
+    if(K&&K.sub==="KCCN") info("Het kiescollege telt evenveel leden als de eilandsraad (11/7/7 vanaf 2027, Verhogingswet). Controleer dit bij de bekendmaking.");
+    if(K&&K.sub==="KCNI") warn("Het aantal leden van het kiescollege niet-ingezetenen hangt af van het aantal registraties (art. 5 Wet kiescollege niet-ingezetenen). 25 is het aantal van 2023; controleer het.");
+    info("e-KS heeft geen voorbeeldbestand voor een kiescollegeverkiezing. De indeling volgt de nummers uit MasterElectionTree. Lees het bestand proef in.");
+  }
   if(S.emlVersion==="1.2.2") info("EML_NL 1.2.2: het bestand krijgt geen kr:Schema-element. Gebruik deze versie alleen voor de herindelingsverkiezingen van 18 november 2026.");
+  if(S.type==="EK") info("Indeling zoals het e-KS-voorbeeld 110a-ek27: 12 provincies, 3 openbare lichamen en het kiescollege niet-ingezetenen (16 Buitenland), elk met een provinciaal stembureau. De Kiesraad is CSB bij Zuid-Holland.");
   if(S.type==="EK") info("Bij de Eerste Kamer werkt de uitslag met stemwaarden; die horen niet in dit bestand.");
   return out;
 }
@@ -604,9 +696,10 @@ function renderTypes(){
 }
 function renderForm(){
   const T=TYPES[S.type];
-  $("qDomain").hidden=!T.domain;
+  $("qDomain").hidden=!T.domain && S.type!=="KC";
+  if(S.type==="KC"){ $("domainTitle").textContent=T.domainTitle; $("domainHint").textContent=T.hint; }
   if(T.domain){ $("domainTitle").textContent=T.domainTitle; $("domainNameLbl").textContent=T.nameLbl; $("domainCodeLbl").textContent=T.codeLbl; $("domainHint").textContent=T.hint; }
-  const hasPick=(S.type==="GR"||S.type==="PS"||S.type==="AB"||!!T.local);
+  const hasPick=(S.type==="GR"||S.type==="PS"||S.type==="AB"||S.type==="KC"||!!T.local);
   $("bodyWrap").hidden=!T.local;
   if(T.local){
     $("bodyList").innerHTML=(BODIES[S.domainCode]||[]).map(b=>'<option value="'+esc(b)+'"></option>').join("");
@@ -614,20 +707,22 @@ function renderForm(){
     $("bodyName").placeholder=S.type==="GC"?"bijv. Wijkraad Kralingen":S.type==="BR"?"bijv. Bestuursraad Engelen en Bokhoven":"bijv. Stadsdeelcommissie Centrum";
   }
   $("pickWrap").hidden=!hasPick;
-  $("manualWrap").hidden=hasPick && !!S.pick;
+  $("manualWrap").hidden=(hasPick && !!S.pick) || S.type==="KC";
   if(hasPick){
-    $("domainPickLbl").textContent=S.type==="PS"?"Kies de provincie":S.type==="AB"?"Kies het waterschap":"Kies de gemeente";
+    $("domainPickLbl").textContent=S.type==="KC"?"Kies het kiescollege":S.type==="PS"?"Kies de provincie":S.type==="AB"?"Kies het waterschap":"Kies de gemeente";
     if($("domainPick").dataset.type!==(T.local?"GR":S.type)){ $("domainPick").innerHTML=pickOptions(); $("domainPick").dataset.type=(T.local?"GR":S.type); }
     $("domainPick").value=S.pick||"";
   }
   let facts=[];
   const g=S.type==="GR"&&GEM_BY_CODE[S.pick], P=S.type==="PS"&&provByNr(S.pick);
   if(g) facts=g[3]==="Fictief"?["Fictieve testgemeente","Gemeentecode "+g[0],"RegionNumber "+rn(g[0])]:["Gemeentecode "+g[0],"Provincie "+g[3],g[2]+" raadszetels (GR2026)"];
-  if(S.type==="AB"&&S.pick===FICT_WS.nr) facts=["Fictief testwaterschap","Waterschapsnummer "+FICT_WS.nr,"4 testgemeenten"];
+  if(S.type==="AB"&&S.pick===FICT_WS.pick) facts=["Fictief testwaterschap","Waterschapsnummer "+FICT_WS.nr,"4 testgemeenten"];
+  else if(S.type==="AB"&&wsByPick(S.pick)){ const W=wsByPick(S.pick); facts=["Waterschapsnummer "+W.nr,W.gem.length+" gemeenten"]; if(W.ab) facts.push(W.seats+" gekozen zetels (bestuur "+W.ab+")"); facts.push("bron: e-KS"); if(W.frys) facts.push("Fries toegestaan"); }
   const gl=T.local&&GEM_BY_CODE[S.pick];
   if(gl) facts=["Gemeentecode "+gl[0],"Provincie "+gl[3],"Categorie "+T.cat];
+  if(gl && dgFor()) facts.push("DEELGEMEENTE "+dgFor().nr+" (e-KS)");
   if(P&&P.fict) facts=["Fictieve testprovincie","Provincienummer "+P.nr,P.kk.length+(P.kk.length>1?" kieskringen":" kieskring")+": "+P.kk.map(k=>k.hsb).join(", ")];
-  else if(P) facts=["Provincienummer "+P.nr,P.seats+" statenzetels (2023)","Centraal stembureau "+P.csb,P.kk.length+(P.kk.length>1?" kieskringen: "+P.kk.map(k=>k.nr+" "+k.hsb).join(", "):" kieskring")];
+  else if(P){ const L=(PS_KK[P.nr]||[]).slice().sort((a,b)=>a.nr-b.nr); facts=["Provincienummer "+P.nr,P.seats+" statenzetels (2023)","Centraal stembureau "+P.csb,L.length+(L.length>1?" kieskringen: ":" kieskring: ")+L.map(k=>k.nr+" "+k.name).join(", ")]; }
   { const pl=dedupe(S.parties.split(/\r?\n/)); const f=[pl.length+(pl.length===1?" aanduiding":" aanduidingen")];
     if(S.partySource) f.push("bron: "+S.partySource); else if(S.parties===FICT_PARTIES) f.push("bron: testpartijen Kiesraad");
     $("partyFacts").innerHTML=f.map(x=>'<span class="chip'+(pl.length?' on':'')+'">'+esc(x)+'</span>').join(""); }
@@ -635,13 +730,17 @@ function renderForm(){
   $("partyHint").textContent=(S.type==="TK"||S.type==="EP"||S.type==="EK")
     ? "Bij deze verkiezing gelden de aanduidingen uit het landelijk register van de Kiesraad. Die zijn al ingevuld; controleer of het register sindsdien is gewijzigd."
     : "Neem de aanduidingen over uit het register van het centraal stembureau (Kieswet hoofdstuk G), letterlijk zoals ze daar staan, één per regel. Aanduidingen uit het landelijk register van de Kiesraad werken door naar deze verkiezing; die voeg je toe met de knop. Lees de rest in uit een bestand van het CSB of typ of plak ze hieronder.";
+  if(S.type==="KC"&&KC_BY[S.pick]){ const K=KC_BY[S.pick]; facts=["Nummer "+K.nr,"Subcategorie "+K.sub,K.seats+" leden (standaard)","bron: e-KS"]; }
+  if(isFrysPick()) facts.push("Fries toegestaan");
   $("pickFacts").innerHTML=facts.map(f=>'<span class="chip on">'+esc(f)+'</span>').join("");
   $("pickFacts").hidden=!facts.length;
-  $("hsbWrap").hidden=lawHasHSB();
+  $("hsbWrap").hidden=lawHasHSB()||S.type==="EK";
+  $("dgWrap").hidden=!dgFor();
+  $("dgOpt").checked=!!S.useDg;
   $("hsbCompat").checked=!!S.hsbCompat;
   $("fictWrap").hidden=!(S.type==="TK"||S.type==="EP");
   $("fictTree").checked=!!S.fict;
-  $("incGemWrap").hidden=!((S.type==="PS"||S.type==="TK"||S.type==="EP"||(S.type==="AB"&&S.pick===FICT_WS.nr)) && !S.fict);
+  $("incGemWrap").hidden=!((S.type==="PS"||S.type==="TK"||S.type==="EP"||(S.type==="AB"&&!!wsByPick(S.pick))) && !S.fict);
   $("includeGem").checked=!!S.includeGem;
   ["domainName","domainCode","electionDate","nominationDate","seats","threshold","parties","electionName","electionId","transactionId","issueDate","authorityId","maxVotes","contestId"].forEach(k=>{ const el=$(k); if(document.activeElement!==el) el.value=S[k]; });
   $("subcat").innerHTML=T.subs.map(s=>'<option'+(s===S.subcat?" selected":"")+'>'+s+'</option>').join("");
@@ -650,9 +749,12 @@ function renderForm(){
   const n=+S.seats;
   let h="";
   if(S.type==="GR"||S.type==="AB") h=n<19?"Minder dan 19 zetels: subcategorie "+S.type+"1 en een voorkeurdrempel van 50%.":"19 zetels of meer: subcategorie "+S.type+"2 en een voorkeurdrempel van 25%.";
+  if(S.type==="AB" && wsByPick(S.pick) && wsByPick(S.pick)!==FICT_WS && wsByPick(S.pick).ab){ const W=wsByPick(S.pick); h="Het algemeen bestuur van "+W.name+" telt "+W.ab+" leden. Daarvan zijn 4 geborgde zetels (2 ongebouwd, 2 natuurterreinen) die niet gekozen worden. Er worden dus "+W.seats+" zetels verdeeld; alleen die horen in het bestand. "+h; }
+  else if(S.type==="AB" && wsByPick(S.pick)!==FICT_WS) h="Vul het aantal te kiezen zetels in volgens het reglement van het waterschap (zonder de 4 geborgde zetels). "+h;
   if(S.type==="PS") h="De subcategorie volgt uit het aantal kieskringen bij vraag 6.";
   if(S.type==="TK") h="De Tweede Kamer heeft 150 zetels.";
-  if(S.type==="EK") h="De Eerste Kamer heeft 75 zetels; de voorkeurdrempel is 50% van de kiesdeler.";
+  if(S.type==="EK") h="De Eerste Kamer heeft 75 zetels; de voorkeurdrempel is 100% van de kiesdeler.";
+  if(S.type==="KC") h=(KC_BY[S.pick]&&KC_BY[S.pick].sub==="KCNI")?"Het aantal leden hangt af van het aantal geregistreerde kiezers buiten Nederland (9 bij minder dan 3.001 registraties, oplopend tot 45). 25 is het aantal van 2023.":"Het kiescollege telt evenveel leden als de eilandsraad: vanaf 2027 Bonaire 11, Sint Eustatius 7 en Saba 7 (Verhogingswet BES). Minder dan 19 zetels: voorkeurdrempel 50%.";
   if(S.type==="EP") h="Controleer het aantal Nederlandse zetels voor deze zittingsperiode; in 2024 waren dat er 31.";
   if(T.local) h="Het aantal zetels staat in de verordening van de gemeente. Bij minder dan 19 zetels geldt een voorkeurdrempel van 50%, anders 25% (Kieswet van overeenkomstige toepassing).";
   $("seatHint").textContent=h;
@@ -668,7 +770,7 @@ function renderTree(){
       '<td><select data-f="sup" aria-label="Valt onder">'+supOpts+'</select></td>'+
       '<td class="cm">'+COMMITTEES.map(c=>'<label><input type="checkbox" data-c="'+c+'"'+(r.committees.includes(c)?" checked":"")+'> '+c+'</label>').join("")+
         (r.committees.includes("CSB")?'<div><input type="text" data-f="csbName" aria-label="Naam centraal stembureau" placeholder="naam CSB (optioneel)" value="'+esc(r.csbName)+'" style="margin-top:4px;width:170px"></div>':'')+'</td>'+
-      '<td class="cm"><label title="Romeinse cijfers"><input type="checkbox" data-f="roman"'+(r.roman?" checked":"")+'> Romeins</label><label title="Fries toegestaan"><input type="checkbox" data-f="frys"'+(r.frys?" checked":"")+'> Fries</label>'+(r.committees.includes("HSB")?'<label title="AcceptCentralSubmissions: dit hoofdstembureau accepteert centraal ingeleverde lijsten"><input type="checkbox" data-f="central"'+(r.central?" checked":"")+'> Centraal inleveren</label>':'')+'</td>'+
+      '<td class="cm"><label title="Romeinse cijfers"><input type="checkbox" data-f="roman"'+(r.roman?" checked":"")+'> Romeins</label><label title="Fries toegestaan"><input type="checkbox" data-f="frys"'+(r.frys?" checked":"")+'> Fries</label>'+((r.committees.includes("HSB")||r.committees.includes("CSB"))?'<label title="AcceptCentralSubmissions: dit stembureau accepteert centraal ingeleverde lijsten (bij het HSB, of bij het CSB als er geen HSB is)"><input type="checkbox" data-f="central"'+(r.central?" checked":"")+'> Centraal inleveren</label>':'')+'</td>'+
       '<td><button type="button" class="small" data-del aria-label="Verwijder gebied">×</button></td></tr>';
   }).join("");
   document.querySelector("#treeTable tbody").innerHTML=rows;
@@ -699,13 +801,16 @@ function update(full){ applyAuto(); renderForm(); if(full) renderTree(); renderO
 $("types").addEventListener("change",e=>{
   S.type=e.target.value; const T=TYPES[S.type];
   S.seats=T.seats; edited={};
-  S.pick=""; S.domainName=""; S.domainCode=""; S.fict=false; setTestParties(false);
+  S.pick=""; S.domainName=""; S.domainCode=""; S.fict=false; setTestParties(false); S.useDg=false; S.dgNr="";
   if(S.type==="GR"){ S.pick="0106"; applyPick(); }
   if(T.local){ S.pick=T.defGem; applyPick(); S.seats=""; S.electionDate="2030-03-20"; }
   if(S.type==="PS"){ S.pick="1"; applyPick(); }
+  if(S.type==="AB"){ S.pick="1"; applyPick(); }
   if(S.type==="PS"||S.type==="AB"||S.type==="KC") S.electionDate="2027-03-17";
+  if(S.type==="EK") S.electionDate="2027-05-24";
   if((S.type==="TK"||S.type==="EP"||S.type==="EK") && !S.parties.trim()){ S.parties=NATIONAL_PARTIES.join("\n"); S.partySource="landelijk register"; }
   S.subcat=T.subs[0];
+  if(S.type==="KC"){ S.pick="13"; applyPick(); }
   S.tree=defaultTree(); update(true);
 });
 $("domainPick").addEventListener("change",e=>{
@@ -715,6 +820,7 @@ $("domainPick").addEventListener("change",e=>{
   if(!S.pick) $("domainName").focus();
 });
 $("hsbCompat").addEventListener("change",e=>{ S.hsbCompat=e.target.checked; S.tree=defaultTree(); update(true); });
+$("dgOpt").addEventListener("change",e=>{ S.useDg=e.target.checked; S.tree=defaultTree(); update(true); });
 $("fictTree").addEventListener("change",e=>{ S.fict=e.target.checked; setTestParties(S.fict); S.tree=defaultTree(); update(true); });
 $("includeGem").addEventListener("change",e=>{ S.includeGem=e.target.checked; S.tree=defaultTree(); update(true); });
 /* ---------- geregistreerde aanduidingen inlezen ---------- */
@@ -767,7 +873,7 @@ $("partyNational").addEventListener("click",()=>{
 $("partyClear").addEventListener("click",()=>{ S.parties=""; S.partySource=""; update(false); });
 $("emlVersion").addEventListener("change",e=>{ S.emlVersion=e.target.value; update(false); });
 $("contestId").addEventListener("input",e=>{ S.contestId=e.target.value; edited.contestId=e.target.value!==""; update(false); });
-$("bodyName").addEventListener("input",e=>{ S.body=e.target.value; update(false); });
+$("bodyName").addEventListener("input",e=>{ S.body=e.target.value; S.dgNr=""; S.tree=defaultTree(); update(true); });
 $("parties").addEventListener("input",()=>{ S.partySource=""; });
 ["domainName","domainCode","electionDate","seats","parties","transactionId","issueDate","authorityId","maxVotes"].forEach(k=>{
   $(k).addEventListener("input",e=>{ S[k]=e.target.value; const bind=(k==="domainName"||k==="domainCode"); update(bind); });
@@ -775,7 +881,7 @@ $("parties").addEventListener("input",()=>{ S.partySource=""; });
 [["nominationDate"],["threshold"],["electionName"],["electionId"]].forEach(([k])=>{
   $(k).addEventListener("input",e=>{ S[k]=e.target.value; edited[k]=e.target.value!==""; update(false); });
 });
-$("subcat").addEventListener("change",e=>{ S.subcat=e.target.value; edited.subcat=S.subcat!==autoSubcat(); if(S.type==="KC"){ edited.subcat=false; S.tree=defaultTree(); update(true); } else update(false); });
+$("subcat").addEventListener("change",e=>{ S.subcat=e.target.value; edited.subcat=S.subcat!==autoSubcat(); if(S.type==="KC"){ edited.subcat=false; S.pick=S.subcat==="KCNI"?"16":(KC_BY[S.pick]&&KC_BY[S.pick].sub==="KCCN"?S.pick:"13"); applyPick(); S.tree=defaultTree(); update(true); } else update(false); });
 
 const tbody=document.querySelector("#treeTable tbody");
 tbody.addEventListener("input",e=>{
@@ -859,12 +965,15 @@ $("importFile").addEventListener("change",async e=>{
       if(t.sc){ const s=tmp.find(o=>o.r.cat===t.sc && (o.r.num===t.sn || (t.sc==="STAAT"))); if(s) t.r.sup=s.r.id; } });
     S.tree=tmp.map(t=>t.r);
     const rootR=S.tree.find(r=>!r.sup);
+    if(cat==="KC"){ const kcR=S.tree.find(r=>r.cat==="KIESCOLLEGE"); if(kcR&&KC_BY[kcR.num]){ S.pick=kcR.num; S.domainName=KC_BY[kcR.num].name; S.domainCode=kcR.num; } }
     if(cat==="PS" && rootR && rootR.cat==="PROVINCIE"){ S.domainCode=rootR.num; S.domainName=rootR.name; }
     if((cat==="GR"||TYPES[typeKey].local) && GEM_BY_CODE[S.domainCode]) S.pick=S.domainCode;
+    S.useDg=false; S.dgNr="";
+    if(TYPES[typeKey].local){ const dgR=S.tree.find(r=>r.cat==="DEELGEMEENTE"); if(dgR){ S.useDg=true; S.dgNr=dgR.num; } }
     if(TYPES[typeKey].local){ const dom2=one(KR,"ElectionDomain"); S.body=dom2?dom2.textContent.trim():nm; const g2=GEM_BY_CODE[S.domainCode]; if(g2) S.domainName=g2[1]; }
     if(cat==="PS" && provByNr(S.domainCode)) S.pick=S.domainCode;
     if(cat==="PS" && rootR && rootR.cat==="PROVINCIE" && rootR.num===S.domainCode) rootR.bound=true;
-    if(cat==="AB" && S.domainCode===FICT_WS.nr) S.pick=FICT_WS.nr;
+    if(cat==="AB"){ if(S.domainCode===FICT_WS.nr && S.domainName===FICT_WS.name) S.pick=FICT_WS.pick; else if(WATERSCHAPPEN.some(w=>w.nr===S.domainCode)) S.pick=S.domainCode; }
     if((cat==="TK"||cat==="EP") && S.tree.some(r=>r.name==="Juinen")) S.fict=true;
     if(rootR && TYPES[typeKey].domain && rootR.cat===TYPES[typeKey].domain && rn(rootR.num)===rn(S.domainCode)) rootR.bound=true;
     renderTypes(); update(true); toast("Bestand ingelezen: "+S.electionName);
