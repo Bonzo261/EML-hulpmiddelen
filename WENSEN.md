@@ -1,6 +1,6 @@
 # Wensen en to-do
 
-Wat er nog op de lijst staat, per onderwerp. Bijgewerkt op 23-11-2026. Wat al klaar is, staat in [`CHANGELOG.md`](CHANGELOG.md); de bekende beperkingen per app staan in [`docs/`](docs/).
+Wat er nog op de lijst staat, per onderwerp. Bijgewerkt op 23-11-2026 (avond). Wat al klaar is, staat in [`CHANGELOG.md`](CHANGELOG.md); de bekende beperkingen per app staan in [`docs/`](docs/).
 
 Heb je een idee of vind je een fout? Maak een [issue](https://github.com/Bonzo261/EML-hulpmiddelen/issues) aan.
 
@@ -8,7 +8,8 @@ Heb je een idee of vind je een fout? Maak een [issue](https://github.com/Bonzo26
 
 **Kandidatenlijsten**
 - **Eerste Kamer per provincie.** Bij de Eerste Kamer is elke provincie en elk eiland een kieskring voor de kandidaatstelling. De app maakt nu nog één set lijsten. Eerst uitzoeken hoe de 230b eruitziet, te beginnen met het e-KS-voorbeeld 230b-ek27.
-- **EML 210 en 230c maken.** e-KS maakt ook de inlevering van een kandidatenlijst (210) en een 230c. Eerst uitzoeken wat 230c precies bevat; daarna kiezen tussen een extra uitvoer en een nieuwe app.
+- **EML 210 maken.** e-KS maakt ook de inlevering van een kandidatenlijst (210). Nog uitzoeken wat erin hoort. (De 230c, totaallijsten met adressen, is klaar.)
+- Een gemachtigde ook bij kandidaten die in Nederland wonen (in de 230c).
 - Afwijkende lijstnummers per kieskring.
 - Instellingen bewaren, zodat je na herladen verder kunt.
 
@@ -31,8 +32,9 @@ Heb je een idee of vind je een fout? Maak een [issue](https://github.com/Bonzo26
 - **Proef inlezen in Abacus of OSV** van de nieuwe bestanden:
   - 110a voor Provinciale Staten, waterschappen, Eerste Kamer en kiescolleges;
   - 110a met DEELGEMEENTE (stadsdelen en gebieden) en met Fries;
-  - 230b met geboortedatum, geslacht onbekend en kr:ListData.
-- **Romeinse cijfers bij Limburg:** e-KS schrijft kieskring "1", Abacus verwacht "I". Nagaan wat de uitslagsoftware echt verwacht.
+  - 230b met geboortedatum, geslacht onbekend en kr:ListData;
+  - 230c (totaallijsten met adressen) in OSV2020-KS of een ander programma dat 230c leest. Abacus leest geen 230c.
+- **Romeinse cijfers bij Limburg:** e-KS schrijft kieskring "1", Abacus verwacht "I" (bevestigd in de Abacus-code). Nagaan wat OSV verwacht, en of e-KS en Abacus hierin gelijk worden getrokken.
 - **Met echte bestanden testen:** een 520 van de uitslagsoftware, en een 510d van de Tweede Kamer of het Europees Parlement met meerdere kieskringen.
 - **Ondertekening** van de Uitslagen-generator testen in een draaiende Abacus, en het certificaat voor HSB en CSB nalopen zodra Abacus dat vastlegt.
 - Het Excel-bestand van het Controleprotocol testen in Microsoft Excel.

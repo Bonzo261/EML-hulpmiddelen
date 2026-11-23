@@ -7,13 +7,16 @@ Statische website: alle apps zijn losse HTML-bestanden in de hoofdmap. Huisstijl
 | `index.html` | Startpagina met logo, uitleg, disclaimer, link naar de handleidingen en zeven app-kaarten in drie groepen (basisbestanden maken, uitslagen testen, uitslag controleren) |
 | `handleidingen.html` | Handleidingen per app (tabbladen via de hash, bijv. `#controleprotocol`, `#cp-excel` of `#zetelverdeling-controle`; prefixen vd, sb, kl, pv, ug, cp, zv) |
 | `verkiezingsdefinitie.html` | Verkiezingsdefinitie-maker (110a) |
-| `kandidatenlijsten.html` | Kandidatenlijsten-maker (230b) |
+| `kandidatenlijsten.html` | Kandidatenlijsten-maker (230b, 230c) |
 | `stembureaus.html` | Stembureaus-maker (110b) |
 | `uitslagen-generator.html` | Uitslagen-generator (510b/c/d) |
 | `pv-generator.html` + `pv-fonts.js` | PV-generator |
 | `controleprotocol.html` | Controleprotocol (GR26) |
 | `zetelverdeling.html` | Controle zetelverdeling (CSB, P 5–P 10) |
 | `logo-512.png`, `favicon.ico`, `favicon-16.png`, `favicon-32.png`, `apple-touch-icon.png` | Logo en iconen |
+
+## Startpagina en logo
+De startpagina (`index.html`) en de logobestanden worden bijgehouden in een apart artifact. Bij het overnemen moet de `<title>` terug naar `EML-hulpmiddelen voor verkiezingen – hobbyproject`.
 
 ## Een app bijwerken
 1. Vervang het HTML-bestand door de nieuwe versie.

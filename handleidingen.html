@@ -144,9 +144,9 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
       </div>
     </div>
     <div class="card">
-      <span class="lvl">EML 230b</span>
+      <span class="lvl">EML 230b · 230c</span>
       <h2>Kandidatenlijsten-maker</h2>
-      <p>Maak kandidatenlijsten met fictieve personen, per kieskring, voor test en oefening. Met stellen, lijstengroepen, geboortedata en hashcodes, in de opbouw van e-KS.</p>
+      <p>Maak kandidatenlijsten (230b) en totaallijsten met adressen (230c) met fictieve personen, per kieskring, voor test en oefening. Met stellen, lijstengroepen, geboortedata en hashcodes, in de opbouw van e-KS.</p>
       <div class="btns">
         <a class="btn primary" href="#kandidatenlijsten-maker">Handleiding lezen</a>
         <a class="btn" href="kandidatenlijsten.html">App openen</a>
@@ -197,7 +197,7 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
       <span class="app">Verkiezingsdefinitie-maker</span><i>→</i><span>110a</span><i>→</i>
       <span class="app">Stembureaus-maker</span><i>→</i><span>110b</span>
       <i>en</i>
-      <span class="app">Kandidatenlijsten-maker</span><i>→</i><span>230b</span>
+      <span class="app">Kandidatenlijsten-maker</span><i>→</i><span>230b · 230c</span>
     </div>
     <div class="chain">
       <span>110a</span><span>110b</span><span>230b</span><i>→</i>
@@ -524,6 +524,7 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
       <li><a href="#kl-kk">Per kieskring</a></li>
       <li><a href="#kl-v3">3 · Personen</a></li>
       <li><a href="#kl-v4">4 · Bestanden</a></li>
+      <li><a href="#kl-230c">De 230c met adressen</a></li>
       <li><a href="#kl-listdata">Geslacht en taal (kr:ListData)</a></li>
       <li><a href="#kl-roman">Romeinse cijfers</a></li>
       <li><a href="#kl-dl">Bekijken en downloaden</a></li>
@@ -535,11 +536,18 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
   </aside>
   <article>
     <h2>Kandidatenlijsten-maker</h2>
-    <p class="lead">Handleiding voor het maken van kandidatenlijsten (EML 230b) met fictieve personen.</p>
+    <p class="lead">Handleiding voor het maken van kandidatenlijsten (EML 230b) en totaallijsten met adressen (EML 230c) met fictieve personen.</p>
 
     <h3 id="kl-doel">1. Waarvoor is de app?</h3>
     <p>Voor testen en oefenen heb je kandidatenlijsten nodig die passen bij je verkiezingsdefinitie. Deze app maakt ze, per kieskring, met fictieve personen en met de hashcodes erbij. De opbouw van de bestanden volgt de voorbeelden van e-KS, het nieuwe kandidaatstellingssysteem van de Kiesraad.</p>
-    <div class="note"><b>Alleen voor testen</b>Alle personen zijn fictief, samengesteld uit veelvoorkomende voor- en achternamen. Gebruik de bestanden alleen voor test en oefening.</div>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Bestand</th><th>Wat staat erin</th><th>Waarvoor</th></tr></thead>
+      <tbody>
+        <tr><td><code>230b</code> kandidatenlijsten</td><td>De openbare lijsten: naam, geboortedatum, geslacht en woonplaats per kandidaat</td><td>Hoofdstembureaus en Abacus (één bestand per kieskring)</td></tr>
+        <tr><td><code>230c</code> totaallijsten</td><td>Alle kieskringen in één bestand, met per kandidaat een correspondentieadres (of een gemachtigde)</td><td>De uitslagvaststelling door het centraal stembureau, en het benoemen van gekozenen</td></tr>
+      </tbody>
+    </table></div>
+    <div class="note"><b>Alleen voor testen</b>Alle personen en adressen zijn fictief, samengesteld uit veelvoorkomende namen. Straatnamen en postcodes zijn willekeurig en kunnen toevallig bestaan. Gebruik de bestanden alleen voor test en oefening.</div>
 
     <h3 id="kl-v1">2. Vraag 1 · Laad de verkiezingsdefinitie in</h3>
     <p>Sleep een 110a-bestand naar het vak of klik op <span class="ui">Kies 110a-bestand</span>. Gebruik het bestand uit de Verkiezingsdefinitie-maker of uit de uitslagsoftware. De andere vragen zijn vergrendeld tot er een definitie is ingeladen. Onder het vak staan de kenmerken van de definitie.</p>
@@ -576,15 +584,31 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
     <p>De woonplaatsen komen uit de gemeenten in de definitie. Staan daar geen gemeenten in, dan gebruikt de app een vaste lijst plaatsen per kieskring.</p>
 
     <h3 id="kl-v4">6. Vraag 4 · Bestanden</h3>
-    <p>Er wordt altijd een <b>totaalbestand</b> gemaakt met alle kieskringen samen. Dat is nodig voor de uitslagvaststelling door het centraal stembureau.</p>
+    <p>Kies welke bestanden de app maakt:</p>
     <ul>
-      <li><span class="ui">Ook een apart bestand per kieskring maken</span>: voor de hoofdstembureaus. Deze bestanden heb je ook nodig in Abacus en in de Uitslagen-generator.</li>
+      <li><span class="ui">230c maken: Totaallijsten met adressen</span> (standaard aan): alle kieskringen in één bestand, met adressen. Dit is het totaalbestand voor de uitslagvaststelling. Zie <a href="#kl-230c">De 230c</a>.</li>
+      <li><span class="ui">230b per kieskring maken (voor de hoofdstembureaus en Abacus)</span> (standaard aan): één 230b per kieskring; bij één kieskring één 230b. Deze bestanden heb je nodig in Abacus en in de Uitslagen-generator.</li>
+      <li><span class="ui">Ook een 230b met alle kieskringen in één bestand (zonder adressen)</span> (standaard uit, alleen bij meer kieskringen): het oude totaalbestand.</li>
+    </ul>
+    <p>Zet je de 230c uit, dan meldt de app dat die nodig is voor de uitslagvaststelling. Zet je alle 230b's uit, dan waarschuwt de app dat je de lijsten niet in Abacus kunt inlezen.</p>
+    <ul>
       <li><span class="ui">kr:ListData opnemen (EML_NL 1.3 en hoger)</span>: met daaronder het geslacht en de taal (zie de volgende paragraaf).</li>
       <li><span class="ui">Romeinse cijfers in ContestIdentifier</span>: alleen bij een definitie met Romeinse cijfers (zie <a href="#kl-roman">Romeinse cijfers</a>).</li>
       <li>Onder <span class="ui">Geavanceerd</span>: ManagingAuthority Id en naam, TransactionId en IssueDate. Standaard is de afzender het centraal stembureau (‘Centraal stembureau &lt;naam&gt;’), bij een gemeenteraad de gemeentecode.</li>
     </ul>
 
-    <h3 id="kl-listdata">7. Geslacht en taal (kr:ListData)</h3>
+    <h3 id="kl-230c">7. De 230c: totaallijsten met adressen</h3>
+    <p>De 230c bevat hetzelfde als de 230b, en daarnaast per kandidaat de gegevens die het centraal stembureau nodig heeft om gekozenen te benoemen en brieven te sturen:</p>
+    <ul>
+      <li><b>Kandidaat in Nederland:</b> een correspondentieadres: straat en huisnummer, postcode en plaats. Het correspondentieadres is iets anders dan de woonplaats op de kandidatenlijst; brieven gaan altijd naar het correspondentieadres.</li>
+      <li><b>Kandidaat in het buitenland:</b> geen eigen adres, maar een <b>gemachtigde</b> in Nederland met naam, adres en woonplaats, zoals in e-KS. Dit komt alleen voor als <span class="ui">Enkele kandidaten wonen in het buitenland</span> aan staat.</li>
+      <li><b>Korte code:</b> de eerste keer dat een kandidaat in het bestand staat, krijgt hij een korte code: de letters van de achternaam plus de voorletters, bijvoorbeeld <code>JansenJ</code>. Komt dezelfde naam vaker voor, dan volgt een nummer (<code>JansenJ2</code>).</li>
+      <li><b>Meer kieskringen:</b> staat een kandidaat van dezelfde partij in meer kieskringen op de lijst, dan staat hij er één keer volledig in en verder alleen met zijn korte code.</li>
+    </ul>
+    <p>De adressen en gemachtigden komen uit een eigen, afgeleide toevalsgenerator. Met hetzelfde startgetal krijg je dezelfde adressen terug, en de 230b-bestanden blijven precies gelijk aan die van eerdere versies van de app.</p>
+    <div class="note"><b>Niet voor Abacus</b>Abacus leest geen 230c. Gebruik de 230c om bijvoorbeeld OSV2020-KS of een benoemingen-app te testen.</div>
+
+    <h3 id="kl-listdata">8. Geslacht en taal (kr:ListData)</h3>
     <p>Per lijst kan het bestand aangeven of het geslacht van de kandidaten wordt gepubliceerd, en in welke taal. Onder <span class="ui">kr:ListData opnemen</span> stel je in:</p>
     <ul>
       <li><span class="ui">Geslacht publiceren (PublishGender)</span>: standaard aan.</li>
@@ -593,7 +617,7 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
     <p>Fries kan alleen als de verkiezingsdefinitie Fries toestaat. Dat is zo bij een definitie uit de Verkiezingsdefinitie-maker voor waterschap Fryslân, Provinciale Staten Fryslân, de Eerste Kamer of een Friese gemeenteraad. De app meldt het als de definitie Fries toestaat.</p>
     <p>Bij een definitie in EML_NL 1.2.2 is er geen kr:ListData.</p>
 
-    <h3 id="kl-roman">8. Romeinse cijfers</h3>
+    <h3 id="kl-roman">9. Romeinse cijfers</h3>
     <p>Sommige definities gebruiken Romeinse cijfers voor de kieskringen, zoals Provinciale Staten Limburg. Dan verschijnt bij vraag 4 de schakelaar <span class="ui">Romeinse cijfers in ContestIdentifier (zoals Abacus verwacht; e-KS schrijft gewone nummers)</span>.</p>
     <ul>
       <li><b>Uit</b> (standaard): het bestand gebruikt gewone nummers, zoals e-KS: <code>&lt;ContestIdentifier Id="1"&gt;</code> met ContestName Maastricht.</li>
@@ -601,16 +625,18 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
     </ul>
     <p>EML_NL staat beide toe. Kies wat de software waarin je het bestand inleest verwacht.</p>
 
-    <h3 id="kl-dl">9. Bekijken en downloaden</h3>
+    <h3 id="kl-dl">10. Bekijken en downloaden</h3>
     <p>Rechts zie je het aantal kieskringen, lijsten, unieke kandidaten en bestanden, met de meldingen eronder. Kies met de tabbladen <span class="ui">Lijsten</span> of <span class="ui">XML</span> hoe je het resultaat bekijkt, en kies de kieskring in de keuzelijst.</p>
     <ul>
       <li>In de lijstweergave betekent een rood nummer: regionale kandidaat (verschilt per kieskring). De geboortedatum staat hier niet bij; in de XML wel.</li>
-      <li>‘Totaal – alle kieskringen’ toont een overzicht van alle kieskringen: S = stel gelijkluidende lijsten, G = lijstengroep, Z = op zichzelf staande lijst, – = doet niet mee. Het kleine getal is het aantal kandidaten.</li>
+      <li>Bij meer kieskringen toont ‘Totaal – alle kieskringen (230c)’ een overzicht van alle kieskringen: S = stel gelijkluidende lijsten, G = lijstengroep, Z = op zichzelf staande lijst, – = doet niet mee. Het kleine getal is het aantal kandidaten.</li>
+      <li>Bij één kieskring kies je in de keuzelijst tussen ‘230b – kandidatenlijsten’ en ‘230c – totaallijsten met adressen’. In de 230c-weergave staat per kandidaat ook het correspondentieadres of de gemachtigde.</li>
+      <li>Op het tabblad XML zie je het bestand dat bij je keuze hoort.</li>
     </ul>
-    <p>Klik op <span class="ui">Download .zip (lijsten + hashcodes)</span>. De zip bevat de lijstbestanden, per bestand een hashcode-bestand en een overzicht van alle hashcodes. De hashcodes zijn SHA-256 over het hele bestand, in groepen van vier zoals op de processen-verbaal. Met <span class="ui">Kopieer XML van getoond bestand</span> zet je één bestand op het klembord.</p>
+    <p>Onder de knoppen staat elk bestand met zijn soort (230b of 230c) en zijn hashcode. Klik op <span class="ui">Download .zip (lijsten + hashcodes)</span>. De zip bevat de lijstbestanden, per bestand een hashcode-bestand en een overzicht van alle hashcodes. De hashcodes zijn SHA-256 over het hele bestand, in groepen van vier zoals op de processen-verbaal. Met <span class="ui">Kopieer XML van getoond bestand</span> zet je één bestand op het klembord.</p>
     <div class="note"><b>Proef inlezen</b>De app valideert niet tegen de XSD. Lees de bestanden altijd eerst proef in.</div>
 
-    <h3 id="kl-kand">10. Hoe een kandidaat eruitziet</h3>
+    <h3 id="kl-kand">11. Hoe een kandidaat eruitziet</h3>
     <p>Elke kandidaat staat in het bestand in dezelfde volgorde als in de voorbeelden van e-KS:</p>
     <ol>
       <li>volgnummer op de lijst;</li>
@@ -619,19 +645,24 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
       <li>geslacht: male, female of unknown;</li>
       <li>woonplaats, of land en plaats bij een kandidaat in het buitenland.</li>
     </ol>
+    <p>In de 230c staan daar nog bij: de korte code (de eerste keer dat de kandidaat voorkomt) en het correspondentieadres, of bij een kandidaat in het buitenland de gemachtigde met diens adres en woonplaats.</p>
 
-    <h3 id="kl-faq">11. Vragen en problemen</h3>
+    <h3 id="kl-faq">12. Vragen en problemen</h3>
     <details><summary>Ik kan vraag 2 t/m 4 niet invullen.</summary><p>Laad eerst een verkiezingsdefinitie (110a) in bij vraag 1.</p></details>
     <details><summary>Ik zie de kolommen voor kieskringen niet.</summary><p>Die verschijnen alleen als de definitie meerdere kieskringen heeft.</p></details>
     <details><summary>Ik kan Fries niet kiezen.</summary><p>De definitie staat Fries niet toe. Maak de definitie in de Verkiezingsdefinitie-maker, bijvoorbeeld voor waterschap of Provinciale Staten Fryslân, of zet in de indeling het vinkje ‘Fries’ aan.</p></details>
     <details><summary>Ik wil dezelfde lijsten nog een keer maken.</summary><p>Gebruik dezelfde definitie, dezelfde instellingen en hetzelfde startgetal. De app onthoudt het startgetal niet: noteer het. Namen, geslacht en woonplaatsen blijven ook gelijk als je de geboortedatum of ‘geslacht onbekend’ aan- of uitzet.</p></details>
-    <details><summary>Welk bestand lees ik in Abacus in?</summary><p>De bestanden per kieskring. Abacus leest per bestand precies één kieskring in; het totaalbestand is bedoeld voor de uitslagvaststelling door het centraal stembureau. Bij Limburg: zet de Romeinse cijfers aan.</p></details>
+    <details><summary>Welk bestand lees ik in Abacus in?</summary><p>De 230b per kieskring. Abacus leest per bestand precies één kieskring in, en leest geen 230c. Bij Limburg: zet de Romeinse cijfers aan.</p></details>
+    <details><summary>Waarom heeft een kandidaat in het buitenland geen adres in de 230c?</summary><p>Zoals in e-KS heeft een kandidaat die in het buitenland woont een gemachtigde in Nederland. In de 230c staan de naam en het adres van die gemachtigde.</p></details>
+    <details><summary>Is het correspondentieadres hetzelfde als de woonplaats?</summary><p>Nee. De woonplaats staat op de openbare kandidatenlijst (230b). Het correspondentieadres staat alleen in de 230c en is het adres waar brieven naartoe gaan. In de app zijn beide fictief en hoeven ze niet bij elkaar te passen.</p></details>
     <details><summary>Bij de Eerste Kamer krijg ik maar één set lijsten.</summary><p>Dat klopt nog: bij de Eerste Kamer is elke provincie een kieskring voor de kandidaatstelling, maar dat ondersteunt de app nog niet.</p></details>
 
-    <h3 id="kl-beperk">12. Bekende beperkingen</h3>
+    <h3 id="kl-beperk">13. Bekende beperkingen</h3>
     <ul>
       <li>De app valideert niet tegen de XSD. Lees de bestanden altijd eerst proef in.</li>
       <li>Bij de Eerste Kamer maakt de app één set lijsten, niet per provincie.</li>
+      <li>Abacus leest geen 230c. Lees de 230c proef in OSV2020-KS of in de software waarvoor je hem gebruikt.</li>
+      <li>Alleen een kandidaat in het buitenland krijgt een gemachtigde, zoals in e-KS. Een gemachtigde bij een kandidaat in Nederland maakt de app niet.</li>
       <li>Of Abacus bij Limburg echt Romeinse cijfers verwacht, is niet bevestigd.</li>
       <li>De lijstnummers zijn in alle kieskringen gelijk.</li>
       <li>Een lijst met minder dan 4 kandidaten wordt altijd overal gelijk gemaakt, ook als je regionale stellen of een lijstengroep kiest.</li>

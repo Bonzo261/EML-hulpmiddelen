@@ -2,6 +2,25 @@
 
 Wat er per update is veranderd, nieuwste bovenaan. De precieze verschillen per bestand staan in de [commitgeschiedenis](https://github.com/Bonzo261/EML-hulpmiddelen/commits/main).
 
+## 23-11-2026 (avond): totaallijsten met adressen (230c)
+
+### Kandidatenlijsten-maker (`kandidatenlijsten.html`)
+- **Nieuw: EML 230c**, de totaallijsten met adressen, zoals [e-KS](https://github.com/kiesraad/e-ks) die maakt. Alle kieskringen staan in één bestand, `Totaallijsten_<verkiezing>.eml.xml`. Dit is het totaalbestand voor het centraal stembureau.
+  - Een kandidaat die in Nederland woont, krijgt een (verzonnen) correspondentieadres met postcode.
+  - Een kandidaat in het buitenland krijgt een gemachtigde.
+  - Elke persoon krijgt een korte code. Staat dezelfde persoon in een volgende kieskring op de lijst, dan verwijst het bestand alleen naar die code.
+- Bij vraag 4 kies je welke bestanden je wilt: de 230c (standaard aan), een 230b per kieskring (standaard aan) en eventueel nog de oude 230b met alle kieskringen. De 230b per kieskring blijft nodig voor Abacus, want Abacus leest geen 230c.
+- Bij één kieskring kun je in de weergave kiezen tussen de 230b en de 230c.
+- De 230b-bestanden zelf zijn niet veranderd. Met hetzelfde startgetal krijg je dezelfde personen als eerst.
+- De opbouw is vergeleken met de e-KS-voorbeelden voor waterschap Fryslân, Provinciale Staten Limburg en de Eerste Kamer.
+
+### Handleidingen
+- Handleiding van de Kandidatenlijsten-maker bijgewerkt, met een nieuwe paragraaf "De 230c".
+
+### Website
+- De kaart van de Kandidatenlijsten-maker op de startpagina noemt nu ook 230c.
+- `docs/kandidatenlijsten-maker.md`, de README en `WENSEN.md` bijgewerkt.
+
 ## 23-11-2026 (ochtend, 2): logo en nieuwe startpagina
 
 - **Logo:** de site heeft een eigen logo: twee haken met een rood potlood. Het logo staat in de kop van de startpagina en is ook het icoon in het browsertabblad en op het beginscherm van je telefoon, op alle pagina's.
