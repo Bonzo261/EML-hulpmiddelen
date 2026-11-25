@@ -1,6 +1,6 @@
 # App: PV-generator
 
-Bestand: `pv-generator.html` (met `pv-fonts.js`)
+Bestand: `pv-generator.html` (met `huisstijl/pv-fonts.js`)
 
 De app zelf gebruikt IBM Plex; de PDF volgt de opmaak van Abacus (DM Sans en Geist Mono).
 

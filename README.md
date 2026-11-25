@@ -27,7 +27,7 @@ De volgorde waarin je de apps meestal gebruikt: **110a → 110b → 230b → 510
 ## Gebruiken
 
 - **Online:** <https://bonzo261.github.io/EML-hulpmiddelen/>
-- **Lokaal:** download de repository en open `index.html` in de browser. Voor de PV-generator moet `pv-fonts.js` in dezelfde map staan.
+- **Lokaal:** download de repository en open `index.html` in de browser. Laat de map `huisstijl/` naast de HTML-bestanden staan: daarin zitten het logo, de iconen en de lettertypen voor de PDF's van de PV-generator.
 
 Externe afhankelijkheden, geladen vanaf een CDN (daarvoor is internet nodig):
 - Google Fonts (IBM Plex)
@@ -52,7 +52,7 @@ De volledige lijst staat in [`WENSEN.md`](WENSEN.md). Ideeën en fouten zijn wel
 - De Controle zetelverdeling rekent volgens de tekst van de Kieswet en toetst de uitkomst aan een port van de zetelverdeling in Abacus (`backend/apportionment`), getest met alle eind-tot-eindtests daarvan.
 - Het Controleprotocol volgt de controleprotocollen GR26 van de Kiesraad (november 2025).
 - De indeling van Nederland (kieskringen, waterschappen, deelgemeenten, kiescolleges) en de opbouw van de 110a-, 210-, 230b- en 230c-bestanden volgen [e-KS](https://github.com/kiesraad/e-ks), het kandidaatstellingssysteem van de Kiesraad (EUPL-1.2), stand 23-11-2026.
-- PDF-lettertypen in `pv-fonts.js`: DM Sans (aangepast door de Kiesraad) en Geist Mono, beide onder de SIL Open Font License 1.1, uit `kiesraad/abacus`.
+- PDF-lettertypen in `huisstijl/pv-fonts.js`: DM Sans (aangepast door de Kiesraad) en Geist Mono, beide onder de SIL Open Font License 1.1, uit `kiesraad/abacus`.
 
 ## Licentie
 

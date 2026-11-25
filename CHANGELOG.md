@@ -2,6 +2,11 @@
 
 Wat er per update is veranderd, nieuwste bovenaan. De precieze verschillen per bestand staan in de [commitgeschiedenis](https://github.com/Bonzo261/EML-hulpmiddelen/commits/main).
 
+## 25-11-2026: map `huisstijl/`
+
+- Het logo, de iconen en de lettertypen voor de PDF's van de PV-generator staan nu samen in de map `huisstijl/` in plaats van los in de hoofdmap. Alle pagina's verwijzen naar de nieuwe plek. Voor gebruikers verandert er niets.
+- Wie de site lokaal gebruikt: laat de map `huisstijl/` naast de HTML-bestanden staan.
+
 ## 25-11-2026: inleveringsbestanden (210)
 
 ### Kandidatenlijsten-maker (`kandidatenlijsten.html`)
