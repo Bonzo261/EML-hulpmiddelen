@@ -1,4 +1,6 @@
-# EML-hulpmiddelen
+# EML-tools
+
+*Voorheen EML-hulpmiddelen. De repository en het webadres hebben de oude naam nog.*
 
 Hulpmiddelen om testbestanden te maken en te controleren volgens de **EML_NL-standaard** van de Kiesraad: van verkiezingsdefinitie tot proces-verbaal. **Direct gebruiken: <https://bonzo261.github.io/EML-hulpmiddelen/>**
 

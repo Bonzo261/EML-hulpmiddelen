@@ -16,12 +16,12 @@ Statische website: alle apps zijn losse HTML-bestanden in de hoofdmap. Huisstijl
 | `huisstijl/` | Logo (`logo-512.png`), iconen (`favicon.ico`, `favicon-16.png`, `favicon-32.png`, `apple-touch-icon.png`) en de PDF-lettertypen van de PV-generator (`pv-fonts.js`) |
 
 ## Startpagina en logo
-De startpagina (`index.html`) en de logobestanden worden bijgehouden in een apart artifact. Bij het overnemen moet de `<title>` terug naar `EML-hulpmiddelen voor verkiezingen – hobbyproject`.
+De startpagina (`index.html`) en de logobestanden worden bijgehouden in een apart artifact. Bij het overnemen moet de `<title>` terug naar `EML-tools voor verkiezingen – hobbyproject`.
 
 ## Een app bijwerken
 1. Vervang het HTML-bestand door de nieuwe versie.
 2. Zet bovenaan in `<header class="top"><div>` de terugknop en de disclaimer terug:
-   `<a class="back" href="index.html">← Alle hulpmiddelen</a><span class="nk"> · Onafhankelijk hulpmiddel, niet van de Kiesraad</span>`, met de CSS voor `.back` en `.nk` onderaan in `<style>`.
+   `<a class="back" href="index.html"><span aria-hidden="true">←</span> Alle EML-tools</a><span class="nk"> · Onafhankelijk hulpmiddel, niet van de Kiesraad</span>`, met de CSS voor `.back` en `.nk` onderaan in `<style>`.
 2c. In `handleidingen.html` staat een tab over de benoemingen-app. Die app heeft een eigen repository en hoort niet op deze site: haal de tab, de kaart, de regel in het schema en de links ernaar weg (zie `views`/`prefix` in het script).
 2b. Zet vóór `<title>` de vier icon-links naar `huisstijl/` (favicon.ico, favicon-32.png, favicon-16.png, apple-touch-icon.png); zie `index.html`. De artifacts verwijzen naar deze bestanden zonder map: zet er `huisstijl/` voor (ook `logo-512.png` in de startpagina en `pv-fonts.js` in de PV-generator).
 3. Komt de app uit een artifact met meer bestanden (zoals `pv-fonts.js` bij de PV-generator), zet die bestanden in `huisstijl/`.

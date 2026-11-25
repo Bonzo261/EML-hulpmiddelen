@@ -2,6 +2,12 @@
 
 Wat er per update is veranderd, nieuwste bovenaan. De precieze verschillen per bestand staan in de [commitgeschiedenis](https://github.com/Bonzo261/EML-hulpmiddelen/commits/main).
 
+## 25-11-2026: nieuwe naam EML-tools
+
+- De site heet nu **EML-tools** (voorheen EML-hulpmiddelen): in de titel en de kop van de startpagina, in de voettekst, en in de terugknop bovenaan elke app en de handleidingen ("← Alle EML-tools").
+- De repository en het webadres (`bonzo261.github.io/EML-hulpmiddelen`) hebben nog de oude naam, zodat bestaande links blijven werken.
+- Verder is er niets veranderd aan de apps.
+
 ## 25-11-2026: map `huisstijl/`
 
 - Het logo, de iconen en de lettertypen voor de PDF's van de PV-generator staan nu samen in de map `huisstijl/` in plaats van los in de hoofdmap. Alle pagina's verwijzen naar de nieuwe plek. Voor gebruikers verandert er niets.
