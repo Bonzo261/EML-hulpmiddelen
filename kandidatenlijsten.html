@@ -126,8 +126,8 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
 <header class="top">
   <div>
     <a class="back" href="index.html">← Alle hulpmiddelen</a><span class="nk"> · Onafhankelijk hulpmiddel, niet van de Kiesraad</span>
-    <h1>Kandidatenlijsten-maker <span class="tag">EML_NL 230b + 230c</span></h1>
-    <p>Laad een verkiezingsdefinitie (EML 110a) in en geef aan hoeveel partijen meedoen. De app maakt kandidatenlijsten (230b) en totaallijsten met adressen (230c) met fictieve personen, per kieskring, en levert ze met hashcodes als download.</p>
+    <h1>Kandidatenlijsten-maker <span class="tag">EML_NL 210 + 230b + 230c</span></h1>
+    <p>Laad een verkiezingsdefinitie (EML 110a) in en geef aan hoeveel partijen meedoen. De app maakt kandidatenlijsten (230b), totaallijsten met adressen (230c) en desgewenst inleveringsbestanden per lijst (210) met fictieve personen, per kieskring, en levert ze met hashcodes als download.</p>
   </div>
   <div class="actions"><button type="button" id="resetBtn">Opnieuw beginnen</button></div>
 </header>
@@ -186,6 +186,12 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
     <p class="hint" id="totalHint" style="padding-left:24px">De 230c bevat alle kieskringen in één bestand, met per kandidaat een correspondentieadres, en bij een kandidaat in het buitenland een gemachtigde (zoals e-KS). Dit is het totaalbestand voor de uitslagvaststelling. De adressen zijn fictief.</p>
     <label class="inline" id="oneFileWrap"><input type="checkbox" id="perKK" checked> 230b per kieskring maken (voor de hoofdstembureaus en Abacus)</label>
     <label class="inline" id="b230TotalWrap"><input type="checkbox" id="b230Total"> Ook een 230b met alle kieskringen in één bestand (zonder adressen)</label>
+    <label class="inline"><input type="checkbox" id="e210"> 210 maken: één inleveringsbestand per ingeleverde kandidatenlijst (zoals e-KS)</label>
+    <div id="e210Opts" style="padding-left:24px;display:grid;gap:6px">
+      <p class="hint">Voor het testen van de inlevering: per partij en per lijst die ze inlevert één bestand, met de kieskringen waarvoor de lijst geldt, de kandidaten met adres, en de inleveraar met plaatsvervangers. Alles is fictief.</p>
+      <label class="inline"><input type="checkbox" id="bsn" checked> BSN opnemen (fictief, reeks 99999xxxx met elfproef, zoals het e-KS-voorbeeld)</label>
+      <div class="field narrow"><label for="nDeputies">Plaatsvervangers van de inleveraar</label><input type="number" id="nDeputies" min="1" max="2" value="2"></div>
+    </div>
     <label class="inline" id="listDataWrap"><input type="checkbox" id="listData" checked> kr:ListData opnemen (EML_NL 1.3 en hoger)</label>
     <div class="row" id="listDataOpts" style="padding-left:24px">
       <label class="inline"><input type="checkbox" id="publishGender" checked> Geslacht publiceren (PublishGender)</label>
@@ -237,7 +243,7 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
 </main>
 
 <footer>
-  Uitvoer volgens EML_NL (github.com/kiesraad/EML_NL): documenten <code>230b</code> (kandidatenlijsten) en <code>230c</code> (totaallijsten met adressen, opgebouwd zoals de e-KS-voorbeelden), EML-schema 5, namespace <code>http://www.kiesraad.nl/extensions</code>. De verkiezingsgegevens (ElectionIdentifier, contest, kieskringen) komen uit het ingeladen 110a-bestand. Lijsttypen: <em>stel gelijkluidende lijsten</em>, <em>lijstengroep</em> en <em>op zichzelf staande lijst</em>. De Kieswet staat maximaal 50 kandidaten per lijst toe, en 80 voor partijen met meer dan 15 zetels. De hashcode is SHA-256 over het hele bestand, weergegeven in groepen van vier zoals op de processen-verbaal van de Kiesraad. De app valideert niet tegen de XSD: lees de bestanden altijd eerst proef in. <strong>Alle personen en adressen zijn fictief</strong>; gebruik de bestanden alleen voor test en oefening.
+  Uitvoer volgens EML_NL (github.com/kiesraad/EML_NL): documenten <code>210</code> (inlevering per lijst, zoals e-KS), <code>230b</code> (kandidatenlijsten) en <code>230c</code> (totaallijsten met adressen, opgebouwd zoals de e-KS-voorbeelden), EML-schema 5, namespace <code>http://www.kiesraad.nl/extensions</code>. De verkiezingsgegevens (ElectionIdentifier, contest, kieskringen) komen uit het ingeladen 110a-bestand. Lijsttypen: <em>stel gelijkluidende lijsten</em>, <em>lijstengroep</em> en <em>op zichzelf staande lijst</em>. De Kieswet staat maximaal 50 kandidaten per lijst toe, en 80 voor partijen met meer dan 15 zetels. De hashcode is SHA-256 over het hele bestand, weergegeven in groepen van vier zoals op de processen-verbaal van de Kiesraad. De app valideert niet tegen de XSD: lees de bestanden altijd eerst proef in. <strong>Alle personen en adressen zijn fictief</strong>; gebruik de bestanden alleen voor test en oefening.
 </footer>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -312,7 +318,7 @@ let FILES=[]; // [{name,xml,hash,contests}]
 let view={tab:"lists",kk:0};
 
 function freshSettings(){
-  S={parties:[],seed:String(Math.floor(Math.random()*900000)+100000),pctF:50,pctU:0,dob:true,abroad:false,perKK:true,c230:true,b230Total:false,listData:true,publishGender:true,pubLang:"nl",romanIds:false,
+  S={parties:[],seed:String(Math.floor(Math.random()*900000)+100000),pctF:50,pctU:0,dob:true,abroad:false,perKK:true,c230:true,b230Total:false,e210:false,bsn:true,nDeputies:2,listData:true,publishGender:true,pubLang:"nl",romanIds:false,
      authId:"",authName:"",transactionId:"1",issueDate:iso(new Date())};
 }
 
@@ -409,7 +415,7 @@ function resizeParties(n){
 /* ---------- genereren ---------- */
 function generate(){
   const rng=mulberry(hashStr(S.seed));
-  const used=new Set();
+  const used=new Set(), all=[], bsnPool=bsnPoolFor(S.seed);
   const pick=a=>a[Math.floor(rng()*a.length)];
   const letters="ABCDEFGHIJKLMNPRSTW";
   const area=areaTowns();
@@ -428,7 +434,7 @@ function generate(){
       /* geslacht onbekend en geboortedatum: eigen afgeleide generatoren, zodat de hoofdreeks gelijk blijft */
       if(S.pctU>0 && mulberry(hashStr(S.seed+"|gender|"+key))()*100<S.pctU) p.gender="unknown";
       p.dob=birthDate(mulberry(hashStr(S.seed+"|dob|"+key)));
-      p.key=key; addAddress(p,towns);
+      p.key=key; addAddress(p,towns); p.bsn=bsnPool[all.length%bsnPool.length]; all.push(p); bsnShort=all.length>bsnPool.length;
       return p;
     }
     throw new Error("Te weinig naamcombinaties.");
@@ -492,6 +498,107 @@ function addAddress(p,towns){
   const female=r()<0.5, [prefix,last]=pk(SUR), first=pk(female?FEMALE:MALE);
   const nl=towns.length&&!towns.every(t=>ABROAD.some(a=>a[1]===t))?towns:ALL_TOWNS;
   p.addr=null; p.agent={first,prefix,last,ini:first[0]+".",addr:fakeAddress(r,pk(nl))};
+}
+/* fictieve BSN's: reeks 999990000-999999999 die de elfproef halen (ook het e-KS-voorbeeld 999995972 valt hierin) */
+let BSN_POOL=null, bsnShort=false;
+function elfproef(n){ const d=String(n).split("").map(Number); let t=0; for(let i=0;i<8;i++) t+=d[i]*(9-i); t-=d[8]; return t%11===0; }
+function bsnPoolFor(seed){
+  if(!BSN_POOL){ BSN_POOL=[]; for(let n=999990000;n<=999999999;n++) if(elfproef(n)) BSN_POOL.push(String(n)); }
+  const pool=BSN_POOL.slice(), r=mulberry(hashStr(seed+"|bsn"));
+  for(let i=pool.length-1;i>0;i--){ const j=Math.floor(r()*(i+1)); [pool[i],pool[j]]=[pool[j],pool[i]]; }
+  bsnShort=false;
+  return pool;
+}
+/* inleveraar en plaatsvervangers per partij, met een eigen afgeleide generator */
+function proposers(nr){
+  const r=mulberry(hashStr(S.seed+"|inleveraar|"+nr)), pk=a=>a[Math.floor(r()*a.length)];
+  const towns=areaTowns().filter(t=>!ABROAD.some(a=>a[1]===t));
+  const out=[];
+  for(let i=0;i<=S.nDeputies;i++){
+    const female=r()<0.5, first=pk(female?FEMALE:MALE), [prefix,last]=pk(SUR);
+    let ini=first[0]+"."; if(r()>0.5) ini+="ABCDEFGHJKLMNPRSTW"[Math.floor(r()*18)]+".";
+    out.push({ini,prefix,last,addr:fakeAddress(r,pk(towns.length?towns:ALL_TOWNS)),job:i===0?"inleveraar":"plaatsvervanger van de inleveraar",id:i===0?null:String(i)});
+  }
+  return out;
+}
+/* de ingeleverde lijsten: per partij één lijst per groep kieskringen met dezelfde kandidaten */
+function submittedLists(){
+  const map=new Map(), out=[];
+  G.contests.forEach(c=>c.lists.forEach(l=>{
+    let e=map.get(l.cands);
+    if(!e){ e={nr:l.nr,name:l.name,cands:l.cands,kks:[]}; map.set(l.cands,e); out.push(e); }
+    e.kks.push(c);
+  }));
+  return out.sort((a,b)=>a.nr-b.nr);
+}
+function districts210(e){
+  /* geeft [contestId, contestName, [[id,naam],...]] zoals e-KS */
+  if(D.single){
+    if(D.cat==="EK"){ const pv=D.regions.filter(r=>r.cat==="PROVINCIE"); if(pv.length) return ["alle","",pv.map(r=>[r.num,r.name])]; }
+    const kks=D.regions.filter(r=>r.cat==="KIESKRING"), kk=kks.length===1?kks[0]:null;
+    const nm=(kk&&kk.name)||(D.root&&D.root.name)||D.domName||D.name;
+    return ["geen","",[[kk&&/^[1-9]\d*$/.test(kk.num)?kk.num:"1",nm]]];
+  }
+  const list=e.kks.map(c=>[String(c.num),c.name]);
+  if(e.kks.length===G.contests.length) return ["alle","",list];
+  return [list[0][0],list[0][1],list];
+}
+function buildXml210(e,stamp){
+  const I="    ", L=[], p=(d,s)=>L.push(I.repeat(d)+s);
+  const name=(d,n)=>{ p(d,"<xnl:PersonName>"); p(d+1,'<xnl:NameLine NameType="Initials">'+esc(n.ini)+"</xnl:NameLine>"); if(n.first) p(d+1,"<xnl:FirstName>"+esc(n.first)+"</xnl:FirstName>"); if(n.prefix) p(d+1,"<xnl:NamePrefix>"+esc(n.prefix)+"</xnl:NamePrefix>"); p(d+1,"<xnl:LastName>"+esc(n.last)+"</xnl:LastName>"); p(d,"</xnl:PersonName>"); };
+  const mail=(d,a)=>{ p(d,"<Contact>"); p(d+1,"<MailingAddress>"); p(d+2,"<xal:Locality>"); p(d+3,"<xal:AddressLine>"+esc(a.line)+"</xal:AddressLine>"); p(d+3,"<xal:LocalityName>"+esc(a.town)+"</xal:LocalityName>"); p(d+3,"<xal:PostalCode>"); p(d+4,"<xal:PostalCodeNumber>"+esc(a.pc)+"</xal:PostalCodeNumber>"); p(d+3,"</xal:PostalCode>"); p(d+2,"</xal:Locality>"); p(d+1,"</MailingAddress>"); p(d,"</Contact>"); };
+  const [cid,cname,cs]=districts210(e);
+  L.push('<?xml version="1.0" encoding="UTF-8"?>');
+  L.push('<EML xmlns="urn:oasis:names:tc:evs:schema:eml" xmlns:kr="http://www.kiesraad.nl/extensions" xmlns:xal="urn:oasis:names:tc:ciq:xsdschema:xAL:2.0" xmlns:xnl="urn:oasis:names:tc:ciq:xsdschema:xNL:2.0" Id="210" SchemaVersion="5">');
+  p(1,"<TransactionId>"+esc(S.transactionId||"1")+"</TransactionId>");
+  p(1,"<ManagingAuthority>"); p(2,'<AuthorityIdentifier Id="0000"/>'); p(2,"<AuthorityAddress/>"); p(2,'<kr:CreatedByAuthority Id="0000">De politieke partij</kr:CreatedByAuthority>'); p(1,"</ManagingAuthority>");
+  if(S.issueDate) p(1,"<IssueDate>"+esc(S.issueDate)+"</IssueDate>");
+  if(D.version!=="1.2.2") p(1,'<kr:Schema Version="'+esc(D.version)+'"/>');
+  p(1,"<kr:CreationDateTime>"+stamp+"</kr:CreationDateTime>");
+  p(1,"<Nomination>");
+  p(2,'<ElectionIdentifier Id="'+esc(D.id)+'">');
+  p(3,"<ElectionName>"+esc(D.name)+"</ElectionName>");
+  p(3,"<ElectionCategory>"+esc(D.cat)+"</ElectionCategory>");
+  if(D.sub) p(3,"<kr:ElectionSubcategory>"+esc(D.sub)+"</kr:ElectionSubcategory>");
+  if(D.domName!==null) p(3,"<kr:ElectionDomain"+(D.domId!==null?' Id="'+esc(D.domId)+'"':"")+">"+esc(D.domName)+"</kr:ElectionDomain>");
+  p(3,"<kr:ElectionDate>"+esc(D.date)+"</kr:ElectionDate>");
+  p(3,"<kr:NominationDate>"+esc(D.nom)+"</kr:NominationDate>");
+  p(2,"</ElectionIdentifier>");
+  p(2,'<ContestIdentifier Id="'+esc(cid)+'">'); p(3,"<ContestName>"+esc(cname)+"</ContestName>"); p(2,"</ContestIdentifier>");
+  p(2,"<Affiliation>");
+  p(3,"<AffiliationIdentifier>"); p(4,"<RegisteredName>"+esc(e.name)+"</RegisteredName>"); p(3,"</AffiliationIdentifier>");
+  p(3,"<Type>op zichzelf staande lijst</Type>");
+  p(3,'<kr:ListData PublishGender="'+(S.publishGender?"true":"false")+'" PublicationLanguage="'+pubLang()+'">');
+  p(4,"<kr:Contests>"); cs.forEach(([id,n])=>p(5,'<kr:Contest Id="'+esc(id)+'">'+esc(n)+"</kr:Contest>")); p(4,"</kr:Contests>");
+  p(3,"</kr:ListData>");
+  e.cands.forEach((k,ix)=>{
+    p(3,"<Candidate>");
+    p(4,'<CandidateIdentifier Id="'+(ix+1)+'"/>');
+    p(4,"<CandidateFullName>"); name(5,k); p(4,"</CandidateFullName>");
+    if(S.dob && k.dob) p(4,"<DateOfBirth>"+k.dob+"</DateOfBirth>");
+    p(4,"<Gender>"+k.gender+"</Gender>");
+    p(4,"<QualifyingAddress>");
+    if(k.country){ p(5,"<xal:Country>"); p(6,"<xal:CountryNameCode>"+k.country+"</xal:CountryNameCode>"); p(6,"<xal:Locality>"); p(7,"<xal:LocalityName>"+esc(k.town)+"</xal:LocalityName>"); p(6,"</xal:Locality>"); p(5,"</xal:Country>"); }
+    else { p(5,"<xal:Locality>"); p(6,"<xal:LocalityName>"+esc(k.town)+"</xal:LocalityName>"); p(5,"</xal:Locality>"); }
+    p(4,"</QualifyingAddress>");
+    if(k.addr) mail(4,k.addr);
+    else if(k.agent){
+      const a=k.agent;
+      p(4,'<Agent Role="H10">'); p(5,"<AgentIdentifier>"); p(6,"<AgentName>"); name(7,a); p(6,"</AgentName>"); p(5,"</AgentIdentifier>");
+      mail(5,a.addr); p(5,"<kr:LivingAddress>"); p(6,"<kr:LocalityName>"+esc(a.addr.town)+"</kr:LocalityName>"); p(5,"</kr:LivingAddress>"); p(4,"</Agent>");
+    }
+    if(S.bsn && k.bsn) p(4,"<kr:NationalIdentificationNumber>"+k.bsn+"</kr:NationalIdentificationNumber>");
+    p(3,"</Candidate>");
+  });
+  p(2,"</Affiliation>");
+  p(2,"<Nominate>");
+  proposers(e.nr).forEach(q=>{
+    p(3,"<Proposer>"); p(4,"<Name>"); name(5,q); p(4,"</Name>"); mail(4,q.addr); p(4,"<JobTitle>"+q.job+"</JobTitle>"); if(q.id) p(4,"<Id>"+q.id+"</Id>"); p(3,"</Proposer>");
+  });
+  p(2,"</Nominate>");
+  p(1,"</Nomination>");
+  L.push("</EML>");
+  return L.join("\n")+"\n";
 }
 /* korte code zoals e-KS: letters van achternaam + voorletters (zonder voorvoegsel), max. 15 bytes, zo nodig genummerd */
 function shortCodeFor(k,taken){
@@ -637,12 +744,23 @@ function buildFiles(){
   const stamp=nowStamp(), base="Kandidatenlijsten_"+(slug(D.id)||"verkiezing");
   const out=[];
   if(S.c230) out.push({name:"Totaallijsten_"+(slug(D.id)||"verkiezing")+".eml.xml",kind:"230c",contests:G.contests,label:D.single?"":"alle "+G.contests.length+" kieskringen",total:true,xml:buildXml(G.contests,stamp,"230c")});
-  if(D.single){ out.push({name:base+".eml.xml",kind:"230b",contests:G.contests,label:"",total:!S.c230,xml:buildXml(G.contests,stamp)}); return out; }
+  if(D.single){ out.push({name:base+".eml.xml",kind:"230b",contests:G.contests,label:"",total:!S.c230,xml:buildXml(G.contests,stamp)}); add210(out,stamp); return out; }
   if(S.b230Total) out.push({name:base+"_totaal.eml.xml",kind:"230b",contests:G.contests,label:"alle "+G.contests.length+" kieskringen",total:!S.c230,all:true,xml:buildXml(G.contests,stamp)});
   if(S.perKK) G.contests.forEach(c=>out.push({name:base+"_kieskring_"+String(c.num).padStart(2,"0")+"_"+slug(c.name)+".eml.xml",kind:"230b",contests:[c],label:"kieskring "+c.num+" "+c.name,xml:buildXml([c],stamp)}));
+  add210(out,stamp);
   return out;
 }
+function add210(out,stamp){
+  if(!S.e210) return;
+  submittedLists().forEach(e=>{
+    const [cid,,cs]=districts210(e);
+    const kk=D.single||cid==="alle"?"":"_kieskring_"+(cs.length===1?cs[0][0]:cs[0][0]+"-"+cs[cs.length-1][0]);
+    out.push({name:"210_inlevering/Inlevering_"+(slug(D.id)||"verkiezing")+"_lijst_"+String(e.nr).padStart(2,"0")+"_"+(slug(e.name)||"blanco")+kk+".eml.xml",
+      kind:"210",contests:[],sub:e,label:"lijst "+e.nr+" "+(e.name||"(blanco)")+(cid==="alle"?", alle kieskringen":D.single?"":", kieskring "+cs.map(c=>c[0]).join(", ")),xml:buildXml210(e,stamp)});
+  });
+}
 function fileForView(){
+  if(view.kk===-2) return FILES.filter(f=>f.kind==="210")[view.f210]||FILES[0];
   if(view.kk===-1) return FILES.find(f=>f.kind==="230c")||FILES.find(f=>f.all)||FILES[0];
   const c=G.contests[view.kk]||G.contests[0];
   return FILES.find(f=>f.kind==="230b" && f.contests.length===1 && f.contests[0]===c) || FILES.find(f=>f.kind==="230b" && f.contests.includes(c)) || FILES[0];
@@ -651,17 +769,17 @@ function hashText(f){
   const d=new Date(), z=n=>String(n).padStart(2,"0");
   const soort=f.kind==="230c"?"\r\nSoort:        totaallijsten met adressen"+(f.label?" ("+f.label+")":"")+", voor de uitslagvaststelling"
     : f.all?"\r\nSoort:        kandidatenlijsten, "+f.label : f.label?"\r\nKieskring:    "+f.label.replace(/^kieskring /,""):"";
-  return [f.kind==="230c"?"Hashcode totaallijsten (EML 230c)":"Hashcode kandidatenlijsten (EML 230b)","",
-    "Bestand:      "+f.name, "Verkiezing:   "+D.name+" ("+D.id+")"+soort,
+  return [f.kind==="210"?"Hashcode inlevering kandidatenlijst (EML 210)":f.kind==="230c"?"Hashcode totaallijsten (EML 230c)":"Hashcode kandidatenlijsten (EML 230b)","",
+    "Bestand:      "+f.name.replace(/^.*\//,""), "Verkiezing:   "+D.name+" ("+D.id+")"+(f.kind==="210"?"\r\nLijst:        "+f.label.replace(/^lijst /,""):soort),
     "Gemaakt op:   "+z(d.getDate())+"-"+z(d.getMonth()+1)+"-"+d.getFullYear()+" "+z(d.getHours())+":"+z(d.getMinutes()),
     "Algoritme:    SHA-256","","Hashcode:",groupHash(f.hash),"","Zonder spaties:",f.hash,"",
-    "Controleren:","  Windows:  certutil -hashfile \""+f.name+"\" SHA256","  Linux:    sha256sum \""+f.name+"\"","  macOS:    shasum -a 256 \""+f.name+"\"","",
+    "Controleren:","  Windows:  certutil -hashfile \""+f.name.replace(/^.*\//,"")+"\" SHA256","  Linux:    sha256sum \""+f.name.replace(/^.*\//,"")+"\"","  macOS:    shasum -a 256 \""+f.name.replace(/^.*\//,"")+"\"","",
     "De uitkomst moet gelijk zijn aan de hashcode hierboven (hoofd- of kleine letters maakt niet uit).",
-    f.kind==="230c"?"Let op: alle personen en adressen in dit bestand zijn fictief.":"Let op: alle personen in dit bestand zijn fictief.",""].join("\r\n");
+    f.kind!=="230b"?"Let op: alle personen, adressen"+(f.kind==="210"&&S.bsn?", BSN's":"")+" in dit bestand zijn fictief.":"Let op: alle personen in dit bestand zijn fictief.",""].join("\r\n");
 }
 function overviewText(){
   const L=["Overzicht hashcodes kandidatenlijsten","Verkiezing: "+D.name+" ("+D.id+")","Algoritme: SHA-256",""];
-  FILES.forEach(f=>{ L.push(f.name+"   ["+f.kind+(f.kind==="230c"?" – totaallijsten met adressen, uitslagvaststelling":f.all?" – alle kieskringen":"")+"]"); L.push("  "+groupHash(f.hash)); L.push(""); });
+  FILES.forEach(f=>{ L.push(f.name+"   ["+f.kind+(f.kind==="230c"?" – totaallijsten met adressen, uitslagvaststelling":f.kind==="210"?" – inlevering "+f.label:f.all?" – alle kieskringen":"")+"]"); L.push("  "+groupHash(f.hash)); L.push(""); });
   L.push("Alle personen en adressen in deze bestanden zijn fictief.","");
   return L.join("\r\n");
 }
@@ -691,6 +809,12 @@ function validate(){
   if(D.cat==="GR"||D.cat==="PS"||D.cat==="AB") info("Een kandidaat mag bij de kandidaatstelling in het buitenland wonen; e-KS gebruikt dit ook in zijn voorbeeld voor een waterschap.");
   if(D.roman) info(S.romanIds?"De kieskringen krijgen Romeinse cijfers als ContestIdentifier-Id (I, II), zoals Abacus verwacht. e-KS schrijft hier gewone nummers.":"De definitie gebruikt Romeinse cijfers voor de kieskringen. In het bestand blijft het ContestIdentifier-Id een gewoon nummer, zoals in e-KS (230b-ps27-2). Abacus verwacht bij deze kieskringen Romeinse cijfers; zet daarvoor bij vraag 4 de Romeinse cijfers aan.");
   if(!D.single && !S.perKK && !S.b230Total) warn("Er wordt geen 230b gemaakt. Zet bij vraag 4 de 230b per kieskring aan als je de lijsten in Abacus wilt inlezen.");
+  if(S.e210){
+    const n=FILES.filter(f=>f.kind==="210").length;
+    info(n+" inleveringsbestanden (210), in de map 210_inlevering. Elke lijst die een partij inlevert, krijgt een eigen bestand met de kieskringen waarvoor de lijst geldt, zoals in e-KS. Het lijsttype is daarin altijd 'op zichzelf staande lijst', net als in e-KS.");
+    if(S.bsn && bsnShort) warn("Er zijn meer kandidaten dan fictieve BSN's in de reeks 99999xxxx (909). Sommige BSN's komen daardoor dubbel voor.");
+    if(D.cat==="GR"||D.cat==="BC"||D.cat==="GC"||D.cat==="EP") info("Voor deze soort verkiezing heeft e-KS geen voorbeeld-210. Het kieskringnummer in kr:Contests is daarom 1, met de naam van het gebied.");
+  }
   if(!S.c230) info("Er wordt geen 230c (Totaallijsten) gemaakt. Die is nodig voor de uitslagvaststelling.");
   else info("De 230c (Totaallijsten_"+(slug(D.id)||"verkiezing")+".eml.xml) bevat alle kieskringen, met fictieve correspondentieadressen"+(S.abroad?" en, bij kandidaten in het buitenland, een gemachtigde":"")+". Staat een kandidaat in meer kieskringen op de lijst, dan staat hij er één keer volledig in en verder alleen met zijn korte code.");
   if(!D.single) info("Abacus leest per bestand precies één kieskring in. Gebruik in Abacus de bestanden per kieskring; het totaalbestand met alle kieskringen is daar niet voor bedoeld.");
@@ -714,7 +838,7 @@ function renderDef(){
   $("regHint").textContent=D.parties.length?"De definitie bevat "+D.parties.length+" geregistreerde aanduidingen.":"De definitie bevat geen geregistreerde aanduidingen; alle namen worden fictief.";
   document.querySelectorAll("#partyTable .mk").forEach(e=>e.hidden=D.single);
   $("modeHint").hidden=D.single;
-  $("oneFileWrap").hidden=D.single; $("b230TotalWrap").hidden=D.single;
+  $("oneFileWrap").hidden=D.single; $("b230TotalWrap").hidden=D.single; $("e210Opts").hidden=!S.e210;
   $("listDataWrap").hidden=D.version==="1.2.2";
   $("abroadWrap").hidden=false;
   $("listDataOpts").hidden=D.version==="1.2.2"; $("pubLangHint").hidden=D.version==="1.2.2"||D.frys;
@@ -738,16 +862,20 @@ function renderParties(){
 function renderKKPick(){
   const sel=$("kkPick");
   const hasTot=S.c230||(!D.single&&S.b230Total);
+  const f210=FILES.filter(f=>f.kind==="210");
+  if(view.kk===-2 && !(view.f210<f210.length)) view.kk=D.single?0:-1;
+  const opt210=f210.length?'<optgroup label="210 – inlevering per lijst">'+f210.map((f,i)=>'<option value="210:'+i+'"'+(view.kk===-2&&view.f210===i?" selected":"")+">"+esc(f.label)+"</option>").join("")+"</optgroup>":"";
   if(D.single){
-    if(!S.c230){ sel.hidden=true; view.kk=0; return; }
-    sel.hidden=false; if(view.kk!==-1) view.kk=0;
-    sel.innerHTML='<option value="0"'+(view.kk===0?" selected":"")+'>230b – kandidatenlijsten</option><option value="-1"'+(view.kk===-1?" selected":"")+'>230c – totaallijsten met adressen</option>';
+    if(!S.c230 && !f210.length){ sel.hidden=true; view.kk=0; return; }
+    sel.hidden=false; if(view.kk===-1&&!S.c230) view.kk=0; if(view.kk>0) view.kk=0;
+    sel.innerHTML='<option value="0"'+(view.kk===0?" selected":"")+'>230b – kandidatenlijsten</option>'+(S.c230?'<option value="-1"'+(view.kk===-1?" selected":"")+'>230c – totaallijsten met adressen</option>':"")+opt210;
     return;
   }
   sel.hidden=false;
   if(view.kk>=G.contests.length||(view.kk===-1&&!hasTot)) view.kk=hasTot?-1:0;
+  const after=opt210;
   sel.innerHTML=(hasTot?'<option value="-1"'+(view.kk===-1?" selected":"")+">Totaal – alle kieskringen"+(S.c230?" (230c)":" (230b)")+"</option>":"")+
-    G.contests.map((c,i)=>'<option value="'+i+'"'+(i===view.kk?" selected":"")+">Kieskring "+(c.roman?toRoman(+c.num):c.num)+" – "+esc(c.name)+" ("+c.lists.length+" lijsten)</option>").join("");
+    G.contests.map((c,i)=>'<option value="'+i+'"'+(i===view.kk?" selected":"")+">Kieskring "+(c.roman?toRoman(+c.num):c.num)+" – "+esc(c.name)+" ("+c.lists.length+" lijsten)</option>").join("")+after;
 }
 function totalMatrix(){
   const cs=G.contests, rows=S.parties.map((p,i)=>i+1);
@@ -769,11 +897,18 @@ function renderView(){
   $("legend").hidden=!has||view.tab!=="lists"||D.single;
   $("tabLists").setAttribute("aria-selected",view.tab==="lists"); $("tabXml").setAttribute("aria-selected",view.tab==="xml");
   if(!has) return;
-  const tot=!D.single && view.kk===-1;
+  const tot=!D.single && view.kk===-1, is210=view.kk===-2;
+  $("legend").hidden=$("legend").hidden||is210;
   $("legend").textContent=tot?"Totaaloverzicht: S1 = stel gelijkluidende lijsten nr. 1, G = lijstengroep, Z = op zichzelf staande lijst, – = doet niet mee. Klein getal = aantal kandidaten.":"Rood nummer = regionale kandidaat (verschilt per kieskring).";
   const c=G.contests[view.kk]||G.contests[0];
   const showAddr=D.single && view.kk===-1 && S.c230;
-  if(view.tab==="lists" && tot){ $("ballot").innerHTML=totalMatrix(); }
+  if(view.tab==="lists" && is210){
+    const f=fileForView(), e=f.sub, [cid,,cs]=districts210(e);
+    $("ballot").innerHTML='<div class="list" style="flex-basis:360px"><h3><span class="ln">'+e.nr+'</span><span>'+(e.name?esc(e.name):"<i>blanco lijst</i>")+'</span></h3><span class="ty">210 · ContestIdentifier '+esc(cid)+" · kieskringen "+esc(cs.map(c=>c[0]+" "+c[1]).join(", "))+"</span><ol>"+
+      e.cands.map((k,ix)=>'<li><span class="p">'+(ix+1)+'</span><span>'+esc(fmtName(k))+'<span class="w">'+esc(k.town)+(k.country?" ("+k.country+")":"")+'</span><span class="w">'+esc(addrText(k))+(S.bsn&&k.bsn?" · BSN "+k.bsn:"")+"</span></span></li>").join("")+
+      '</ol><span class="ty" style="border-top:1px solid var(--line)">'+proposers(e.nr).map(q=>esc((q.id?"Plaatsvervanger "+q.id:"Inleveraar")+": "+q.ini+(q.prefix?" "+q.prefix:"")+" "+q.last+", "+q.addr.line+", "+q.addr.pc+" "+q.addr.town)).join("<br>")+"</span></div>";
+  }
+  else if(view.tab==="lists" && tot){ $("ballot").innerHTML=totalMatrix(); }
   else if(view.tab==="lists"){
     $("ballot").innerHTML=c.lists.length? c.lists.map(l=>'<div class="list"><h3><span class="ln">'+l.nr+'</span><span>'+(l.name?esc(l.name):"<i>blanco lijst</i>")+'</span></h3><span class="ty">'+esc(l.type)+(l.set?" · stel "+l.set:"")+" · "+l.cands.length+" kandidaten</span><ol>"+
       l.cands.map((k,ix)=>'<li class="'+(k.reg?"reg":"")+'"><span class="p">'+(ix+1)+'</span><span>'+esc(fmtName(k))+'<span class="w">'+esc(k.town)+(k.country?" ("+k.country+")":"")+"</span>"+(showAddr?'<span class="w">'+esc(addrText(k))+"</span>":"")+"</span></li>").join("")+"</ol></div>").join("")
@@ -805,7 +940,7 @@ async function renderOut(){
   const seq=++hashSeq, enc=new TextEncoder();
   for(const f of FILES){ f.bytes=enc.encode(f.xml); f.hash=await sha256hex(f.bytes); if(seq!==hashSeq) return; }
   $("files").hidden=false;
-  $("files").innerHTML=FILES.map(f=>"<div><b>"+esc(f.name)+"</b>"+" <span class=\"chip"+(f.kind==="230c"?" on":"")+"\">"+f.kind+(f.kind==="230c"?" totaal":f.all?" alle kieskringen":"")+"</span>"+"<br>SHA-256 "+groupHash(f.hash)+"</div>").join("");
+  $("files").innerHTML=FILES.map(f=>"<div><b>"+esc(f.name)+"</b>"+" <span class=\"chip"+(f.kind==="230c"?" on":"")+"\">"+f.kind+(f.kind==="230c"?" totaal":f.kind==="210"?" inlevering":f.all?" alle kieskringen":"")+"</span>"+"<br>SHA-256 "+groupHash(f.hash)+"</div>").join("");
 }
 let tmr=null;
 function update(){ clearTimeout(tmr); tmr=setTimeout(renderOut,180); }
@@ -824,7 +959,7 @@ function loadDef(text,label){
 function freshSettingsKeep(){ const keep=S?{seed:S.seed,pctF:S.pctF,pctU:S.pctU,dob:S.dob,abroad:S.abroad}:{}; freshSettings(); Object.assign(S,keep); }
 function syncInputs(){
   $("nParties").value=S.parties.length; $("pctF").value=S.pctF; $("pctU").value=S.pctU; $("dob").checked=S.dob; $("publishGender").checked=S.publishGender; $("pubLang").value=S.pubLang; $("romanIds").checked=S.romanIds; $("seed").value=S.seed; $("abroad").checked=S.abroad;
-  $("perKK").checked=S.perKK; $("c230").checked=S.c230; $("b230Total").checked=S.b230Total; $("listData").checked=S.listData; $("authId").value=S.authId; $("authName").value=S.authName;
+  $("perKK").checked=S.perKK; $("c230").checked=S.c230; $("b230Total").checked=S.b230Total; $("e210").checked=S.e210; $("bsn").checked=S.bsn; $("nDeputies").value=S.nDeputies; $("listData").checked=S.listData; $("authId").value=S.authId; $("authName").value=S.authName;
   $("transactionId").value=S.transactionId; $("issueDate").value=S.issueDate;
 }
 
@@ -882,11 +1017,14 @@ $("abroad").addEventListener("change",e=>{ S.abroad=e.target.checked; update(); 
 $("perKK").addEventListener("change",e=>{ S.perKK=e.target.checked; update(); });
 $("c230").addEventListener("change",e=>{ S.c230=e.target.checked; update(); });
 $("b230Total").addEventListener("change",e=>{ S.b230Total=e.target.checked; update(); });
+$("e210").addEventListener("change",e=>{ S.e210=e.target.checked; $("e210Opts").hidden=!S.e210; update(); });
+$("bsn").addEventListener("change",e=>{ S.bsn=e.target.checked; update(); });
+$("nDeputies").addEventListener("input",e=>{ S.nDeputies=Math.max(1,Math.min(2,parseInt(e.target.value,10)||1)); update(); });
 $("listData").addEventListener("change",e=>{ S.listData=e.target.checked; update(); });
 ["authId","authName","transactionId","issueDate"].forEach(k=>$(k).addEventListener("input",e=>{ S[k]=e.target.value; update(); }));
 $("tabLists").addEventListener("click",()=>{ view.tab="lists"; renderView(); });
 $("tabXml").addEventListener("click",()=>{ view.tab="xml"; renderView(); });
-$("kkPick").addEventListener("change",e=>{ view.kk=+e.target.value; renderView(); });
+$("kkPick").addEventListener("change",e=>{ const v=e.target.value; if(v.startsWith("210:")){ view.kk=-2; view.f210=+v.slice(4); } else view.kk=+v; renderView(); });
 
 $("copyBtn").addEventListener("click",async()=>{
   if(!G) return; const f=fileForView();

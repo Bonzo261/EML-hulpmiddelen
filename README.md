@@ -12,7 +12,7 @@ Elke app is één HTML-bestand dat helemaal in de browser draait. Er gaat niets 
 |---|---|---|
 | Verkiezingsdefinitie-maker | [`verkiezingsdefinitie.html`](verkiezingsdefinitie.html) | 110a |
 | Stembureaus-maker | [`stembureaus.html`](stembureaus.html) | 110b (1.2.2 en 1.3.1) |
-| Kandidatenlijsten-maker | [`kandidatenlijsten.html`](kandidatenlijsten.html) | 230b, 230c (totaallijsten met adressen) |
+| Kandidatenlijsten-maker | [`kandidatenlijsten.html`](kandidatenlijsten.html) | 230b, 230c (totaallijsten met adressen), 210 (inlevering per lijst) |
 | Uitslagen-generator | [`uitslagen-generator.html`](uitslagen-generator.html) | 510b, 510c, 510d (optioneel ondertekend) |
 | PV-generator | [`pv-generator.html`](pv-generator.html) | leest 110a/b, 230b, 510b/c/d/r, 520; maakt PDF |
 | Controleprotocol (GR26) | [`controleprotocol.html`](controleprotocol.html) | leest 110a/b, 230b, 510b/c/d; offline invoer via Excel |
@@ -40,9 +40,8 @@ Sommige apps bewaren hun werk in `localStorage` van je browser. De Uitslagen-gen
 
 De belangrijkste punten op de to-do-lijst:
 - kandidatenlijsten voor de Eerste Kamer per provincie;
-- EML 210 maken, zoals e-KS;
 - referenda en de TK-kieskring Bonaire;
-- de nieuwe bestanden proef inlezen in Abacus en OSV.
+- de nieuwe bestanden proef inlezen in Abacus, OSV en e-KS.
 
 De volledige lijst staat in [`WENSEN.md`](WENSEN.md). Ideeën en fouten zijn welkom als [issue](https://github.com/Bonzo261/EML-hulpmiddelen/issues).
 
@@ -52,7 +51,7 @@ De volledige lijst staat in [`WENSEN.md`](WENSEN.md). Ideeën en fouten zijn wel
 - Het formaat van de 510-bestanden en de ondertekening volgen de testbestanden en de code van Abacus.
 - De Controle zetelverdeling rekent volgens de tekst van de Kieswet en toetst de uitkomst aan een port van de zetelverdeling in Abacus (`backend/apportionment`), getest met alle eind-tot-eindtests daarvan.
 - Het Controleprotocol volgt de controleprotocollen GR26 van de Kiesraad (november 2025).
-- De indeling van Nederland (kieskringen, waterschappen, deelgemeenten, kiescolleges) en de opbouw van de 110a-, 230b- en 230c-bestanden volgen [e-KS](https://github.com/kiesraad/e-ks), het kandidaatstellingssysteem van de Kiesraad (EUPL-1.2), stand 23-11-2026.
+- De indeling van Nederland (kieskringen, waterschappen, deelgemeenten, kiescolleges) en de opbouw van de 110a-, 210-, 230b- en 230c-bestanden volgen [e-KS](https://github.com/kiesraad/e-ks), het kandidaatstellingssysteem van de Kiesraad (EUPL-1.2), stand 23-11-2026.
 - PDF-lettertypen in `pv-fonts.js`: DM Sans (aangepast door de Kiesraad) en Geist Mono, beide onder de SIL Open Font License 1.1, uit `kiesraad/abacus`.
 
 ## Licentie

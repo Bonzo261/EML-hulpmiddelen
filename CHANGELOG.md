@@ -2,6 +2,25 @@
 
 Wat er per update is veranderd, nieuwste bovenaan. De precieze verschillen per bestand staan in de [commitgeschiedenis](https://github.com/Bonzo261/EML-hulpmiddelen/commits/main).
 
+## 25-11-2026: inleveringsbestanden (210)
+
+### Kandidatenlijsten-maker (`kandidatenlijsten.html`)
+- **Nieuw: EML 210**, het bestand waarmee een partij een kandidatenlijst inlevert, zoals [e-KS](https://github.com/kiesraad/e-ks) dat gebruikt. Bedoeld om het inleveren in e-KS te testen met losse kandidatenlijsten.
+  - Eén bestand per ingeleverde lijst, in de map `210_inlevering/` van de zip. Een partij met overal dezelfde lijst levert één bestand in; bij regionale stellen of een lijstengroep zijn het er meer.
+  - Per kandidaat staat er een (verzonnen) adres en een fictief BSN in. De BSN's halen de elfproef en komen uit een reeks die niet aan echte personen wordt uitgegeven. Elke persoon houdt in alle bestanden hetzelfde BSN.
+  - De inleveraar en een of twee plaatsvervangers staan erin, met naam en adres.
+- Bij vraag 4 zet je de 210 aan (standaard uit). Je kunt kiezen of het BSN erin komt en hoeveel plaatsvervangers er zijn.
+- In de weergave kun je elk 210-bestand bekijken.
+- De 230b- en 230c-bestanden zijn niet veranderd. Met hetzelfde startgetal krijg je dezelfde personen.
+- De opbouw is vergeleken met de e-KS-voorbeelden voor waterschap Fryslân, Provinciale Staten Groningen en Limburg en de Eerste Kamer.
+
+### Handleidingen
+- Handleiding van de Kandidatenlijsten-maker bijgewerkt voor de 210.
+
+### Website
+- De kaart van de Kandidatenlijsten-maker op de startpagina noemt nu ook 210.
+- `docs/kandidatenlijsten-maker.md`, de README en `WENSEN.md` bijgewerkt.
+
 ## 23-11-2026 (avond): totaallijsten met adressen (230c)
 
 ### Kandidatenlijsten-maker (`kandidatenlijsten.html`)
