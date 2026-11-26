@@ -172,6 +172,8 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
     <div class="row">
       <div class="field narrow"><label for="pctF">Aandeel vrouwen (%)</label><input type="number" id="pctF" min="0" max="100" value="50"></div>
       <div class="field narrow"><label for="pctU">Aandeel geslacht onbekend (%)</label><input type="number" id="pctU" min="0" max="100" value="0"></div>
+      <div class="field narrow"><label for="pctX">Aandeel niet-Nederlandse namen (%)</label><input type="number" id="pctX" min="0" max="100" value="20"></div>
+      <div class="field narrow" id="pctOutWrap"><label for="pctOut">Aandeel woonplaats buiten het gebied (%)</label><input type="number" id="pctOut" min="0" max="100" value="5"></div>
       <div class="field narrow"><label for="seed">Startgetal</label><input type="text" id="seed" inputmode="numeric"></div>
       <button type="button" id="reseed">Nieuwe personen</button>
     </div>
@@ -289,6 +291,38 @@ const PC_LETTERS="ABCEGHJKLMNPRTVWXZ";
 const ABROAD=[["BE","Brussel"],["BE","Antwerpen"],["DE","Berlijn"],["DE","Keulen"],["GB","Londen"],["FR","Parijs"],["ES","Barcelona"],["US","New York"]];
 const MALE=["Jan","Pieter","Kees","Willem","Hendrik","Johan","Gerrit","Dirk","Bas","Thijs","Daan","Sander","Ruben","Joost","Maarten","Erik","Rob","Mark","Tom","Stefan","Niels","Jeroen","Bram","Lars","Wouter","Michiel","Frank","Arjen","Ronald","Marco","Hans","Peter","Martijn","Koen","Jesse","Milan","Sem","Luuk","Stijn","Gijs","Mehmet","Mohamed","Youssef","Ahmed","Kevin","Rik","Jasper","Hugo","Floris","Teun","Reinier","Ferry","Ivo","Olaf","Ewout","Siem","Wessel","Dennis","Patrick","Remco"];
 const FEMALE=["Anna","Maria","Sophie","Emma","Julia","Lisa","Eva","Sanne","Anouk","Fleur","Lotte","Iris","Femke","Ingrid","Petra","Monique","Esther","Marloes","Karin","Linda","Saskia","Annemiek","Judith","Mirjam","Wendy","Ilse","Noor","Lieke","Marieke","Hanneke","Nienke","Merel","Romy","Fatima","Samira","Yasmina","Elif","Priya","Chantal","Joyce","Charlotte","Sara","Roos","Tessa","Marit","Jolien","Ellen","Renate","Astrid","Danielle","Kim","Mandy","Nathalie","Bregje","Gerda","Hilde","Wilma","Carla","Tamara","Vera"];
+/* namen van niet-Nederlandse herkomst, veel met diakrieten. Achternaam als [voorvoegsel, naam] of, bij talen met
+   een vrouwelijke vorm, als [voorvoegsel, mannelijk, vrouwelijk]. Alle combinaties zijn willekeurig en fictief. */
+const FOREIGN=[
+ {o:"Turks",m:["Ömer","Şükrü","Çağlar","Gökhan","Hüseyin","Mehmet","Barış","Oğuz","Selçuk","Ümit"],f:["Ayşe","Gülşen","Özlem","Çağla","Şeyma","Büşra","Gülay","Nesrin","İlknur","Sevgül"],
+  s:[["","Şahin"],["","Çelik"],["","Öztürk"],["","Yıldız"],["","Doğan"],["","Güneş"],["","Aydın"],["","Koç"],["","Özdemir"],["","Kılıç"]]},
+ {o:"Marokkaans",m:["Mohammed","Youssef","Hamza","Bilal","Karim","Mustapha"],f:["Fatima","Samira","Naïma","Loubna","Zineb","Houda"],
+  s:[["","El Idrissi"],["","Benali"],["","Ouaali"],["el","Khattabi"],["","Azzouzi"],["","Bouhlal"]]},
+ {o:"Pools",m:["Łukasz","Paweł","Wojciech","Michał","Grzegorz","Jarosław"],f:["Małgorzata","Agnieszka","Katarzyna","Bożena","Łucja","Żaneta"],
+  s:[["","Wójcik","Wójcik"],["","Zieliński","Zielińska"],["","Kowalczyk","Kowalczyk"],["","Woźniak","Woźniak"],["","Dąbrowski","Dąbrowska"],["","Kamiński","Kamińska"],["","Łuczak","Łuczak"]]},
+ {o:"Tsjechisch",m:["Jiří","Tomáš","Lukáš","Václav"],f:["Šárka","Lucie","Zuzana","Jana"],
+  s:[["","Dvořák","Dvořáková"],["","Novák","Nováková"],["","Černý","Černá"],["","Růžička","Růžičková"]]},
+ {o:"Portugees/Kaapverdisch",m:["João","Gonçalo","Tomás","Sérgio"],f:["Conceição","Inês","Lúcia","Fátima"],
+  s:[["","Gonçalves"],["dos","Santos"],["da","Costa"],["","Simões"],["","Gonçalves Lopes"]]},
+ {o:"Spaans",m:["José","Raúl","Andrés","Jesús"],f:["Inés","María","Begoña","Ángela"],
+  s:[["","Muñoz"],["","Peña"],["","Ibáñez"],["","Martínez"],["","Núñez"]]},
+ {o:"Frans/Belgisch",m:["François","Benoît","Jérôme","Hervé"],f:["Hélène","Céline","Mélanie","Anaïs"],
+  s:[["","Lefèvre"],["","Lefèbvre"],["","Mercier"],["","Bérard"],["","Dupré"]]},
+ {o:"Duits",m:["Jürgen","Jörg","Günther","Björn"],f:["Jutta","Bärbel","Dörte","Käthe"],
+  s:[["","Müller"],["","Schäfer"],["","Köhler"],["","Größer"],["","Weiß"]]},
+ {o:"Scandinavisch",m:["Søren","Bjørn","Jørgen","Åke"],f:["Åsa","Sølvi","Ingrid","Märta"],
+  s:[["","Jørgensen"],["","Sørensen"],["","Åberg"],["","Østergaard"],["","Lindström"]]},
+ {o:"Roemeens/Hongaars",m:["Ștefan","Mihai","Zoltán","Gábor"],f:["Ioana","Ilinca","Zsófia","Réka"],
+  s:[["","Popescu"],["","Ionescu"],["","Szabó"],["","Kovács"],["","Tóth"]]},
+ {o:"Kroatisch/Servisch",m:["Ivan","Dražen","Željko","Goran"],f:["Ivana","Mirjana","Snežana","Jelena"],
+  s:[["","Marić"],["","Horvat"],["","Kovačević"],["","Petrović"],["","Jurić"]]},
+ {o:"Vietnamees",m:["Minh","Đức","Quang","Tuấn"],f:["Thị Lan","Hương","Ngọc","Thảo"],
+  s:[["","Nguyễn"],["","Trần"],["","Phạm"],["","Lê"],["","Đặng"]]},
+ {o:"Surinaams/Hindoestaans",m:["Ravi","Sanjay","Dinesh","Ashwin"],f:["Shanti","Anjali","Priya","Sunita"],
+  s:[["","Ramdin"],["","Sewdien"],["","Jagessar"],["","Mahabier"],["","Ramsaran"]]},
+ {o:"Nederlands met trema",m:["Michaël","Raphaël","Noël","Joël"],f:["Daniëlle","Chloë","Zoë","Anaïs"],
+  s:[["","Smeets"],["","Peeters"],["","Hendriks"],["van","Dijk"],["de","Graaf"]]}
+];
 const SUR=[["","Jansen"],["de","Vries"],["van den","Berg"],["van","Dijk"],["","Bakker"],["","Janssen"],["","Visser"],["","Smit"],["","Meijer"],["de","Boer"],["","Mulder"],["de","Groot"],["","Bos"],["","Vos"],["","Peters"],["","Hendriks"],["van","Leeuwen"],["","Dekker"],["","Brouwer"],["de","Wit"],["","Dijkstra"],["","Smits"],["de","Graaf"],["van der","Meer"],["van der","Linden"],["","Kok"],["","Jacobs"],["de","Haan"],["","Vermeulen"],["van den","Heuvel"],["van der","Veen"],["van den","Broek"],["de","Bruijn"],["de","Jong"],["","Schouten"],["","Willems"],["van","Vliet"],["","Hoekstra"],["","Maas"],["","Verhoeven"],["","Koster"],["van","Dam"],["van der","Wal"],["","Prins"],["","Blom"],["","Huisman"],["","Peeters"],["de","Lange"],["van","Wijk"],["","Kuipers"],["","Postma"],["","Kramer"],["","Scholten"],["van","Beek"],["","Hermans"],["","Wolters"],["","Evers"],["","Sanders"],["","Timmermans"],["","Groen"],["","Gerritsen"],["van","Doorn"],["","Bosman"],["","Molenaar"],["","Veenstra"],["","Koning"],["ten","Have"],["ter","Horst"],["van","Rijn"],["","Lammers"],["","Goossens"],["","Hofman"],["","Wouters"],["van","Os"],["","Zijlstra"],["","Boersma"],["","Kuiper"],["","Arts"],["","Verbeek"],["","Claassen"],["van","Loon"],["van","Wijngaarden"],["","Vink"],["","Hoogendoorn"],["","Pronk"],["","Westerhof"],["","Nijhuis"],["","Kalkman"],["","Oosterhuis"],["","Rietveld"],["","Yilmaz"],["","Kaya"],["","El Amrani"],["","Bouzid"],["","Demir"],["","Ramdin"],["","Sewdien"],["","Martina"],["","Nguyen"],["","Kowalski"],["","Brinkman"],["van","Essen"],["","Faber"],["","Haverkamp"],["","Steenbergen"],["","Veldman"],["","Wijnands"],["","Zwart"],["van der","Heijden"],["van","Gelder"],["de","Ruiter"],["","Mertens"],["","Spoelstra"],["","Talsma"],["","Vonk"],["","Beekman"],["","Klaver"],["","Bijl"],["","Tuinstra"],["","Wiersma"],["","Douma"],["van","Asselt"],["","Schipper"],["","Stam"],["","Visscher"],["den","Hartog"]];
 const FAKE_PARTIES=["Lokaal Vooruit","Partij voor Ruimte","Groen Dichtbij","Samen Sterk","Burgerbelang","Nieuwe Koers","Eerlijk Wonen","Platform Toekomst","Vrije Kiezers","Ouderen Nu","Jong & Betrokken","Duurzaam Samen","Dorpen Centraal","Stad en Land","Open Bestuur","Gewoon Doen","Zorg Voorop","Water & Wind","Fietsland","Recht door Zee","Nieuw Evenwicht","De Brug","Kiezen voor Morgen","Middenpartij","Polder Nu","Heldere Taal","Sociaal Anders","Vrij en Veilig","Natuurlijk Lokaal","Wij Samen"];
 const MODES=[["gelijk","gelijk"],["stellen","regionale stellen"],["perkk","elke kieskring anders"],["deels","alleen enkele kieskringen"]];
@@ -318,7 +352,7 @@ let FILES=[]; // [{name,xml,hash,contests}]
 let view={tab:"lists",kk:0};
 
 function freshSettings(){
-  S={parties:[],seed:String(Math.floor(Math.random()*900000)+100000),pctF:50,pctU:0,dob:true,abroad:false,perKK:true,c230:true,b230Total:false,e210:false,bsn:true,nDeputies:2,listData:true,publishGender:true,pubLang:"nl",romanIds:false,
+  S={parties:[],seed:String(Math.floor(Math.random()*900000)+100000),pctF:50,pctU:0,pctX:20,pctOut:5,dob:true,abroad:false,perKK:true,c230:true,b230Total:false,e210:false,bsn:true,nDeputies:2,listData:true,publishGender:true,pubLang:"nl",romanIds:false,
      authId:"",authName:"",transactionId:"1",issueDate:iso(new Date())};
 }
 
@@ -364,7 +398,22 @@ function defaultAuthority(){
 }
 
 /* ---------- woonplaatsen ---------- */
+/* plaatsen uit TOWNS die geen gemeente zijn, met de gemeente waar ze onder vallen (om "buiten het gebied" goed te bepalen) */
+const KERN={"Veendam":"Veendam","Delfzijl":"Eemsdelta","Appingedam":"Eemsdelta","Winschoten":"Oldambt","Hoogezand":"Midden-Groningen","Leek":"Westerkwartier","Zuidhorn":"Westerkwartier","Winsum":"Het Hogeland",
+ "Sneek":"Súdwest-Fryslân","Bolsward":"Súdwest-Fryslân","Drachten":"Smallingerland","Franeker":"Waadhoeke","Dokkum":"Noardeast-Fryslân","Joure":"De Fryske Marren","Wolvega":"Weststellingwerf",
+ "Roden":"Noordenveld","Beilen":"Midden-Drenthe","Westerbork":"Midden-Drenthe","Zuidlaren":"Tynaarlo","Vries":"Tynaarlo","Rijssen":"Rijssen-Holten","Hengelo":"Hengelo (O)",
+ "Emmeloord":"Noordoostpolder","Groesbeek":"Berg en Dal","Hoofddorp":"Haarlemmermeer","IJmuiden":"Velsen","Zaandam":"Zaanstad","Heerhugowaard":"Dijk en Waard","Den Burg":"Texel",
+ "Spijkenisse":"Nissewaard","Hellevoetsluis":"Voorne aan Zee","Oud-Beijerland":"Hoeksche Waard","Middelharnis":"Goeree-Overflakkee","Zierikzee":"Schouwen-Duiveland","Oostburg":"Sluis",
+ "Uden":"Maashorst","Sittard":"Sittard-Geleen","Geleen":"Sittard-Geleen"};
 const ALL_TOWNS=[].concat(...Object.keys(TOWNS).filter(k=>k!=="20").map(k=>TOWNS[k]));
+function outsideApplies(){ return !!D && ["GR","BC","GC","PS","AB"].includes(D.cat); }
+function outsideTowns(){
+  if(!outsideApplies()) return [];
+  const inside=new Set(areaTowns());
+  if(D.cat==="PS" && D.root && PS_KK[+D.root.num]) PS_KK[+D.root.num].forEach(n=>TOWNS[n].forEach(t=>inside.add(t)));
+  if(D.domName) inside.add(D.domName);
+  return ALL_TOWNS.filter(t=>!inside.has(t) && !inside.has(KERN[t]));
+}
 function townsForKK(kk){
   const fromTree=D.regions.filter(r=>r.cat==="GEMEENTE" && r.supCat==="KIESKRING" && r.supNum===kk.num).map(r=>r.name);
   if(fromTree.length) return fromTree;
@@ -415,22 +464,36 @@ function resizeParties(n){
 /* ---------- genereren ---------- */
 function generate(){
   const rng=mulberry(hashStr(S.seed));
-  const used=new Set(), all=[], bsnPool=bsnPoolFor(S.seed);
+  const used=new Set(), all=[], bsnPool=bsnPoolFor(S.seed), outside=outsideTowns(); let nOut=0;
   const pick=a=>a[Math.floor(rng()*a.length)];
   const letters="ABCDEFGHIJKLMNPRSTW";
   const area=areaTowns();
   function person(towns){
     for(let tries=0;tries<200;tries++){
       const female=rng()*100<S.pctF;
-      const first=pick(female?FEMALE:MALE);
-      const [prefix,last]=pick(SUR);
+      let first=pick(female?FEMALE:MALE);
+      let [prefix,last]=pick(SUR);
       let ini=first[0]+".";
       const extra=rng(); if(extra>0.45) ini+=pick(letters)+"."; if(extra>0.85) ini+=pick(letters)+".";
-      const key=last+"|"+prefix+"|"+ini+"|"+first;
+      let key=last+"|"+prefix+"|"+ini+"|"+first;
       if(used.has(key)) continue;
+      if(S.pctX>0){
+        const rx=mulberry(hashStr(S.seed+"|herkomst|"+key));
+        if(rx()*100<S.pctX){
+          const O=FOREIGN[Math.floor(rx()*FOREIGN.length)], pk=a=>a[Math.floor(rx()*a.length)];
+          const fn=pk(female?O.f:O.m), sn=pk(O.s), ln=sn.length>2&&female?sn[2]:sn[1];
+          const ni=fn[0]+"."+ini.slice(2), nk=ln+"|"+sn[0]+"|"+ni+"|"+fn;
+          if(!used.has(nk)){ first=fn; prefix=sn[0]; last=ln; ini=ni; key=nk; }
+        }
+      }
       used.add(key);
       const p={first,prefix,last,ini,gender:female?"female":"male",town:pick(towns),country:null};
       if(S.abroad && rng()<0.03){ const [c,t]=pick(ABROAD); p.country=c; p.town=t; }
+      /* woonplaats buiten het verkiezingsgebied: eigen afgeleide generator, hoofdreeks blijft gelijk */
+      if(!p.country && outside.length && S.pctOut>0){
+        const ro=mulberry(hashStr(S.seed+"|buiten|"+key));
+        if(ro()*100<S.pctOut){ p.town=outside[Math.floor(ro()*outside.length)]; p.outside=true; nOut++; }
+      }
       /* geslacht onbekend en geboortedatum: eigen afgeleide generatoren, zodat de hoofdreeks gelijk blijft */
       if(S.pctU>0 && mulberry(hashStr(S.seed+"|gender|"+key))()*100<S.pctU) p.gender="unknown";
       p.dob=birthDate(mulberry(hashStr(S.seed+"|dob|"+key)));
@@ -478,7 +541,7 @@ function generate(){
       b.forEach(c=>c.lists.push({nr,name:P.name,type:isSet?"stel gelijkluidende lijsten":"lijstengroep",set:isSet?bi+1:null,cands:L}));
     });
   });
-  return {contests,unique:used.size};
+  return {contests,unique:used.size,nOut};
 }
 
 /* ---------- XML ---------- */
@@ -806,6 +869,7 @@ function validate(){
   if(!AUTH_RE.test(S.authId.trim())) bad("ManagingAuthority Id \""+S.authId+"\" is ongeldig. EML_NL staat alleen CSB, HSB+nummer, SB+nummer of een 4-cijferige gemeentecode toe (vraag 4, Geavanceerd).");
   if(D.domId!==null && !DOMID_RE.test(D.domId)) bad("Het ElectionDomain-Id \""+D.domId+"\" in de definitie is ongeldig (4 cijfers of 0 t/m 29). Pas de definitie aan.");
   if(D.frys && D.version!=="1.2.2") info("Deze verkiezing staat Fries toe. Kies bij vraag 4 de taal van publicatie.");
+  if(outsideApplies() && G && G.nOut) info(G.nOut+(G.nOut===1?" kandidaat woont":" kandidaten wonen")+" buiten het verkiezingsgebied. Dat mag: de Kieswet eist geen woonplaats in het gebied voor de kandidaatstelling, alleen voor het lidmaatschap.");
   if(D.cat==="GR"||D.cat==="PS"||D.cat==="AB") info("Een kandidaat mag bij de kandidaatstelling in het buitenland wonen; e-KS gebruikt dit ook in zijn voorbeeld voor een waterschap.");
   if(D.roman) info(S.romanIds?"De kieskringen krijgen Romeinse cijfers als ContestIdentifier-Id (I, II), zoals Abacus verwacht. e-KS schrijft hier gewone nummers.":"De definitie gebruikt Romeinse cijfers voor de kieskringen. In het bestand blijft het ContestIdentifier-Id een gewoon nummer, zoals in e-KS (230b-ps27-2). Abacus verwacht bij deze kieskringen Romeinse cijfers; zet daarvoor bij vraag 4 de Romeinse cijfers aan.");
   if(!D.single && !S.perKK && !S.b230Total) warn("Er wordt geen 230b gemaakt. Zet bij vraag 4 de 230b per kieskring aan als je de lijsten in Abacus wilt inlezen.");
@@ -840,7 +904,7 @@ function renderDef(){
   $("modeHint").hidden=D.single;
   $("oneFileWrap").hidden=D.single; $("b230TotalWrap").hidden=D.single; $("e210Opts").hidden=!S.e210;
   $("listDataWrap").hidden=D.version==="1.2.2";
-  $("abroadWrap").hidden=false;
+  $("abroadWrap").hidden=false; $("pctOutWrap").hidden=!outsideApplies();
   $("listDataOpts").hidden=D.version==="1.2.2"; $("pubLangHint").hidden=D.version==="1.2.2"||D.frys;
   $("pubLang").querySelector('option[value="fy"]').disabled=!D.frys;
   if(!D.frys && S.pubLang==="fy") S.pubLang="nl";
@@ -956,9 +1020,9 @@ function loadDef(text,label){
     toast("Definitie ingeladen: "+D.name+(label?" ("+label+")":""));
   }catch(e){ toast(e.message||"Inlezen mislukt."); }
 }
-function freshSettingsKeep(){ const keep=S?{seed:S.seed,pctF:S.pctF,pctU:S.pctU,dob:S.dob,abroad:S.abroad}:{}; freshSettings(); Object.assign(S,keep); }
+function freshSettingsKeep(){ const keep=S?{seed:S.seed,pctF:S.pctF,pctU:S.pctU,pctX:S.pctX,pctOut:S.pctOut,dob:S.dob,abroad:S.abroad}:{}; freshSettings(); Object.assign(S,keep); }
 function syncInputs(){
-  $("nParties").value=S.parties.length; $("pctF").value=S.pctF; $("pctU").value=S.pctU; $("dob").checked=S.dob; $("publishGender").checked=S.publishGender; $("pubLang").value=S.pubLang; $("romanIds").checked=S.romanIds; $("seed").value=S.seed; $("abroad").checked=S.abroad;
+  $("nParties").value=S.parties.length; $("pctF").value=S.pctF; $("pctU").value=S.pctU; $("pctX").value=S.pctX; $("pctOut").value=S.pctOut; $("dob").checked=S.dob; $("publishGender").checked=S.publishGender; $("pubLang").value=S.pubLang; $("romanIds").checked=S.romanIds; $("seed").value=S.seed; $("abroad").checked=S.abroad;
   $("perKK").checked=S.perKK; $("c230").checked=S.c230; $("b230Total").checked=S.b230Total; $("e210").checked=S.e210; $("bsn").checked=S.bsn; $("nDeputies").value=S.nDeputies; $("listData").checked=S.listData; $("authId").value=S.authId; $("authName").value=S.authName;
   $("transactionId").value=S.transactionId; $("issueDate").value=S.issueDate;
 }
@@ -1007,6 +1071,8 @@ tb.addEventListener("change",e=>{
 });
 $("pctF").addEventListener("input",e=>{ S.pctF=Math.max(0,Math.min(100,+e.target.value||0)); update(); });
 $("pctU").addEventListener("input",e=>{ S.pctU=Math.max(0,Math.min(100,+e.target.value||0)); update(); });
+$("pctX").addEventListener("input",e=>{ S.pctX=Math.max(0,Math.min(100,+e.target.value||0)); update(); });
+$("pctOut").addEventListener("input",e=>{ S.pctOut=Math.max(0,Math.min(100,+e.target.value||0)); update(); });
 $("dob").addEventListener("change",e=>{ S.dob=e.target.checked; update(); });
 $("publishGender").addEventListener("change",e=>{ S.publishGender=e.target.checked; update(); });
 $("pubLang").addEventListener("change",e=>{ S.pubLang=e.target.value; update(); });

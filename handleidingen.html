@@ -579,6 +579,8 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
     <ul>
       <li><b>Aandeel vrouwen (%)</b>: geldt voor de kandidaten met een bekend geslacht.</li>
       <li><b>Aandeel geslacht onbekend (%)</b>: standaard 0. Deze kandidaten krijgen in het bestand geslacht ‘unknown’ en in de weergave geen geslachtsletter.</li>
+      <li><b>Aandeel niet-Nederlandse namen (%)</b>: standaard 20. Deze kandidaten krijgen een naam uit een van 14 groepen, zoals Turks, Marokkaans, Pools, Portugees, Vietnamees of Surinaams-Hindoestaans, vaak met tekens als ş, ö, ł, ç, é of ø. Zo test je of software met zulke namen overweg kan. Bij Poolse en Tsjechische namen krijgt een vrouw de vrouwelijke vorm van de achternaam (bijvoorbeeld Zielińska, Dvořáková).</li>
+      <li><b>Aandeel woonplaats buiten het gebied (%)</b>: standaard 5. Alleen bij gemeenteraad, stadsdeel/gebied, Provinciale Staten en waterschap. Deze kandidaten wonen in een plaats buiten de gemeente, provincie of het waterschap; dat mag bij de kandidaatstelling. De app meldt hoeveel kandidaten buiten het gebied wonen.</li>
       <li><b>Startgetal:</b> met hetzelfde startgetal krijg je dezelfde personen terug, ook met geboortedatum en geslacht onbekend. <span class="ui">Nieuwe personen</span> kiest een nieuw startgetal.</li>
       <li><span class="ui">Geboortedatum opnemen</span>: standaard aan. Elke kandidaat is op de dag van stemming tussen 18 en 80 jaar.</li>
       <li><span class="ui">Enkele kandidaten wonen in het buitenland</span>: kan nu bij alle soorten verkiezingen. Een kandidaat mag bij de kandidaatstelling in het buitenland wonen; e-KS doet dit ook in zijn voorbeeld voor een waterschap.</li>
@@ -667,6 +669,7 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
     <details><summary>Ik zie de kolommen voor kieskringen niet.</summary><p>Die verschijnen alleen als de definitie meerdere kieskringen heeft.</p></details>
     <details><summary>Ik kan Fries niet kiezen.</summary><p>De definitie staat Fries niet toe. Maak de definitie in de Verkiezingsdefinitie-maker, bijvoorbeeld voor waterschap of Provinciale Staten Fryslân, of zet in de indeling het vinkje ‘Fries’ aan.</p></details>
     <details><summary>Ik wil dezelfde lijsten nog een keer maken.</summary><p>Gebruik dezelfde definitie, dezelfde instellingen en hetzelfde startgetal. De app onthoudt het startgetal niet: noteer het. Namen, geslacht en woonplaatsen blijven ook gelijk als je de geboortedatum of ‘geslacht onbekend’ aan- of uitzet.</p></details>
+    <details><summary>Met hetzelfde startgetal krijg ik andere personen dan vóór 26 november 2026.</summary><p>Sinds die dag staan ‘niet-Nederlandse namen’ (20%) en ‘woonplaats buiten het gebied’ (5%) standaard aan. Zet beide op 0 en je krijgt precies dezelfde bestanden als met de vorige versie.</p></details>
     <details><summary>Welk bestand lees ik in Abacus in?</summary><p>De 230b per kieskring. Abacus leest per bestand precies één kieskring in, en leest geen 230c. Bij Limburg: zet de Romeinse cijfers aan.</p></details>
     <details><summary>Waarom heeft een kandidaat in het buitenland geen adres in de 230c?</summary><p>Zoals in e-KS heeft een kandidaat die in het buitenland woont een gemachtigde in Nederland. In de 230c staan de naam en het adres van die gemachtigde.</p></details>
     <details><summary>Is het correspondentieadres hetzelfde als de woonplaats?</summary><p>Nee. De woonplaats staat op de openbare kandidatenlijst (230b). Het correspondentieadres staat alleen in de 230c en is het adres waar brieven naartoe gaan. In de app zijn beide fictief en hoeven ze niet bij elkaar te passen.</p></details>
@@ -684,7 +687,7 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
       <li>De lijstnummers zijn in alle kieskringen gelijk.</li>
       <li>Een lijst met minder dan 4 kandidaten wordt altijd overal gelijk gemaakt, ook als je regionale stellen of een lijstengroep kiest.</li>
       <li>Instellingen worden niet bewaard; bij elke start krijgt het startgetal een nieuwe waarde.</li>
-      <li>De woonplaatsen zijn indicatief.</li>
+      <li>De woonplaatsen zijn indicatief. Een woonplaats buiten het gebied komt uit heel Nederland, niet per se uit een buurgemeente.</li>
       <li>Maximaal 60 partijen. De XML-weergave toont maximaal 2.500 regels; de download is wel volledig.</li>
     </ul>
   </article>

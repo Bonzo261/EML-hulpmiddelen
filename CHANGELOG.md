@@ -2,6 +2,20 @@
 
 Wat er per update is veranderd, nieuwste bovenaan. De precieze verschillen per bestand staan in de [commitgeschiedenis](https://github.com/Bonzo261/EML-hulpmiddelen/commits/main).
 
+## 26-11-2026: realistischere kandidaten
+
+### Kandidatenlijsten-maker (`kandidatenlijsten.html`)
+- **Niet-Nederlandse namen:** standaard heeft 20% van de kandidaten een naam uit een andere taal, vaak met bijzondere tekens (zoals ş, ö, ł, ç, é, ø, ễ). Er zijn 14 groepen, van Turks en Pools tot Vietnamees en Surinaams-Hindoestaans. Bij Poolse en Tsjechische namen krijgt een vrouw de vrouwelijke vorm van de achternaam (Zielińska, Dvořáková). Zo kun je testen of andere software deze tekens goed verwerkt.
+- **Woonplaats buiten het gebied:** standaard woont 5% van de kandidaten buiten de gemeente, provincie of het waterschap van de verkiezing. Dat mag bij de kandidaatstelling. Alleen bij gemeenteraad, stadsdelen/gebieden, Provinciale Staten en waterschap. De app meldt hoeveel kandidaten buiten het gebied wonen.
+- Beide percentages zijn instelbaar bij vraag 3. Let op: met de standaardwaarden krijg je met hetzelfde startgetal andere personen dan eerst. Zet je beide op 0%, dan zijn de bestanden precies gelijk aan de vorige versie.
+
+### Handleidingen
+- Handleiding van de Kandidatenlijsten-maker bijgewerkt voor de twee nieuwe instellingen, met een vraag over afwijkende personen bij hetzelfde startgetal.
+
+### Website
+- De kaart van de Kandidatenlijsten-maker op de startpagina noemt de niet-Nederlandse namen.
+- `docs/kandidatenlijsten-maker.md` bijgewerkt.
+
 ## 25-11-2026: nieuwe naam EML-tools
 
 - De site heet nu **EML-tools** (voorheen EML-hulpmiddelen): in de titel en de kop van de startpagina, in de voettekst, en in de terugknop bovenaan elke app en de handleidingen ("← Alle EML-tools").
