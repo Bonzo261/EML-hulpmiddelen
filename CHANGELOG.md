@@ -2,6 +2,21 @@
 
 Wat er per update is veranderd, nieuwste bovenaan. De precieze verschillen per bestand staan in de [commitgeschiedenis](https://github.com/Bonzo261/EML-hulpmiddelen/commits/main).
 
+## 26-11-2026 (middag): uitslagen met zetelverdeling (520)
+
+### Uitslagen-generator (`uitslagen-generator.html`)
+- **Nieuw: EML 520**, de uitslag van het centraal stembureau met de zetelverdeling en de gekozen kandidaten.
+  - De zetels worden verdeeld met dezelfde berekening als in de Controle zetelverdeling, volgens Kieswet P 5 t/m P 10.
+  - Daarna worden de kandidaten gekozen: eerst wie meer voorkeurstemmen heeft dan de voorkeurdrempel, daarna in de volgorde van de lijst.
+  - Is er een loting nodig, dan trekt de app die en meldt dat.
+- De 520 kan worden ondertekend met de sleutel van het centraal stembureau, net als de 510d.
+- Alle bestanden (510b, 510c, 510d en 520) zijn gecontroleerd tegen het officiële XSD van EML_NL.
+- Bij meerdere kieskringen (Tweede Kamer, sommige provincies) is de verdeling over de kandidaten vereenvoudigd. Overleden kandidaten worden niet ondersteund.
+
+### Website
+- De kaart van de Uitslagen-generator op de startpagina noemt nu ook de 520.
+- README, `docs/uitslagen-generator.md` en `WENSEN.md` bijgewerkt.
+
 ## 26-11-2026: realistischere kandidaten
 
 ### Kandidatenlijsten-maker (`kandidatenlijsten.html`)

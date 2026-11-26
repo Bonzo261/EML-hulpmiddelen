@@ -15,7 +15,7 @@ Elke app is één HTML-bestand dat helemaal in de browser draait. Er gaat niets 
 | Verkiezingsdefinitie-maker | [`verkiezingsdefinitie.html`](verkiezingsdefinitie.html) | 110a |
 | Stembureaus-maker | [`stembureaus.html`](stembureaus.html) | 110b (1.2.2 en 1.3.1) |
 | Kandidatenlijsten-maker | [`kandidatenlijsten.html`](kandidatenlijsten.html) | 230b, 230c (totaallijsten met adressen), 210 (inlevering per lijst) |
-| Uitslagen-generator | [`uitslagen-generator.html`](uitslagen-generator.html) | 510b, 510c, 510d (optioneel ondertekend) |
+| Uitslagen-generator | [`uitslagen-generator.html`](uitslagen-generator.html) | 510b, 510c, 510d, 520 (optioneel ondertekend) |
 | PV-generator | [`pv-generator.html`](pv-generator.html) | leest 110a/b, 230b, 510b/c/d/r, 520; maakt PDF |
 | Controleprotocol (GR26) | [`controleprotocol.html`](controleprotocol.html) | leest 110a/b, 230b, 510b/c/d; offline invoer via Excel |
 | Controle zetelverdeling | [`zetelverdeling.html`](zetelverdeling.html) | leest 110a, 230b, 510b/c/d, 520 |

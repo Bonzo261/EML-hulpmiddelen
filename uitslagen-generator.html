@@ -123,6 +123,7 @@ ul.checks li.bad::before{background:var(--bad)} ul.checks li.warn::before{backgr
 .key{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:7px 10px;border-top:1px solid var(--line);font-size:13.5px}
 .key:first-child{border-top:0}
 .key .fp{font:500 11.5px var(--font-mono);color:var(--muted);word-break:break-all}
+table.zt{border-collapse:collapse;width:100%;font-size:12.5px;margin-top:6px}table.zt th,table.zt td{border-bottom:1px solid var(--line);padding:4px 6px;text-align:left;vertical-align:top}table.zt th{color:var(--muted);font-weight:600}table.zt .r{text-align:right;font-variant-numeric:tabular-nums}
 .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:9px 14px;border-radius:4px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw;z-index:10}
 .toast.show{opacity:1}
 @media (prefers-reduced-motion:reduce){.toast{transition:none}}
@@ -137,8 +138,8 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
 <header class="top">
   <div>
     <a class="back" href="index.html"><span aria-hidden="true">←</span> Alle EML-tools</a><span class="nk"> · Onafhankelijk hulpmiddel, niet van de Kiesraad</span>
-    <h1>Uitslagen-generator <span class="tag">510b · 510c · 510d</span></h1>
-    <p>Maak test-uitslagen voor Abacus. Laad de verkiezingsdefinitie, kandidatenlijsten en stembureaus uit je andere apps; de app verzint een consistente uitslag per stembureau en telt die op tot GSB-, HSB- en CSB-niveau. Alle uitslagen kunnen worden ondertekend zoals Abacus dat doet.</p>
+    <h1>Uitslagen-generator <span class="tag">510b · 510c · 510d · 520</span></h1>
+    <p>Maak test-uitslagen voor Abacus. Laad de verkiezingsdefinitie, kandidatenlijsten en stembureaus uit je andere apps; de app verzint een consistente uitslag per stembureau en telt die op tot GSB-, HSB- en CSB-niveau, met de zetelverdeling en gekozen kandidaten als 520. Alle uitslagen kunnen worden ondertekend zoals Abacus dat doet.</p>
   </div>
   <div class="actions">
     <input type="file" id="openFile" accept=".xml,.eml,text/xml" multiple hidden>
@@ -163,10 +164,11 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
 
   <div class="q">
     <h2><span class="n">2</span>Welke uitslagen?</h2>
-    <div class="types">
+    <div class="types" style="grid-template-columns:repeat(auto-fill,minmax(170px,1fr))">
       <input type="checkbox" id="lGSB" checked><label for="lGSB"><b>510b <i>GSB</i></b><span>Gemeentelijk stembureau</span><small>Eén bestand per gemeente, met de uitslag per stembureau.</small></label>
       <input type="checkbox" id="lHSB" checked><label for="lHSB"><b>510c <i>HSB</i></b><span>Hoofdstembureau</span><small>Eén bestand per kieskring, met de uitslag per gemeente.</small></label>
       <input type="checkbox" id="lCSB" checked><label for="lCSB"><b>510d <i>CSB</i></b><span>Centraal stembureau</span><small>De totaaltelling, met de uitslag per hoofdstembureau.</small></label>
+      <input type="checkbox" id="lRes" checked><label for="lRes"><b>520 <i>CSB</i></b><span>Resultaat</span><small>De zetelverdeling en de gekozen kandidaten, berekend volgens de Kieswet.</small></label>
     </div>
     <div class="row">
       <div class="field"><label for="gemMode">Gemeenten</label>
@@ -175,7 +177,12 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
       <div class="field"><label for="method">Stemopneming</label>
         <select id="method"><option value="centrale stemopneming">Centraal (CSO)</option><option value="decentrale stemopneming">Decentraal (DSO)</option></select></div>
     </div>
-    <p class="hint">Gemeenten zonder 110b krijgen het opgegeven aantal fictieve stembureaus. De indeling in kieskringen komt uit de 110a.</p>
+    <div class="row">
+      <div class="field narrow"><label for="seats">Zetels (520)</label><input type="number" id="seats" min="1" placeholder="uit 110a"></div>
+      <div class="field"><label for="prefPct">Voorkeurdrempel (520)</label>
+        <select id="prefPct"><option value="auto">Automatisch (110a of Kieswet)</option><option value="25">25% van de kiesdeler</option><option value="50">50% van de kiesdeler</option></select></div>
+    </div>
+    <p class="hint">Gemeenten zonder 110b krijgen het opgegeven aantal fictieve stembureaus. De indeling in kieskringen komt uit de 110a. Voor de 520 komt het aantal zetels uit de 110a (<code>kr:NumberOfSeats</code>); de voorkeurdrempel uit de 110a of anders volgens de Kieswet (50% bij een gemeenteraad met minder dan 19 zetels, anders 25%). Is er een loting nodig, dan trekt de app die met de seed en meldt dat.</p>
   </div>
 
   <div class="q">
@@ -257,7 +264,7 @@ header.top .back{display:inline-block;font:500 13px/1 var(--font-mono,monospace)
 </main>
 
 <footer>
-  Het formaat van de 510b en van de handtekening volgt de broncode van Abacus (<code>github.com/kiesraad/abacus</code>: <code>backend/src/eml/tests/eml510b_test.eml.xml</code> en <code>backend/eml_signature</code>; EUPL-1.2): een zelfondertekend X.509-certificaat met RSA-4096 en SHA-256, en een CMS <code>signedData</code> zonder signed attributes over de exacte bytes van het EML-bestand. Alles gebeurt in je browser; sleutels en bestanden gaan niet naar een server. Abacus leest op dit moment alleen GSB-uitslagen (510b) met een handtekening in; HSB- en CSB-ondertekening (510c en 510d) gebruikt hetzelfde formaat met een instelbare UID, zodat je die functies kunt testen zodra Abacus ze ondersteunt. Deze bestanden en sleutels zijn uitsluitend bedoeld voor testomgevingen.
+  Het formaat van de 510b en van de handtekening volgt de broncode van Abacus (<code>github.com/kiesraad/abacus</code>: <code>backend/src/eml/tests/eml510b_test.eml.xml</code> en <code>backend/eml_signature</code>; EUPL-1.2): een zelfondertekend X.509-certificaat met RSA-4096 en SHA-256, en een CMS <code>signedData</code> zonder signed attributes over de exacte bytes van het EML-bestand. De 520 volgt het XSD van EML_NL (<code>github.com/kiesraad/EML_NL</code>); de zetelverdeling gebruikt dezelfde rekenkern volgens Kieswet P 5–P 10 als de app Controle zetelverdeling, de gekozen kandidaten volgen P 15–P 17 (voorkeurstemmen boven de drempel op volgorde van stemmen, daarna de lijstvolgorde). Een loting trekt de app met de seed. Alles gebeurt in je browser; sleutels en bestanden gaan niet naar een server. Abacus leest op dit moment alleen GSB-uitslagen (510b) met een handtekening in; HSB- en CSB-ondertekening (510c en 510d) gebruikt hetzelfde formaat met een instelbare UID, zodat je die functies kunt testen zodra Abacus ze ondersteunt. Deze bestanden en sleutels zijn uitsluitend bedoeld voor testomgevingen.
 </footer>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -311,11 +318,20 @@ function parse110a(doc) {
     name: txt(r, "RegionName"),
     committees: all(r, "Committee").map(c => ({ cat: c.getAttribute("CommitteeCategory") || "", name: c.getAttribute("CommitteeName") || "" })),
   }));
-  return { election: parseElectionId(doc), seats: txt(doc, "NumberOfSeats"), regions };
+  return { election: parseElectionId(doc), seats: txt(doc, "NumberOfSeats"), prefThreshold: txt(doc, "PreferenceThreshold"), regions };
 }
 function personName(c) {
   const s = [txt(c, "NameLine") || txt(c, "FirstName"), txt(c, "NamePrefix"), txt(c, "LastName")].filter(Boolean).join(" ");
   return s || txt(c, "CandidateFullName");
+}
+/* Element opnieuw uitschrijven met de vaste voorvoegsels van EML_NL (los van de voorvoegsels in de bron). */
+const NSP = { "urn:oasis:names:tc:ciq:xsdschema:xNL:2.0": "xnl:", "urn:oasis:names:tc:ciq:xsdschema:xAL:2.0": "xal:", "http://www.kiesraad.nl/extensions": "kr:", "urn:oasis:names:tc:evs:schema:eml": "" };
+function reser(el) {
+  const name = (NSP[el.namespaceURI] ?? "") + el.localName;
+  const attrs = [...el.attributes].filter(a => !/^xmlns(:|$)/.test(a.name)).map(a => ` ${a.localName}="${esc(a.value)}"`).join("");
+  const ch = [...el.children];
+  if (!ch.length) { const t = el.textContent.trim(); return t ? `<${name}${attrs}>${esc(t)}</${name}>` : `<${name}${attrs}/>`; }
+  return `<${name}${attrs}>${ch.map(reser).join("")}</${name}>`;
 }
 function parse230b(doc) {
   const contests = all(doc, "Contest").map(ct => {
@@ -324,7 +340,11 @@ function parse230b(doc) {
       const ai = one(a, "AffiliationIdentifier");
       return {
         id: ai ? ai.getAttribute("Id") : "", name: ai ? txt(ai, "RegisteredName") : "",
-        candidates: kids(a, "Candidate").map(c => { const x = one(c, "CandidateIdentifier"); return { id: x ? x.getAttribute("Id") : "", name: personName(c) }; }),
+        candidates: kids(a, "Candidate").map(c => {
+          const x = one(c, "CandidateIdentifier"), pn = one(c, "PersonName"), qa = one(c, "QualifyingAddress");
+          return { id: x ? x.getAttribute("Id") : "", shortCode: x ? x.getAttribute("ShortCode") || "" : "", name: personName(c),
+            nameXml: pn ? reser(pn) : "", addrXml: qa ? [...qa.children].map(reser).join("") : "", gender: txt(c, "Gender") };
+        }),
       };
     });
     return { id: ci ? ci.getAttribute("Id") : "geen", affiliations };
@@ -372,6 +392,7 @@ function refresh() {
     [st(n230b > 0, false), "230b", "Kandidatenlijsten", "Verplicht: de lijsten en kandidaten waarop stemmen worden verdeeld.", n230b ? `${n230b} contest(s), ${new Set(S.d230b.flatMap(d => d.contests.flatMap(c => c.affiliations.map(a => a.id)))).size} lijsten` : ""],
     [st(n110b > 0, true), "110b", "Stembureaus", "Per gemeente. Gemeenten zonder 110b krijgen fictieve stembureaus.", n110b ? S.d110b.map(b => `${b.gemeenteName || b.gemeente}: ${b.stations.length}`).join(" · ") : ""],
   ].map(r => `<li>${r[0]}<div><div class="nm"><code>${r[1]}</code>${r[2]}</div><div class="why">${r[3]}</div>${r[4] ? `<div class="fn">${esc(r[4])}</div>` : ""}</div><span></span></li>`).join("");
+  $("seats").placeholder = S.d110a?.seats ? S.d110a.seats + " (uit 110a)" : "verplicht voor 520";
   summary();
 }
 
@@ -450,6 +471,7 @@ function summary() {
   $("fHsb").textContent = nl(m.hsbs.length);
   const checks = [...m.warn];
   if (!S.d110a) checks.unshift(["warn", "Geen 110a: verkiezingsgegevens komen uit de 230b."]);
+  if (S.outputs.length && S.resultNotes) checks.push(...S.resultNotes);
   if (S.files.some(f => f.type === "fout")) checks.push(["bad", "Niet alle bestanden konden worden gelezen (zie de rode bestanden)."]);
   if (!ready) setStatus("bad", "Er is nog geen kandidatenlijst (230b) geladen.");
   else if (S.outputs.length) setStatus("ok", `${S.outputs.length} bestanden gegenereerd. Pas je iets aan? Genereer opnieuw.`);
@@ -557,6 +579,14 @@ function affOrderFrom(contests) {
   }
   return order;
 }
+function electionIdXml(e) {
+  const eid = [`      <ElectionIdentifier Id="${esc(e.id)}">`, `        <ElectionName>${esc(e.name)}</ElectionName>`, `        <ElectionCategory>${esc(e.category)}</ElectionCategory>`];
+  if (e.subcategory) eid.push(`        <kr:ElectionSubcategory>${esc(e.subcategory)}</kr:ElectionSubcategory>`);
+  if (e.domain) eid.push(`        <kr:ElectionDomain${e.domain.id ? ` Id="${esc(e.domain.id)}"` : ""}>${esc(e.domain.name)}</kr:ElectionDomain>`);
+  if (e.date) eid.push(`        <kr:ElectionDate>${esc(e.date)}</kr:ElectionDate>`);
+  eid.push(`      </ElectionIdentifier>`);
+  return eid;
+}
 function emlDoc({ id, auth, e, contestId, total, units, affOrder, now, method, withRuDetails }) {
   const local = LOCAL.includes(e.category);
   const ru = units.map(u => [
@@ -570,11 +600,7 @@ function emlDoc({ id, auth, e, contestId, total, units, affOrder, now, method, w
       `              <kr:Investigation ReasonCode="stembiljetten deels herteld">false</kr:Investigation>`,
       `            </kr:ReportingUnitInvestigations>`].join("\n") : null,
     `          </ReportingUnitVotes>`].filter(Boolean).join("\n")).join("\n");
-  const eid = [`      <ElectionIdentifier Id="${esc(e.id)}">`, `        <ElectionName>${esc(e.name)}</ElectionName>`, `        <ElectionCategory>${esc(e.category)}</ElectionCategory>`];
-  if (e.subcategory) eid.push(`        <kr:ElectionSubcategory>${esc(e.subcategory)}</kr:ElectionSubcategory>`);
-  if (e.domain) eid.push(`        <kr:ElectionDomain${e.domain.id ? ` Id="${esc(e.domain.id)}"` : ""}>${esc(e.domain.name)}</kr:ElectionDomain>`);
-  if (e.date) eid.push(`        <kr:ElectionDate>${esc(e.date)}</kr:ElectionDate>`);
-  eid.push(`      </ElectionIdentifier>`);
+  const eid = electionIdXml(e);
   return `<?xml version="1.0" encoding="UTF-8"?>
 <EML xmlns="urn:oasis:names:tc:evs:schema:eml" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:kr="http://www.kiesraad.nl/extensions" xmlns:xal="urn:oasis:names:tc:ciq:xsdschema:xAL:2.0" xmlns:xnl="urn:oasis:names:tc:ciq:xsdschema:xNL:2.0" Id="${id}" SchemaVersion="5">
   <TransactionId>1</TransactionId>
@@ -628,7 +654,334 @@ function buildOutputs(model, o) {
     out.push({ level: "CSB", eml: "510d", signer: signerFor("CSB", null, o, e), file: `Totaaltelling_${safe(e.id)}.eml.xml`, total: model.total,
       xml: emlDoc({ id: "510d", auth: { id: o.fmtAuthCsb, name: e.domain?.name || "Centraal stembureau" }, e, contestId: cts.length === 1 ? cts[0].id : o.fmtCsbContest, total: model.total, units, affOrder: affOrderFrom(cts), now, method: o.method }) });
   }
+  S.resultNotes = [];
+  if (o.lRes) {
+    const res = computeResult(model, o);
+    S.resultNotes = res.notes;
+    const kd = res.R.quota;
+    out.push({ level: "CSB", eml: "520", signer: signerFor("CSB", null, o, e), file: `Resultaat_${safe(e.id)}.eml.xml`, total: model.total,
+      summary: `${res.seats} zetels · kiesdeler ${kd.mixed()} · ${res.R.method === "HA" ? "grootste gemiddelden" : "grootste overschotten"} · voorkeurdrempel ${res.pct}%`,
+      detail: resultDetail(res), xml: result520Xml(model, o, res, now) });
+  }
   return out;
+}
+
+/* Zetelverdeling rechtstreeks volgens de tekst van de Kieswet, artikel P 5 t/m P 10
+   (geldende tekst per 1 oktober 2026). Onafhankelijk van de programmatuur geschreven: elke stap
+   verwijst naar de zin uit de wet die hij uitvoert. Waar de wet ruimte laat voor uitleg, staat dat
+   als UITLEG-punt in de code en wordt het in de uitkomst gemeld (notes).
+   Alle getallen zijn exacte breuken (BigInt), er wordt nergens afgerond. */
+const ZVW = (() => {
+  "use strict";
+  // ---- breuken ----
+  const ab = x => (x < 0n ? -x : x);
+  const ggd = (a, b) => { a = ab(a); b = ab(b); while (b) [a, b] = [b, a % b]; return a || 1n; };
+  const Q = (n, d = 1) => { n = BigInt(n); d = BigInt(d); if (d < 0n) { n = -n; d = -d; } const g = ggd(n, d); return mk(n / g, d / g); };
+  function mk(n, d) {
+    return {
+      n, d,
+      cmp(o) { const a = n * o.d, b = o.n * d; return a < b ? -1 : a > b ? 1 : 0; },
+      gt(o) { return this.cmp(o) > 0; }, ge(o) { return this.cmp(o) >= 0; }, eq(o) { return this.cmp(o) === 0; },
+      mul(o) { return Q(n * o.n, d * o.d); }, sub(o) { return Q(n * o.d - o.n * d, d * o.d); }, div(o) { return Q(n * o.d, d * o.n); },
+      int() { return n / d; }, num() { return Number(n) / Number(d); },
+      mixed() { const w = n / d, r = n % d; return r === 0n ? w.toString() : (w ? w + " " : "") + r + "/" + d; },
+    };
+  }
+
+  function verdeel(input) {
+    const S = input.seats | 0;
+    if (!(S > 0)) throw new Error("aantal zetels ontbreekt");
+    const opt = { lid3: "alle", ...(input.opties || {}) };
+    const lijsten = input.lists.map(l => ({
+      nr: l.nr, votes: Math.max(0, Math.floor(+l.votes || 0)),
+      cands: (l.cands === null || l.cands === undefined || l.cands === "") ? Infinity : +l.cands,
+    }));
+    if (new Set(lijsten.map(l => l.nr)).size !== lijsten.length) throw new Error("dubbel lijstnummer");
+    const notes = [];
+    const steps = [];
+    const lots = (input.lots || []).slice();
+    let lotIdx = 0; const lotLog = []; let required = null, badLot = null;
+
+    /* Loting ("beslist zo nodig het lot"): de uitkomst komt van het centraal stembureau.
+       Geeft het getrokken lijstnummer, of null als die uitkomst nog niet is ingevoerd. */
+    function lot(variant) {
+      if (lotIdx < lots.length) {
+        const d = lots[lotIdx];
+        if (variant.options.includes(d)) { lotIdx++; lotLog.push({ ...variant, drawn: d }); return d; }
+        badLot = { at: lotIdx, drawn: d, options: variant.options };
+      }
+      required = variant; return null;
+    }
+
+    // ---- P 5: de kiesdeler ----
+    const T = lijsten.reduce((a, l) => a + l.votes, 0);
+    const kd = Q(T, S);
+
+    const zetels = new Map(lijsten.map(l => [l.nr, 0]));   // totaal per lijst
+    const vol = new Map(lijsten.map(l => [l.nr, 0]));
+    const rest = new Map(lijsten.map(l => [l.nr, 0]));
+    const restzetels = [];                                  // {nr, fase, waarde} in volgorde van toewijzing
+    const L = nr => lijsten.find(l => l.nr === nr);
+    // P 10: een lijst kan alleen een zetel krijgen als er nog een kandidaat zonder zetel op staat.
+    const heeftKandidaat = nr => zetels.get(nr) < L(nr).cands;
+    const snap = () => lijsten.map(l => ({ nr: l.nr, full: vol.get(l.nr), res: rest.get(l.nr) }));
+    const gemiddelde = nr => Q(L(nr).votes, zetels.get(nr) + 1);   // "na toewijzing van de zetel"
+
+    // ---- P 6: volle zetels ----
+    const init = lijsten.map(l => {
+      const v = Q(l.votes);
+      const q = T > 0 ? Number(v.div(kd).int()) : 0;
+      return { nr: l.nr, votes: l.votes, full: q, remainder: T > 0 ? v.sub(Q(q).mul(kd)) : Q(0),
+        meetsThr: T > 0 && v.ge(kd.mul(Q(3, 4))), meetsKd: T > 0 && v.ge(kd) };
+    });
+    let p10vol = 0;
+    for (const s of init) {
+      let q = s.full;
+      if (q > L(s.nr).cands) {   // P 10: meer volle zetels dan kandidaten
+        const over = q - L(s.nr).cands; p10vol += over; q = L(s.nr).cands;
+        steps.push({ kind: "P10", nr: s.nr, aantal: over, fase: "vol", before: snap() });
+      }
+      vol.set(s.nr, q); zetels.set(s.nr, q);
+    }
+    const volTotaal = [...vol.values()].reduce((a, b) => a + b, 0);
+    let teVerdelen = S - volTotaal;   // restzetels, inclusief zetels die door P 10 overblijven
+    const residual = S - init.reduce((a, s) => a + s.full, 0);
+
+    function geef(nr, kind, waarde, extra) {
+      const before = snap();
+      zetels.set(nr, zetels.get(nr) + 1); rest.set(nr, rest.get(nr) + 1);
+      restzetels.push({ nr, kind, waarde });
+      steps.push({ kind, nr, value: waarde, resNo: restzetels.length, before, ...extra });
+      teVerdelen--;
+    }
+    /* Kies de lijst(en) met de hoogste waarde. Zijn er meer gelijke lijsten dan zetels, dan het lot. */
+    function hoogste(kandidaten, waardeVan, soort) {
+      let max = null, groep = [];
+      for (const nr of kandidaten) {
+        const w = waardeVan(nr);
+        if (max === null || w.gt(max)) { max = w; groep = [nr]; } else if (w.eq(max)) groep.push(nr);
+      }
+      if (max === null) return null;
+      if (groep.length <= teVerdelen) return { nr: groep[0], waarde: max, groep, drawing: null };
+      const variant = { type: soort, value: max, options: groep, seatsAvailable: teVerdelen, resNo: restzetels.length + 1 };
+      const d = lot(variant);
+      if (d === null) return "lot";
+      return { nr: d, waarde: max, groep, drawing: variant };
+    }
+    const alleNrs = lijsten.map(l => l.nr);
+    const uitgeput = () => alleNrs.filter(nr => !heeftKandidaat(nr));
+
+    const methode = S >= 19 ? "HA" : "LR";
+    let gestopt = false;
+
+    // ---- P 7 lid 1 (en lid 2): grootste gemiddelden ----
+    function grootsteGemiddelden(magMeedoen, kind) {
+      while (teVerdelen > 0) {
+        const kand = alleNrs.filter(nr => L(nr).votes > 0 && heeftKandidaat(nr) && magMeedoen(nr));
+        if (!kand.length) return "op";
+        const excluded = alleNrs.filter(nr => !kand.includes(nr));
+        const k = hoogste(kand, gemiddelde, kind);
+        if (k === "lot") return "lot";
+        geef(k.nr, kind, k.waarde, { options: k.groep, drawing: k.drawing, exhausted: uitgeput(), excluded });
+      }
+      return "klaar";
+    }
+
+    if (methode === "HA") {
+      // P 7 lid 2: bij de Tweede Kamer (en het EP) geen restzetel voor lijsten onder de kiesdeler.
+      const r = grootsteGemiddelden(nr => !input.kdDrempel || Q(L(nr).votes).ge(kd), "HA");
+      if (r === "lot") gestopt = true;
+    } else {
+      // ---- P 8 lid 1 en 2: grootste overschotten, niet voor lijsten onder 75% van de kiesdeler ----
+      const overschot = nr => init.find(s => s.nr === nr).remainder;
+      const gehad = new Set();
+      while (teVerdelen > 0) {
+        // "achtereenvolgens": elke lijst één keer, want haar overschot verandert niet.
+        const kand = alleNrs.filter(nr => L(nr).votes > 0 && init.find(s => s.nr === nr).meetsThr && !gehad.has(nr) && heeftKandidaat(nr));
+        if (!kand.length) break;
+        const k = hoogste(kand, overschot, "LR");
+        if (k === "lot") { gestopt = true; break; }
+        gehad.add(k.nr);
+        geef(k.nr, "LR", k.waarde, { options: k.groep, drawing: k.drawing, exhausted: uitgeput(), excluded: alleNrs.filter(nr => !kand.includes(nr)) });
+      }
+      // ---- P 8 lid 3: overige zetels volgens P 7 lid 1, hoogstens één per lijst ----
+      if (!gestopt && teVerdelen > 0) {
+        /* UITLEG lid3: welke lijsten doen hier mee? Lid 2 sluit lijsten onder 75% uit "bij deze toewijzing"
+           (die van lid 1). Lid 3 verwijst naar P 7 lid 1, dat geen drempel kent. Standaard: alle lijsten. */
+        const eenPerLijst = new Set();
+        const magMeedoen = nr => !eenPerLijst.has(nr) && (opt.lid3 === "alle" || init.find(s => s.nr === nr).meetsThr);
+        while (teVerdelen > 0) {
+          const kand = alleNrs.filter(nr => L(nr).votes > 0 && heeftKandidaat(nr) && magMeedoen(nr));
+          if (!kand.length) break;
+          const k = hoogste(kand, gemiddelde, "UHA");
+          if (k === "lot") { gestopt = true; break; }
+          eenPerLijst.add(k.nr);
+          geef(k.nr, "UHA", k.waarde, { options: k.groep, drawing: k.drawing, exhausted: uitgeput(), excluded: alleNrs.filter(nr => !kand.includes(nr)) });
+        }
+        if (!gestopt && teVerdelen > 0) {
+          /* UITLEG lid3-op: elke lijst heeft al een zetel uit lid 3 en er zijn nog zetels. De wet regelt dit
+             niet. Hier: gewoon verder volgens P 7 lid 1 (zonder de beperking tot één zetel). */
+          const r = grootsteGemiddelden(nr => opt.lid3 === "alle" || init.find(s => s.nr === nr).meetsThr, "HA");
+          if (r === "lot") gestopt = true;
+          else notes.push({ code: "lid3-op", text: "Alle lijsten hadden al een zetel volgens P 8 lid 3 en er waren nog zetels over. De wet regelt dat niet; de overige zetels zijn verdeeld volgens P 7 lid 1 zonder de beperking tot één zetel per lijst." });
+        }
+      }
+    }
+
+    // ---- P 9: meerderheid van stemmen, geen meerderheid van zetels ----
+    if (!gestopt && T > 0) {
+      const m = lijsten.find(l => 2 * l.votes > T);
+      if (m && zetels.get(m.nr) * 2 <= S) {
+        /* "vervalt één zetel, toegewezen aan de lijst die voor het kleinste gemiddelde of het kleinste
+           overschot een zetel heeft verworven". De restzetels zijn op dalende volgorde toegewezen; de laatst
+           toegewezen restzetel is die met het kleinste gemiddelde of overschot.
+           UITLEG p9-zelf: een zetel van de meerderheidslijst zelf telt hier niet mee. */
+        const andere = restzetels.filter(r => r.nr !== m.nr);
+        if (restzetels.length && restzetels[restzetels.length - 1].nr === m.nr && andere.length)
+          notes.push({ code: "p9-zelf", text: `De kleinste restzetel was van lijst ${m.nr} zelf. Volgens de app vervalt dan de kleinste restzetel van een andere lijst; de wet zegt dit niet met zoveel woorden.` });
+        if (!andere.length) notes.push({ code: "p9-geen", text: `Lijst ${m.nr} heeft de volstrekte meerderheid van de stemmen maar niet van de zetels, en geen andere lijst heeft een restzetel. P 9 kan dan niet worden toegepast.` });
+        else if (!heeftKandidaat(m.nr)) notes.push({ code: "p9-p10", text: `P 9 zou lijst ${m.nr} een extra zetel geven, maar de lijst heeft geen kandidaten meer (P 10). De zetel is niet verplaatst.` });
+        else {
+          const laatste = andere[andere.length - 1];
+          // UITLEG p9-mix: bij P 8 lid 3 staan overschotten en gemiddelden naast elkaar; de laatst toegewezen telt.
+          const gelijk = andere.filter(r => r.kind === laatste.kind && r.waarde.eq(laatste.waarde)).map(r => r.nr);
+          let van = laatste.nr, drawing = null;
+          if (new Set(gelijk).size > 1) {
+            const variant = { type: "AM", assignTo: m.nr, options: [...new Set(gelijk)], base: laatste.kind };
+            const d = lot(variant);
+            if (d === null) gestopt = true; else { van = d; drawing = variant; }
+          }
+          if (!gestopt) {
+            const before = snap();
+            zetels.set(van, zetels.get(van) - 1); rest.set(van, rest.get(van) - 1);
+            zetels.set(m.nr, zetels.get(m.nr) + 1); rest.set(m.nr, rest.get(m.nr) + 1);
+            steps.push({ kind: "AM", nr: m.nr, retracted: van, drawing, before });
+          }
+        }
+      }
+    }
+
+    const standings = lijsten.map(l => ({ nr: l.nr, full: vol.get(l.nr), res: rest.get(l.nr), total: zetels.get(l.nr) }));
+    const assigned = standings.reduce((a, s) => a + s.total, 0);
+    const p10 = steps.some(s => s.kind === "P10") || lijsten.some(l => l.cands !== Infinity && zetels.get(l.nr) >= l.cands && steps.some(s => s.exhausted && s.exhausted.includes(l.nr)));
+    const warnings = [];
+    if (!gestopt && assigned < S) warnings.push("ONBEZET");
+    if (steps.some(s => s.kind === "AM") && p10) warnings.push("P9P10");
+    return {
+      engine: "wet", seats: S, T, quota: kd, fullSeats: init.reduce((a, s) => a + s.full, 0), residual, method: methode,
+      init, lists: lijsten, kdDrempel: !!input.kdDrempel, opties: opt, steps, standings, warnings,
+      unassigned: gestopt ? 0 : S - assigned, lotLog, badLot, lotsUsed: lotIdx,
+      status: gestopt ? "lot" : "ok", required: gestopt ? required : null, notes, p10vol,
+    };
+  }
+  return { verdeel, Q };
+})();
+
+/* ============================== 520: zetelverdeling en gekozen kandidaten ============================== */
+/* Voorkeurdrempel (Kieswet P 15): 50% van de kiesdeler bij een gemeenteraad met minder dan 19 zetels,
+   anders 25%; een waarde in de 110a (kr:PreferenceThreshold) gaat voor. */
+function prefPctFor(o, e, seats) {
+  if (o.prefPct !== "auto") return +o.prefPct;
+  const v = parseInt(S.d110a?.prefThreshold, 10);
+  if (v > 0) return v;
+  return e.category === "GR" && seats < 19 ? 50 : 25;
+}
+function computeResult(model, o) {
+  const e = model.election, notes = [];
+  const seats = o.seats || parseInt(S.d110a?.seats, 10) || 0;
+  if (!(seats > 0)) throw new Error("voor de 520 is het aantal zetels nodig (110a of het veld ‘Zetels’)");
+  const contests = [...new Set(model.gemeenten.map(g => g.contest))];
+  const order = affOrderFrom(contests);
+  // kandidaatgegevens: eerste contest waarin de kandidaat voorkomt
+  const info = new Map();
+  for (const ct of contests) for (const a of ct.affiliations) for (const c of a.candidates) { const k = a.id + "|" + c.id; if (!info.has(k)) info.set(k, c); }
+  const lists = order.map(a => ({ nr: a.id, name: a.name, votes: model.total.aff.get(a.id)?.total || 0, cands: a.cands.length, candIds: a.cands }));
+  const rng = mkRng(o.seed, "loting");
+  const lots = [], lotLog = [];
+  let R;
+  for (let i = 0; i < 500; i++) {
+    R = ZVW.verdeel({ seats, lists: lists.map(l => ({ nr: l.nr, votes: l.votes, cands: l.cands })), kdDrempel: ["TK", "EP"].includes(e.category), lots });
+    if (R.status !== "lot") break;
+    const opts = R.required.options, pick = opts[Math.floor(rng() * opts.length)];
+    lots.push(pick); lotLog.push(`Loting nodig (${R.required.type === "AM" ? "P 9" : "restzetel"}) tussen lijst ${opts.join(", ")}: getrokken lijst ${pick}.`);
+  }
+  if (R.status === "lot") throw new Error("de zetelverdeling bleef om een loting vragen");
+  for (const n of R.notes) notes.push(["info", n.text]);
+  if (R.unassigned > 0) notes.push(["warn", `${R.unassigned} zetel(s) konden niet worden toegewezen (te weinig kandidaten).`]);
+  const pct = prefPctFor(o, e, seats);
+  // P 15: kandidaat is met voorkeurstemmen gekozen als zijn stemmen groter zijn dan pct% van de kiesdeler: v·100·zetels > T·pct
+  const above = v => BigInt(v) * 100n * BigInt(seats) > BigInt(R.T) * BigInt(pct);
+  const per = [];
+  for (const l of lists) {
+    const st = R.standings.find(s => s.nr === l.nr), n = st ? st.total : 0;
+    if (!n) continue;
+    const votes = model.total.aff.get(l.nr)?.cands || new Map();
+    const cands = l.candIds.map((id, pos) => ({ id, pos, votes: votes.get(id) || 0 }));
+    let pref = cands.filter(c => above(c.votes)).sort((a, b) => b.votes - a.votes || a.pos - b.pos);
+    if (pref.length > n) {
+      // P 15 lid 2: meer kandidaten boven de drempel dan zetels → op volgorde van stemmen; bij gelijke stemmen het lot
+      const grens = pref[n - 1].votes, zeker = pref.filter(c => c.votes > grens), groep = pref.filter(c => c.votes === grens);
+      const nodig = n - zeker.length;
+      if (groep.length > nodig) {
+        const g = groep.slice(), getrokken = [];
+        while (getrokken.length < nodig) getrokken.push(g.splice(Math.floor(rng() * g.length), 1)[0]);
+        lotLog.push(`Loting tussen kandidaten ${groep.map(c => c.id).join(", ")} van lijst ${l.nr} (elk ${nl(grens)} stemmen): getrokken ${getrokken.map(c => c.id).join(", ")}.`);
+        pref = zeker.concat(groep.filter(c => getrokken.includes(c)));
+      } else pref = pref.slice(0, n);
+    }
+    const prefSet = new Set(pref.map(c => c.id));
+    // P 17: overige zetels in de volgorde van de lijst
+    const rest = cands.filter(c => !prefSet.has(c.id)).slice(0, n - pref.length);
+    const elected = pref.map(c => ({ ...c, ranking: 1 })).concat(rest.map(c => ({ ...c, ranking: 2 })));
+    per.push({ list: l, seats: n, full: st.full, res: st.res, elected: elected.map(c => ({ ...c, info: info.get(l.nr + "|" + c.id) })) });
+  }
+  if (contests.length > 1) notes.push(["warn", "Meerdere kieskringen: de kandidaten zijn per lijst samengenomen op kandidaatnummer en de volgorde van de eerste kieskring. Lijstvolgorde per kieskring (P 17–P 19) wordt niet nagebootst."]);
+  lotLog.forEach(t => notes.push(["warn", t + " (loting met de seed; alleen voor test)"]));
+  return { R, seats, pct, per, notes, contestId: contests.length === 1 ? contests[0].id : o.fmtCsbContest };
+}
+function result520Xml(model, o, res, now) {
+  const e = model.election, csbName = e.domain?.name || "Centraal stembureau", L = [];
+  for (const p of res.per) {
+    L.push(`        <Selection>`, `          <AffiliationIdentifier Id="${esc(p.list.nr)}">`, `            <RegisteredName>${esc(p.list.name)}</RegisteredName>`, `          </AffiliationIdentifier>`, `          <Elected>yes</Elected>`, `        </Selection>`);
+    p.elected.forEach((c, i) => {
+      const inf = c.info || {};
+      const nameXml = inf.nameXml || `<xnl:PersonName><xnl:LastName>${esc(inf.name || "Kandidaat " + c.id)}</xnl:LastName></xnl:PersonName>`;
+      const addrXml = inf.addrXml || `<xal:Locality><xal:LocalityName>${esc(e.domain?.name || "Onbekend")}</xal:LocalityName></xal:Locality>`;
+      L.push(`        <Selection>`, `          <Candidate>`,
+        `            <CandidateIdentifier Id="${i + 1}"${inf.shortCode ? ` ShortCode="${esc(inf.shortCode)}"` : ""}/>`,
+        `            <CandidateFullName>${nameXml}</CandidateFullName>`,
+        inf.gender ? `            <Gender>${esc(inf.gender)}</Gender>` : null,
+        `            <QualifyingAddress>${addrXml}</QualifyingAddress>`,
+        `          </Candidate>`,
+        c.votes > 0 ? `          <Votes>${c.votes}</Votes>` : null,
+        `          <Ranking>${c.ranking}</Ranking>`, `          <Elected>yes</Elected>`, `        </Selection>`);
+    });
+  }
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<EML xmlns="urn:oasis:names:tc:evs:schema:eml" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:kr="http://www.kiesraad.nl/extensions" xmlns:xal="urn:oasis:names:tc:ciq:xsdschema:xAL:2.0" xmlns:xnl="urn:oasis:names:tc:ciq:xsdschema:xNL:2.0" Id="520" SchemaVersion="5">
+  <TransactionId>1</TransactionId>
+  <ManagingAuthority>
+    <AuthorityIdentifier Id="${esc(o.fmtAuthCsb)}">${esc(csbName)}</AuthorityIdentifier>
+    <AuthorityAddress/>
+  </ManagingAuthority>
+  <kr:Schema Version="1.3.1"/>
+  <kr:CreationDateTime>${now}</kr:CreationDateTime>
+  <ds:CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments"/>
+  <Result>
+    <Election>
+${electionIdXml(e).join("\n")}
+      <Contest>
+        <ContestIdentifier Id="${esc(res.contestId)}"/>
+${L.filter(x => x !== null).join("\n")}
+      </Contest>
+    </Election>
+  </Result>
+</EML>
+`;
+}
+function resultDetail(res) {
+  const rows = res.per.map(p => `<tr><td>${esc(p.list.nr)}</td><td>${esc(p.list.name || "(blanco lijst)")}</td><td class="r">${nl(p.list.votes)}</td><td class="r">${p.full}</td><td class="r">${p.res}</td><td class="r"><b>${p.seats}</b></td><td>${p.elected.map(c => esc((c.info?.name || "kandidaat " + c.id)) + (c.ranking === 1 ? " <span title=\"gekozen met voorkeurstemmen\">★</span>" : "")).join(", ")}</td></tr>`).join("");
+  return `<details style="margin-top:4px"><summary style="font-size:13px">Zetels en gekozen kandidaten</summary><div style="overflow-x:auto"><table class="zt"><thead><tr><th>Lijst</th><th>Naam</th><th class="r">Stemmen</th><th class="r">Vol</th><th class="r">Rest</th><th class="r">Zetels</th><th>Gekozen (★ = voorkeurstemmen)</th></tr></thead><tbody>${rows}</tbody></table></div></details>`;
 }
 
 /* ============================== DER / X.509 / CMS ============================== */
@@ -714,7 +1067,7 @@ function signersOf(m, o) {
   const e = m.election, list = [];
   if (o.lGSB) for (const g of m.gemeenten) list.push(signerFor("GSB", g, o, e));
   if (o.lHSB) for (const h of m.hsbs) list.push(signerFor("HSB", h, o, e));
-  if (o.lCSB) list.push(signerFor("CSB", null, o, e));
+  if (o.lCSB || o.lRes) list.push(signerFor("CSB", null, o, e));
   return list;
 }
 function renderKeys() {
@@ -775,7 +1128,7 @@ function readOpts() {
   let tMin = n("tMin"), tMax = n("tMax"); if (tMax < tMin) [tMin, tMax] = [tMax, tMin];
   return { seed: Math.floor(n("seed")), tMin, tMax, blank: n("blank"), invalid: n("invalid"), diffPct: n("diffPct"), kgRange: v("kgRange"),
     gemMode: v("gemMode"), fakeSb: Math.max(1, Math.floor(n("fakeSb"))), spread: n("spread"), method: v("method"),
-    lGSB: $("lGSB").checked, lHSB: $("lHSB").checked, lCSB: $("lCSB").checked, sign: $("sign").checked,
+    lGSB: $("lGSB").checked, lHSB: $("lHSB").checked, lCSB: $("lCSB").checked, lRes: $("lRes").checked, seats: Math.floor(parseFloat($("seats").value) || 0), prefPct: v("prefPct"), sign: $("sign").checked,
     uidGsb: v("uidGsb"), uidHsb: v("uidHsb"), uidCsb: v("uidCsb"),
     fmtSb: v("fmtSb"), fmtGem: v("fmtGem"), fmtHsb: v("fmtHsb"), fmtAuthHsb: v("fmtAuthHsb"), fmtAuthCsb: v("fmtAuthCsb"), fmtCsbContest: v("fmtCsbContest") };
 }
@@ -791,9 +1144,9 @@ async function runGenerate() {
     for (const f of outs) { f.bytes = enc.encode(f.xml); f.hash = await sha256hex(f.bytes); }
     if (o.sign && outs.length) {
       if (!crypto?.subtle) throw new Error("ondertekenen kan niet: deze browser heeft geen Web Crypto");
-      const uids = outs.map(f => f.signer.UID);
-      if (new Set(uids).size !== uids.length) throw new Error("twee organen krijgen dezelfde UID; controleer de UID-formaten");
-      const missing = outs.filter(f => !S.keys[keyId(e.id, f.signer.UID)]);
+      const byUid = new Map();
+      for (const f of outs) { const k = f.signer.kind + "|" + f.signer.label; if (byUid.has(f.signer.UID) && byUid.get(f.signer.UID) !== k) throw new Error("twee organen krijgen dezelfde UID; controleer de UID-formaten"); byUid.set(f.signer.UID, k); }
+      const missing = [...new Map(outs.filter(f => !S.keys[keyId(e.id, f.signer.UID)]).map(f => [f.signer.UID, f])).values()];
       for (let i = 0; i < missing.length; i++) {
         setStatus("idle", `<span class="busy"></span>Sleutel ${i + 1} van ${missing.length} maken (${esc(missing[i].signer.kind + " " + missing[i].signer.label)})…`);
         const k = await createKey(missing[i].signer, e);
@@ -822,7 +1175,7 @@ function renderOutputs(o) {
   const rows = S.outputs.map((f, i) => {
     const t = f.total, opk = t.kg ? (100 * t.adm / t.kg).toFixed(1).replace(".", ",") + "%" : "–";
     return `<div class="file"><div class="top"><div class="nm"><span class="lvl">${f.level} · ${f.eml}</span>${f.signature ? '<span class="lvl sig">ondertekend</span>' : ""}${esc(f.file)}</div></div>
-      <div class="nums">geldig ${nl(t.counted)} · blanco ${nl(t.blanco)} · ongeldig ${nl(t.ongeldig)} · opkomst ${opk}</div>
+      <div class="nums">${f.summary || `geldig ${nl(t.counted)} · blanco ${nl(t.blanco)} · ongeldig ${nl(t.ongeldig)} · opkomst ${opk}`}</div>${f.detail || ""}
       <div class="hash">SHA-256 ${groupHash(f.hash)}</div>
       <div class="btns"><button type="button" class="small" data-pv="${i}">Bekijk</button><button type="button" class="small" data-cp="${i}">Kopieer XML</button>
       ${f.importZip ? `<button type="button" class="small primary" data-imp="${i}">Abacus-importzip</button>` : `<button type="button" class="small" data-dl="${i}">.zip</button>`}</div></div>`;
@@ -850,7 +1203,7 @@ Gemaakt: ${new Date().toLocaleString("nl-NL")} · seed ${o.seed}
 
 GSB/   510b-bestanden per gemeente${o.sign ? " (met .signature)" : ""}
 HSB/   510c-bestanden per hoofdstembureau
-CSB/   510d-totaaltelling
+CSB/   510d-totaaltelling en 520-resultaat (zetels en gekozen kandidaten)
 ${o.sign ? `Abacus-import/GSB|HSB|CSB/  één zip per uitslag: <naam>.eml.xml + <naam>.eml.xml.signature
 Publieke sleutels/  het .crt-certificaat per orgaan
                     GSB: UID=${o.uidGsb}   HSB: UID=${o.uidHsb}   CSB: UID=${o.uidCsb}
@@ -885,9 +1238,13 @@ async function downloadAll() {
 const NS = 'xmlns="urn:oasis:names:tc:evs:schema:eml" xmlns:kr="http://www.kiesraad.nl/extensions" xmlns:xal="urn:oasis:names:tc:ciq:xsdschema:xAL:2.0" xmlns:xnl="urn:oasis:names:tc:ciq:xsdschema:xNL:2.0"';
 const DEMO_EID = `<ElectionIdentifier Id="GR2026_Juinen"><ElectionName>Gemeenteraad Juinen 2026</ElectionName><ElectionCategory>GR</ElectionCategory><kr:ElectionSubcategory>GR1</kr:ElectionSubcategory><kr:ElectionDomain Id="9999">Juinen</kr:ElectionDomain><kr:ElectionDate>2026-03-18</kr:ElectionDate></ElectionIdentifier>`;
 function demoFiles() {
-  const a = `<?xml version="1.0" encoding="UTF-8"?><EML ${NS} Id="110a" SchemaVersion="5"><ElectionEvent><EventIdentifier/><Election>${DEMO_EID}<Contest><ContestIdentifier Id="geen"/><VotingMethod>SPV</VotingMethod><MaxVotes>1</MaxVotes></Contest><kr:NumberOfSeats>29</kr:NumberOfSeats><kr:Region RegionNumber="9999" RegionCategory="GEMEENTE"><kr:RegionName>Juinen</kr:RegionName><kr:Committee CommitteeCategory="CSB" CommitteeName="Centraal stembureau Juinen"/></kr:Region></Election></ElectionEvent></EML>`;
-  const parties = [["Partij voor de Juinen", ["A. de Vries", "B. Jansen", "C. Bakker", "D. Visser", "E. Smit", "F. Meijer"]], ["Juinens Belang", ["G. de Boer", "H. Mulder", "I. de Groot", "J. Bos"]], ["Groen Juinen", ["K. Vos", "L. Peters", "M. Hendriks", "N. van Leeuwen", "O. Dekker"]], ["", ["P. Brouwer", "Q. de Wit", "R. Dijkstra"]]];
-  const affs = parties.map((p, i) => `<Affiliation><AffiliationIdentifier Id="${i + 1}"><RegisteredName>${p[0]}</RegisteredName></AffiliationIdentifier><Type>lijstengroep</Type>${p[1].map((n, j) => { const [ini, ...ln] = n.split(" "); return `<Candidate><CandidateIdentifier Id="${j + 1}"/><CandidateFullName><xnl:PersonName><xnl:NameLine NameType="Initials">${ini}</xnl:NameLine><xnl:LastName>${ln.join(" ")}</xnl:LastName></xnl:PersonName></CandidateFullName></Candidate>`; }).join("")}</Affiliation>`).join("");
+  const a = `<?xml version="1.0" encoding="UTF-8"?><EML ${NS} Id="110a" SchemaVersion="5"><ElectionEvent><EventIdentifier/><Election>${DEMO_EID}<Contest><ContestIdentifier Id="geen"/><VotingMethod>SPV</VotingMethod><MaxVotes>1</MaxVotes></Contest><kr:NumberOfSeats>23</kr:NumberOfSeats><kr:Region RegionNumber="9999" RegionCategory="GEMEENTE"><kr:RegionName>Juinen</kr:RegionName><kr:Committee CommitteeCategory="CSB" CommitteeName="Centraal stembureau Juinen"/></kr:Region></Election></ElectionEvent></EML>`;
+  const FN = ["Anna", "Bram", "Carla", "Daan", "Eva", "Finn", "Greet", "Hugo", "Iris", "Joris", "Kim", "Lars", "Mila", "Noah", "Olga", "Pim", "Roos", "Sem", "Tess", "Vince"];
+  const LN = [["", "Vries", "de"], ["", "Jansen", ""], ["", "Bakker", ""], ["", "Visser", ""], ["", "Smit", ""], ["", "Meijer", ""], ["", "Boer", "de"], ["", "Mulder", ""], ["", "Groot", "de"], ["", "Bos", ""], ["", "Vos", ""], ["", "Peters", ""], ["", "Hendriks", ""], ["", "Leeuwen", "van"], ["", "Dekker", ""], ["", "Brouwer", ""], ["", "Wit", "de"], ["", "Dijkstra", ""], ["", "Smits", ""], ["", "Graaf", "de"]];
+  const parties = [["Partij voor de Juinen", 14], ["Juinens Belang", 10], ["Groen Juinen", 12], ["Sociaal Juinen", 8], ["", 4]];
+  let k = 0;
+  const cand = j => { const f = FN[k % 20], l = LN[(k * 7) % 20], g = (k % 20) % 2 ? "male" : "female"; k++; return `<Candidate><CandidateIdentifier Id="${j + 1}"/><CandidateFullName><xnl:PersonName><xnl:NameLine NameType="Initials">${f[0]}.</xnl:NameLine><xnl:FirstName>${f}</xnl:FirstName>${l[2] ? `<xnl:NamePrefix>${l[2]}</xnl:NamePrefix>` : ""}<xnl:LastName>${l[1]}</xnl:LastName></xnl:PersonName></CandidateFullName><Gender>${g}</Gender><QualifyingAddress><xal:Locality><xal:LocalityName>Juinen</xal:LocalityName></xal:Locality></QualifyingAddress></Candidate>`; };
+  const affs = parties.map((p, i) => `<Affiliation><AffiliationIdentifier Id="${i + 1}"><RegisteredName>${p[0]}</RegisteredName></AffiliationIdentifier><Type>lijstengroep</Type>${Array.from({ length: p[1] }, (_, j) => cand(j)).join("")}</Affiliation>`).join("");
   const b = `<?xml version="1.0" encoding="UTF-8"?><EML ${NS} Id="230b" SchemaVersion="5"><CandidateList><Election>${DEMO_EID}<Contest><ContestIdentifier Id="geen"/>${affs}</Contest></Election></CandidateList></EML>`;
   const sbs = [["1", "Stadhuis", "1234 AB", 2100], ["2", "Sporthal De Linde", "1235 CD", 1850], ["3", "Basisschool Het Anker", "1236 EF", 2400], ["4", "Wijkcentrum Oost", "1237 GH", 1600]];
   const c = `<?xml version="1.0" encoding="UTF-8"?><EML ${NS} Id="110b" SchemaVersion="5"><ManagingAuthority><AuthorityIdentifier Id="9999">Juinen</AuthorityIdentifier></ManagingAuthority><ElectionEvent><EventIdentifier/><Election>${DEMO_EID}<Contest><ContestIdentifier Id="geen"/>${sbs.map(s => `<PollingPlace Channel="polling"><PhysicalLocation><Address><Locality><xal:LocalityName>${s[1]}</xal:LocalityName><xal:PostalCode><xal:PostalCodeNumber>${s[2]}</xal:PostalCodeNumber></xal:PostalCode></Locality></Address><PollingStation Id="${s[0]}">${s[3]}</PollingStation></PhysicalLocation></PollingPlace>`).join("")}</Contest></Election></ElectionEvent></EML>`;
@@ -906,7 +1263,7 @@ $("resetBtn").onclick = () => { S.files = []; S.outputs = []; S.model = null; $(
 $("genBtn").onclick = runGenerate;
 $("zipBtn").onclick = downloadAll;
 $("pvClose").onclick = () => $("preview").hidden = true;
-["gemMode", "fakeSb", "lGSB", "lHSB", "lCSB", "uidGsb", "uidHsb", "uidCsb"].forEach(id => $(id).addEventListener("change", summary));
+["gemMode", "fakeSb", "lGSB", "lHSB", "lCSB", "lRes", "seats", "uidGsb", "uidHsb", "uidCsb"].forEach(id => $(id).addEventListener("change", summary));
 $("keysExport").onclick = () => { const k = keysForElection(); if (!k.length) return toast("Er zijn nog geen sleutels"); save(`Sleutels_${safe(S.model?.election?.id || "alle")}.json`, JSON.stringify({ format: "uitslagen-generator-keys/1", keys: k }, null, 1)); };
 $("keysImport").onclick = () => $("keysFile").click();
 $("keysFile").onchange = async () => {

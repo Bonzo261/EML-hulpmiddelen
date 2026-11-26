@@ -37,7 +37,8 @@ Heb je een idee of vind je een fout? Maak een [issue](https://github.com/Bonzo26
   - namen met bijzondere tekens (ş, ł, ễ enz.) uit de Kandidatenlijsten-maker: komen ze goed door Abacus, OSV en e-KS, ook op stembiljet en PV?
   - 210 (inlevering per lijst) in e-KS, zodra dat kan. Vooral bij gemeenteraad, stadsdelen en Europees Parlement, waar e-KS nog geen voorbeeld heeft.
 - **Romeinse cijfers bij Limburg:** e-KS schrijft kieskring "1", Abacus verwacht "I" (bevestigd in de Abacus-code). Nagaan wat OSV verwacht, en of e-KS en Abacus hierin gelijk worden getrokken.
-- **Met echte bestanden testen:** een 520 van de uitslagsoftware, en een 510d van de Tweede Kamer of het Europees Parlement met meerdere kieskringen.
+- **Met echte bestanden testen:** een 520 van de uitslagsoftware (en de 520 uit de Uitslagen-generator daarnaast leggen, ook in de PV-generator en de Controle zetelverdeling), en een 510d van de Tweede Kamer of het Europees Parlement met meerdere kieskringen.
+- Uitslagen-generator: de 520 bij meerdere kieskringen (TK, PS) per kieskring volgens P 17–P 19 uitrekenen, en overleden kandidaten ondersteunen.
 - **Ondertekening** van de Uitslagen-generator testen in een draaiende Abacus, en het certificaat voor HSB en CSB nalopen zodra Abacus dat vastlegt.
 - Het Excel-bestand van het Controleprotocol testen in Microsoft Excel.
 - Bevestigen dat de PV-generator op de website goed laadt.
