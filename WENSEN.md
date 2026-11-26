@@ -1,6 +1,6 @@
 # Wensen en to-do
 
-Wat er nog op de lijst staat, per onderwerp. Bijgewerkt op 25-11-2026. Wat al klaar is, staat in [`CHANGELOG.md`](CHANGELOG.md); de bekende beperkingen per app staan in [`docs/`](docs/).
+Wat er nog op de lijst staat, per onderwerp. Bijgewerkt op 26-11-2026. Wat al klaar is, staat in [`CHANGELOG.md`](CHANGELOG.md); de bekende beperkingen per app staan in [`docs/`](docs/).
 
 Heb je een idee of vind je een fout? Maak een [issue](https://github.com/Bonzo261/EML-hulpmiddelen/issues) aan.
 
@@ -34,6 +34,7 @@ Heb je een idee of vind je een fout? Maak een [issue](https://github.com/Bonzo26
   - 110a met DEELGEMEENTE (stadsdelen en gebieden) en met Fries;
   - 230b met geboortedatum, geslacht onbekend en kr:ListData;
   - 230c (totaallijsten met adressen) in OSV2020-KS of een ander programma dat 230c leest. Abacus leest geen 230c;
+  - namen met bijzondere tekens (ş, ł, ễ enz.) uit de Kandidatenlijsten-maker: komen ze goed door Abacus, OSV en e-KS, ook op stembiljet en PV?
   - 210 (inlevering per lijst) in e-KS, zodra dat kan. Vooral bij gemeenteraad, stadsdelen en Europees Parlement, waar e-KS nog geen voorbeeld heeft.
 - **Romeinse cijfers bij Limburg:** e-KS schrijft kieskring "1", Abacus verwacht "I" (bevestigd in de Abacus-code). Nagaan wat OSV verwacht, en of e-KS en Abacus hierin gelijk worden getrokken.
 - **Met echte bestanden testen:** een 520 van de uitslagsoftware, en een 510d van de Tweede Kamer of het Europees Parlement met meerdere kieskringen.

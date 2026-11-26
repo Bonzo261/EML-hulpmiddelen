@@ -14,7 +14,7 @@ Wat er per update is veranderd, nieuwste bovenaan. De precieze verschillen per b
 
 ### Website
 - De kaart van de Kandidatenlijsten-maker op de startpagina noemt de niet-Nederlandse namen.
-- `docs/kandidatenlijsten-maker.md` bijgewerkt.
+- `docs/kandidatenlijsten-maker.md` en `WENSEN.md` bijgewerkt.
 
 ## 25-11-2026: nieuwe naam EML-tools
 
