@@ -2,7 +2,7 @@
 
 Wat er nog op de lijst staat, per onderwerp. Bijgewerkt op 26-11-2026. Wat al klaar is, staat in [`CHANGELOG.md`](CHANGELOG.md); de bekende beperkingen per app staan in [`docs/`](docs/).
 
-Heb je een idee of vind je een fout? Maak een [issue](https://github.com/Bonzo261/EML-hulpmiddelen/issues) aan.
+Heb je een idee of vind je een fout? Maak een [issue](https://github.com/Bonzo261/EML-tools/issues) aan.
 
 ## Nieuwe mogelijkheden
 

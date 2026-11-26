@@ -1,6 +1,12 @@
 # Wijzigingen
 
-Wat er per update is veranderd, nieuwste bovenaan. De precieze verschillen per bestand staan in de [commitgeschiedenis](https://github.com/Bonzo261/EML-hulpmiddelen/commits/main).
+Wat er per update is veranderd, nieuwste bovenaan. De precieze verschillen per bestand staan in de [commitgeschiedenis](https://github.com/Bonzo261/EML-tools/commits/main).
+
+## 26-11-2026 (middag, 2): nieuw webadres
+
+- De repository heet nu **EML-tools**: <https://github.com/Bonzo261/EML-tools>. Oude links naar de repository stuurt GitHub door.
+- De site staat nu op **<https://bonzo261.github.io/EML-tools/>**. Het oude adres (`bonzo261.github.io/EML-hulpmiddelen`) werkt niet meer. Pas bladwijzers en links aan.
+- Alle links in de README, de startpagina, `CHANGELOG.md` en `WENSEN.md` wijzen naar de nieuwe naam.
 
 ## 26-11-2026 (middag): uitslagen met zetelverdeling (520)
 
@@ -132,7 +138,7 @@ De Verkiezingsdefinitie-maker en de Kandidatenlijsten-maker maken hun bestanden 
 - `docs/zetelverdeling-controle.md` en de README bijgewerkt.
 
 ## 22-11-2026 (nacht): link naar de website
-- De site staat online op <https://bonzo261.github.io/EML-hulpmiddelen/>. De README verwijst daar nu naar, in plaats van uit te leggen hoe GitHub Pages aangezet moet worden.
+- De site staat online op <https://bonzo261.github.io/EML-tools/>. De README verwijst daar nu naar, in plaats van uit te leggen hoe GitHub Pages aangezet moet worden.
 
 ## 22-11-2026 (laat): controle zetelverdeling en controleprotocol GR26
 

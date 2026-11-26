@@ -1,8 +1,8 @@
 # EML-tools
 
-*Voorheen EML-hulpmiddelen. De repository en het webadres hebben de oude naam nog.*
+*Voorheen EML-hulpmiddelen. Het oude webadres `bonzo261.github.io/EML-hulpmiddelen` werkt niet meer; gebruik <https://bonzo261.github.io/EML-tools/>.*
 
-Hulpmiddelen om testbestanden te maken en te controleren volgens de **EML_NL-standaard** van de Kiesraad: van verkiezingsdefinitie tot proces-verbaal. **Direct gebruiken: <https://bonzo261.github.io/EML-hulpmiddelen/>**
+Hulpmiddelen om testbestanden te maken en te controleren volgens de **EML_NL-standaard** van de Kiesraad: van verkiezingsdefinitie tot proces-verbaal. **Direct gebruiken: <https://bonzo261.github.io/EML-tools/>**
 
 Elke app is één HTML-bestand dat helemaal in de browser draait. Er gaat niets naar een server.
 
@@ -28,7 +28,7 @@ De volgorde waarin je de apps meestal gebruikt: **110a → 110b → 230b → 510
 
 ## Gebruiken
 
-- **Online:** <https://bonzo261.github.io/EML-hulpmiddelen/>
+- **Online:** <https://bonzo261.github.io/EML-tools/>
 - **Lokaal:** download de repository en open `index.html` in de browser. Laat de map `huisstijl/` naast de HTML-bestanden staan: daarin zitten het logo, de iconen en de lettertypen voor de PDF's van de PV-generator.
 
 Externe afhankelijkheden, geladen vanaf een CDN (daarvoor is internet nodig):
@@ -45,7 +45,7 @@ De belangrijkste punten op de to-do-lijst:
 - referenda en de TK-kieskring Bonaire;
 - de nieuwe bestanden proef inlezen in Abacus, OSV en e-KS.
 
-De volledige lijst staat in [`WENSEN.md`](WENSEN.md). Ideeën en fouten zijn welkom als [issue](https://github.com/Bonzo261/EML-hulpmiddelen/issues).
+De volledige lijst staat in [`WENSEN.md`](WENSEN.md). Ideeën en fouten zijn welkom als [issue](https://github.com/Bonzo261/EML-tools/issues).
 
 ## Bronnen en dank
 
